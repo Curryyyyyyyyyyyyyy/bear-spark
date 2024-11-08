@@ -1,12 +1,18 @@
 <script setup>
-  import index from './views/index.vue';
+
 </script>
 
 <template>
-  <index></index>
+  <div class="app">
+    <router-view></router-view>
+  </div>
 </template>
 
 <style lang="scss">
-  @use './assets/sass/reset.scss';
-  @use './assets/sass/base.scss';
+  @use './assets/sass/reset.scss' as *;
+  @use './assets/sass/base.scss' as *;
+  @use './assets/sass/config.scss' as *;
+  .app {
+    background-color: $colorN;
+  }
 </style>
