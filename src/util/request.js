@@ -1,9 +1,10 @@
 import axios from "axios";
 
-const instanse = axios.create({
-  baseURL:'',
+const instance = axios.create({
+  baseURL:import.meta.env.VITE_PROXY_DOMAIN,
   timeout:5000
 })
+
 
 // 添加请求拦截器
 instance.interceptors.request.use(function (config) {

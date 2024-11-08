@@ -1,4 +1,5 @@
 $min-width:1226px;  //容器安全区域宽度
+$max-width:2048px;  //容器安全区域宽度
 
 // 常规字体大小设置
 $fontA:       80px; //产品站大标题
@@ -24,3 +25,6 @@ $colorG:      #ffffff !default; //用于导航栏文字、按钮文字、白色�
 $colorH:      #e5e5e5 !default; //用于上下模块分割线
 $colorI:      #000000 !default; //纯黑色背景，用于遮罩层
 $colorJ:      #F5F5F5 !default; //弹框标题背景色
+$colorL:      #e2e2e2 !default; // 输入框失焦背景
+$colorM:      #00adeb !default; // 部分按钮颜色
+$colorN:      #f1f2f3 !default; // 超出安全区的背景色
