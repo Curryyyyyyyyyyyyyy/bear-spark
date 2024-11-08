@@ -1,0 +1,19 @@
+.container{
+  position: relative;
+  width: 1226px;
+  margin: 0 auto;
+}
+
+.fl {
+  float: left;
+}
+.fr {
+  float: right;
+}
+.clearfix:after,.clearfix:before {
+  content: '';
+  display: table;
+}
+.clearfix:after {
+  clear: both;
+}
