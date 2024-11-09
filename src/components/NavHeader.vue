@@ -1,5 +1,14 @@
 <script setup>
-  let isLogin = false
+  import { ref,defineEmits } from 'vue';
+  import useUser from '../store/user';
+  import { storeToRefs } from 'pinia';
+  const userStore = useUser()
+  const {userId} = storeToRefs(userStore)
+  const emit = defineEmits(['openLogin'])
+
+  function openLogin() {
+    emit('openLogin')
+  }
 </script>
 
 <template>
@@ -25,8 +34,8 @@
         </span>
       </div>
       <div class="nav-right">
-        <div v-if="!isLogin" class="login right-item">
-          <span class="nav-login">登录</span>
+        <div v-if="!userId" class="login right-item">
+          <span class="nav-login" @click="openLogin">登录</span>
           <div class="children">
             <p>登录后你可以：</p>
             <div class="benefits clearfix">
@@ -49,8 +58,8 @@
                 <span>热门番剧影视看不停</span>
               </div>
             </div>
-            <button class="login-btn">立即登录</button>
-            <p>首次使用？<span class="register">点我注册</span></p>
+            <button class="login-btn" @click="openLogin">立即登录</button>
+            <p>首次使用？<span class="register" @click="openLogin">点我注册</span></p>
           </div>
         </div>
         <div v-else class="avatar right-item"></div>
