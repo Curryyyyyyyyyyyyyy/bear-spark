@@ -13,6 +13,8 @@
   @use './assets/sass/base.scss' as *;
   @use './assets/sass/config.scss' as *;
   .app {
-    background-color: $colorN;
+    margin: 0 auto;
+    min-width: $min-width;
+    max-width: $max-width;
   }
 </style>

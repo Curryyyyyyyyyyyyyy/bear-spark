@@ -1,7 +1,8 @@
 <script setup>
-  import { ref,defineEmits } from 'vue';
   import useUser from '../store/user';
   import { storeToRefs } from 'pinia';
+  import { useRouter } from 'vue-router';
+  const router = useRouter()
   const userStore = useUser()
   const {userId} = storeToRefs(userStore)
   const emit = defineEmits(['openLogin'])
@@ -9,23 +10,28 @@
   function openLogin() {
     emit('openLogin')
   }
+  function toMainInterface() {
+    const {href} = router.resolve({
+      path:`/mainInterface/${userId.value}`,
+    })
+    window.open(href, '_blank')
+  }
 </script>
 
 <template>
   <div class="nav-header">
     <div class="wrapper">
       <div class="nav-left">
-        <i class="iconfont icon-shouye"></i>
-        <span>首页</span>
-        <span>番剧</span>
-        <span>直播</span>
-        <span>游戏中心</span>
-        <span>会员购</span>
-        <span>漫画</span>
-        <span>赛事</span>
-        <span>KPL</span>
+        <slot name="nav"></slot>
+        <a>番剧</a>
+        <a>直播</a>
+        <a>游戏中心</a>
+        <a>会员购</a>
+        <a>漫画</a>
+        <a>赛事</a>
+        <a>KPL</a>
         <i class="iconfont icon-xiazai"></i>
-        <span>下载客户端</span>
+        <a>下载客户端</a>
       </div>
       <div class="inp">
         <input type="text" placeholder="尚硅谷">
@@ -36,6 +42,7 @@
       <div class="nav-right">
         <div v-if="!userId" class="login right-item">
           <span class="nav-login" @click="openLogin">登录</span>
+          <div class="mask"></div>
           <div class="children">
             <p>登录后你可以：</p>
             <div class="benefits clearfix">
@@ -62,7 +69,54 @@
             <p>首次使用？<span class="register" @click="openLogin">点我注册</span></p>
           </div>
         </div>
-        <div v-else class="avatar right-item"></div>
+        <div v-else class="avatar-box right-item">
+          <div class="avatar"  @click="toMainInterface"></div>
+          <div class="avatar-children">
+            <div class="nickname"  @click="toMainInterface">curyyyyyyyyyy</div>
+            <div class="coins"  @click="toMainInterface">
+              硬币：<span class="coin-num">164</span>
+              B币：<span class="coin-num">1</span>
+            </div>
+            <div class="infos">
+              <div class="info-item">
+                <span class="count">222</span>
+                <p class="desc">关注</p>
+              </div>
+              <div class="info-item">
+                <span class="count">1</span>
+                <p class="desc">粉丝</p>
+              </div>
+              <div class="info-item">
+                <span class="count">1</span>
+                <p class="desc">动态</p>
+              </div>
+            </div>
+            <div class="vip-info">
+              <span class="vip-desc">最后3天 大会员4.6折</span>
+              <span class="vip-btn">会员中心</span>
+            </div>
+            <div class="user-item user-center" @click="toMainInterface">
+              <i class="iconfont icon-geren"></i>
+              <span>个人中心</span>
+              <i class="iconfont icon-xiangyoujiantou"></i>
+            </div>
+            <div class="user-item sub-manage">
+              <i class="iconfont icon-tougaogaojian"></i>
+              <span>投稿管理</span>
+              <i class="iconfont icon-xiangyoujiantou"></i>
+            </div>
+            <div class="user-item recommend-service">
+              <i class="iconfont icon-tuijian"></i>
+              <span>推荐服务</span>
+              <i class="iconfont icon-xiangyoujiantou"></i>
+            </div>
+            <div class="split-line"></div>
+            <div class="user-item logout">
+              <i class="iconfont icon-tuichu"></i>
+              <span>退出登录</span>
+            </div>
+          </div>
+        </div>
         <div class="right-item">
           <i class="iconfont icon-huiyuan"></i>
           <p>大会员</p>
@@ -103,28 +157,50 @@
     min-width: $min-width;
     max-width: $max-width;
     margin: 0 auto;
-    height: 152px;
-    padding: 10px 20px 0;
+    // height: 152px;
+    padding: 10px 20px;
     box-sizing: border-box;
-    // background: url('../../public/imgs/indexBg.png') no-repeat;
-    background-color: rgb(151, 140, 125);
-    color: $colorG;
+    background-color: transparent;
     .wrapper {
       display: flex;
       justify-content: space-between;
       height: 40px;
+      color: $colorG;
+      font-size: $fontJ;
       .iconfont {
         font-size: 14px;
+        vertical-align: middle;
       }
       .nav-left {
-        span {
+        flex: 1.1;
+        height: 40px;
+        line-height: 40px;
+        a {
           margin-right: 10px;
+          cursor: pointer;
+          &:first-child:hover {
+            .icon-down {
+              display: inline-block;
+              transform: rotate(180deg);
+            }
+          }
+          &:last-child {
+            margin: 0;
+          }
+        }
+        .icon-shouye {
+          font-size: $fontH;
+        }
+        .icon-down {
+          font-size: $fontH;
+          transition: all .3s;
         }
       }
       .inp {
+        flex: 0.7;
         width: 350px;
-        height:26px;
-        padding: 3px 5px;
+        // height:34px;
+        padding: 0 5px;
         box-sizing: border-box;
         background-color: $colorL;
         border-radius: 5px;
@@ -133,8 +209,8 @@
         }
         input {
           border:none;
-          width: 310px;
-          height: 20px;
+          width: 85%;
+          height: 40px;
           padding: 3px 5px;
           border-radius: 5px;
           background-color: transparent;
@@ -146,7 +222,7 @@
         }
         .icon-search {
           display: inline-block;
-          width: 20px;
+          width: 10%;
           height: 20px;
           line-height: 20px;
           border-radius: 5px;
@@ -160,21 +236,27 @@
         }
       }
       .nav-right {
+        flex: 1;
         display: flex;
+        justify-content: right;
         .right-item {
-          margin-left: 10px;
+          margin-left: 2.5%;
           text-align: center;
+          cursor: pointer;
         }
         .login {
           position: relative;
-          margin-right: 15px;
+          .mask {
+            height: 20px;
+            width: 36px;
+          }
           .nav-login {
             display: inline-block;
-            height: 30px;
-            line-height: 30px;
-            width: 30px;
+            height: 36px;
+            line-height: 36px;
+            width: 36px;
             text-align: center;
-            border-radius: 15px;
+            border-radius: 18px;
             background-color: $colorM;
             cursor: pointer;
           }
@@ -188,13 +270,14 @@
             width: 280px;
             position: absolute;
             left: -125px;
-            top: 40px;
+            top: 50px;
             padding: 10px;
             box-sizing: border-box;
             border-radius: 5px;
             background-color: $colorG;
-            box-shadow: 1px 1px 5px $colorF;
+            box-shadow: 0 0 1px $colorF;
             color: $colorI;
+            font-size: $fontK;
             p:first-child {
               text-align: left;
               margin-bottom: 10px;
@@ -241,23 +324,142 @@
             }
           }
         }
-        .avatar {
-          height: 30px;
-          width: 30px;
-          border-radius: 15px;
-          margin-right: 15px;
-          cursor: pointer;
-          background: url('/imgs/default-avatat.png') no-repeat;
-          background-size: 30px 30px;
+        .avatar-box {
+          position: relative;
+          &:hover {
+            .avatar {
+              transform: translate(-50%,100%) scale(1.5);
+            }
+            .avatar-children {
+              display: block;
+            }
+          }
+          .avatar {
+            position: relative;
+            z-index: 1;
+            height: 36px;
+            line-height: 36px;
+            width: 36px;
+            border-radius: 18px;
+            cursor: pointer;
+            background: url('/imgs/default-avatat.png') no-repeat;
+            background-size: 36px 36px;
+            transition: all .3s;
+          }
+          .avatar-children {
+            display: none;
+            height: 336px;
+            width: 216px;
+            position: absolute;
+            top: 58px;
+            left: -112px;
+            padding: 0 20px;
+            padding-top: 40px;
+            box-sizing: border-box;
+            border-radius: 5px;
+            background-color: $colorG;
+            box-shadow: 0 0 1px $colorF;
+            color:$colorI;
+            .nickname {
+              cursor: pointer;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            .coins {
+              font-size: $fontL;
+              color: $colorD;
+              margin-bottom: 10px;
+              cursor: pointer;
+              .coin-num {
+                color: $colorI;
+                margin-right: 5px
+              }
+            }
+            .infos {
+              @include flex();
+              margin-bottom: 10px;
+              .info-item {
+                flex: 1;
+                cursor: pointer;
+                &:hover {
+                  color: $colorM;
+                }
+                .desc {
+                  color: $colorD;
+                  font-size: $fontL;
+                }
+              }
+            }
+            .vip-info {
+              width: 176px;
+              height: 50px;
+              line-height: 50px;
+              background-color: $colorO;
+              color: $colorA;
+              font-size: $fontL;
+              text-align: left;
+              padding: 0 8px;
+              border-radius: 5px;
+              box-sizing: border-box;
+              margin-bottom: 10px;
+              .vip-desc {
+                font-weight: bold;
+              }
+              .vip-btn {
+                display: inline-block;
+                height: 24px;
+                line-height: 24px;
+                width: 50px;
+                text-align: center;
+                border-radius: 6px;
+                margin-left: 15px;
+                background-color: $colorG;
+                cursor: pointer;
+              }
+            }
+            .user-item {
+              position: relative;
+              height: 25px;
+              line-height: 25px;
+              padding: 0 5px;
+              box-sizing: border-box;
+              margin-bottom: 10px;
+              text-align: left;
+              font-size: $fontK;
+              color: $colorB;
+              border-radius: 5px;
+              cursor: pointer;
+              &:hover {
+                background-color: $colorN;
+              }
+              span {
+                margin-left: 10px;
+              }
+              .icon-xiangyoujiantou {
+                position: absolute;
+                right: 0;
+                font-size: $fontH;
+                vertical-align: middle;
+              }
+              .icon-tougaogaojian {
+                font-size: $fontI;
+              }
+            }
+            .split-line {
+              height: 1px;
+              background-color: $colorF;
+              margin-bottom: 10px;
+            }
+          }
         }
         .submit {
-          width: 70px;
-          height: 30px;
-          line-height: 30px;
-          border-radius: 10px;
+          width: 80px;
+          height: 35px;
+          line-height: 35px;
+          border-radius: 15px;
           background-color: $colorA;
           span {
-            margin-left: 5px;
+            margin-left: 10px;
           }
           &:hover {
             cursor: pointer;

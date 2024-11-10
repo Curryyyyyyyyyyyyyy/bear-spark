@@ -1,7 +1,14 @@
+@use './config.scss' as *;
+
+body {
+  background-color: $colorN;
+}
+
 .container{
   position: relative;
   width: 1226px;
   margin: 0 auto;
+  background-color: $colorG;
 }
 
 .fl {
