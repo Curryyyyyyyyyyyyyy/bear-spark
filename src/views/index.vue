@@ -4,6 +4,7 @@
   import { ref } from 'vue';
 
   let showLogin =  ref(false)
+  let fixedHeader = ref(false)
   function closeLogin(){
     showLogin.value = false
   }
@@ -13,10 +14,26 @@
 </script>
 
 <template>
-  <nav-header @openLogin="openLogin"></nav-header>
+  <div class="index-header">
+    <nav-header @openLogin="openLogin">
+      <template v-slot:nav>
+        <a>
+          <i v-if="fixedHeader" class="iconfont icon-shouye"></i>
+          <span>首页</span>
+          <i v-if="!fixedHeader" class="iconfont icon-down"></i>
+        </a>
+      </template>
+    </nav-header>
+  </div>
   <login v-if="showLogin" @closeLogin="closeLogin"></login>
 </template>
 
-<style>
-
+<style lang="scss">
+  .index-header {
+    height: 152px;
+    background-color: pink;
+  }
+  .container {
+    height: 50px;
+  }
 </style>
