@@ -6,19 +6,28 @@
   "scripts": {
     "dev": "vite --mode development",
     "build": "vite build --mode production",
-    "preview": "vite preview --mode development"
+    "preview": "vite preview --mode development",
+    "lint": "eslint --fix"
   },
   "dependencies": {
     "axios": "^1.7.7",
+    "element-plus": "^2.8.7",
     "pinia": "^2.2.6",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
+    "@eslint/js": "^9.14.0",
     "@vitejs/plugin-vue": "^5.1.4",
+    "eslint": "^9.14.0",
+    "eslint-plugin-vue": "^9.30.0",
+    "globals": "^15.12.0",
     "node-sass": "^9.0.0",
+    "postcss-px-to-viewport": "^1.1.1",
     "sass-embedded": "^1.80.6",
     "sass-loader": "^16.0.3",
+    "unplugin-auto-import": "^0.18.3",
+    "unplugin-vue-components": "^0.27.4",
     "vite": "^5.4.10"
   }
 }
