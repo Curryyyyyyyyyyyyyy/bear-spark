@@ -29,9 +29,11 @@
 </template>
 
 <style lang="scss">
+  @use '../assets/sass/config.scss' as *;
   .index-header {
     height: 152px;
     background-color: pink;
+    color: $colorG;
   }
   .container {
     height: 50px;

@@ -11,7 +11,7 @@ const routes = [
     component:()=>import('@/views/index.vue')
   },
   {
-    path:'/mainInterface/:userId',
+    path:'/mainInterface',
     name:'mainInterface',
     component:()=>import('@/views/mainInterface.vue')
   }
