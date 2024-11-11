@@ -1,11 +1,13 @@
 <script setup>
   import useUser from '../store/user';
   import { storeToRefs } from 'pinia';
+  import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   const router = useRouter()
   const userStore = useUser()
   const {userId} = storeToRefs(userStore)
   const emit = defineEmits(['openLogin'])
+  let showWord = ref(true)
 
   function openLogin() {
     emit('openLogin')
@@ -16,6 +18,20 @@
     })
     window.open(href, '_blank')
   }
+  // 防止刷新显示问题
+  if(window.innerWidth < 1396) {
+    showWord.value = false
+  } else {
+    showWord.value = true
+  }
+  window.addEventListener('resize', ()=> {
+    console.log(window.innerWidth)
+    if(window.innerWidth < 1396) {
+      showWord.value = false
+    } else {
+      showWord.value = true
+    }
+  })
 </script>
 
 <template>
@@ -23,17 +39,16 @@
     <div class="wrapper">
       <div class="nav-left">
         <slot name="nav"></slot>
-        <a>番剧</a>
-        <a>直播</a>
-        <a>游戏中心</a>
-        <a>会员购</a>
-        <a>漫画</a>
-        <a>赛事</a>
-        <a>KPL</a>
-        <i class="iconfont icon-xiazai"></i>
-        <a>下载客户端</a>
+        <a class="jump">番剧</a>
+        <a class="jump">直播</a>
+        <a class="jump">游戏中心</a>
+        <a class="jump">会员购</a>
+        <a class="jump">漫画</a>
+        <a class="jump">赛事</a>
+        <a class="jump">KPL</a>
+        <a><i class="iconfont icon-xiazai"></i>下载客户端</a>
       </div>
-      <div class="inp">
+      <div class="inp" :class="{'inp-small':!showWord}">
         <input type="text" placeholder="尚硅谷">
         <span class="icon-search">
           <i class="iconfont icon-search-1-copy"></i>
@@ -118,32 +133,32 @@
           </div>
         </div>
         <div class="right-item">
-          <i class="iconfont icon-huiyuan"></i>
-          <p>大会员</p>
+          <i class="iconfont icon-huiyuan" :class="{'onlyIcon':!showWord}"></i>
+          <p v-if="showWord">大会员</p>
         </div>
         <div class="right-item">
-          <i class="iconfont icon-xiaoxi"></i>
-          <p>消息</p>
+          <i class="iconfont icon-xiaoxi" :class="{'onlyIcon':!showWord}"></i>
+          <p v-if="showWord">消息</p>
         </div>
         <div class="right-item">
-          <i class="iconfont icon-dongtai"></i>
-          <p>动态</p>
+          <i class="iconfont icon-dongtai" :class="{'onlyIcon':!showWord}"></i>
+          <p v-if="showWord">动态</p>
         </div>
         <div class="right-item">
-          <i class="iconfont icon-shoucang"></i>
-          <p>收藏</p>
+          <i class="iconfont icon-shoucang" :class="{'onlyIcon':!showWord}"></i>
+          <p v-if="showWord">收藏</p>
         </div>
         <div class="right-item">
-          <i class="iconfont icon-lishi"></i>
-          <p>历史</p>
+          <i class="iconfont icon-lishi" :class="{'onlyIcon':!showWord}"></i>
+          <p v-if="showWord">历史</p>
         </div>
         <div class="right-item">
-          <i class="iconfont icon-chuangzuozhongxin"></i>
-          <p>创作中心</p>
+          <i class="iconfont icon-chuangzuozhongxin" :class="{'onlyIcon':!showWord}"></i>
+          <p v-if="showWord">创作中心</p>
         </div>
         <div class="submit right-item">
-          <i class="iconfont icon-shangchuan"></i>
-          <span>投稿</span>
+          <i class="iconfont icon-shangchuan" :class="{'onlyIcon':!showWord}"></i>
+          <span v-if="showWord">投稿</span>
         </div>
       </div>
     </div>
@@ -153,28 +168,36 @@
 <style lang="scss">
   @use '../assets/sass/mixin.scss' as *;
   @use '../assets/sass/config.scss' as *;
+  @use '../assets/sass/animation.scss' as *;
   .nav-header {
     min-width: $min-width;
     max-width: $max-width;
     margin: 0 auto;
     // height: 152px;
-    padding: 10px 20px;
+    padding: 10px 10px 20px 10px;
     box-sizing: border-box;
-    background-color: transparent;
+    // background-color: transparent;
     .wrapper {
       display: flex;
       justify-content: space-between;
       height: 40px;
-      color: $colorG;
+      // color: $colorG;
       font-size: $fontJ;
       .iconfont {
         font-size: 14px;
         vertical-align: middle;
       }
       .nav-left {
-        flex: 1.1;
+        flex: 1.3;
         height: 40px;
         line-height: 40px;
+        .logo {
+          height: 40px;
+          width: 40px;
+          vertical-align: middle;
+          @include bgImg(40px,40px,'/imgs/logo.png',80px 80px);
+          margin-right:10px;
+        }
         a {
           margin-right: 10px;
           cursor: pointer;
@@ -197,12 +220,14 @@
         }
       }
       .inp {
-        flex: 0.7;
+        position: relative;
+        flex: 1;
         width: 350px;
         // height:34px;
         padding: 0 5px;
         box-sizing: border-box;
-        background-color: $colorL;
+        background-color: $colorJ;
+        border: 1px solid $colorL;
         border-radius: 5px;
         &:hover {
           background-color: $colorG;
@@ -221,8 +246,12 @@
           // }
         }
         .icon-search {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
           display: inline-block;
-          width: 10%;
+          width: 30px;
           height: 20px;
           line-height: 20px;
           border-radius: 5px;
@@ -235,6 +264,9 @@
           }
         }
       }
+      .inp-small {
+        flex: 0.7 !important;
+      }
       .nav-right {
         flex: 1;
         display: flex;
@@ -243,6 +275,14 @@
           margin-left: 2.5%;
           text-align: center;
           cursor: pointer;
+          .onlyIcon {
+            line-height: 36px;
+            font-size: 24px;
+            margin-left: 10px;
+            &.icon-shangchuan {
+              margin: 0;
+            }
+          }
         }
         .login {
           position: relative;
@@ -252,11 +292,11 @@
           }
           .nav-login {
             display: inline-block;
-            height: 36px;
-            line-height: 36px;
-            width: 36px;
+            height: 40px;
+            line-height: 40px;
+            width: 40px;
             text-align: center;
-            border-radius: 18px;
+            border-radius: 20px;
             background-color: $colorM;
             cursor: pointer;
           }
@@ -266,6 +306,7 @@
             }
           }
           .children {
+            z-index: 2;
             display: none;
             width: 280px;
             position: absolute;
@@ -275,7 +316,7 @@
             box-sizing: border-box;
             border-radius: 5px;
             background-color: $colorG;
-            box-shadow: 0 0 1px $colorF;
+            box-shadow: 0 0 5px $colorF;
             color: $colorI;
             font-size: $fontK;
             p:first-child {
@@ -315,7 +356,7 @@
               margin-bottom: 10px;
               cursor: pointer;
               &:hover {
-                background-color: #34c2f5;
+                background-color: $colorP;
               }
             }
             .register {
@@ -358,7 +399,7 @@
             box-sizing: border-box;
             border-radius: 5px;
             background-color: $colorG;
-            box-shadow: 0 0 1px $colorF;
+            box-shadow: 0 0 5px $colorF;
             color:$colorI;
             .nickname {
               cursor: pointer;
@@ -453,9 +494,10 @@
           }
         }
         .submit {
-          width: 80px;
+          // width: 80px;
           height: 35px;
           line-height: 35px;
+          padding: 0 10px;
           border-radius: 15px;
           background-color: $colorA;
           span {
@@ -468,5 +510,8 @@
         }
       }
     }
+  }
+  .jump:hover {
+    animation: jump .5s;
   }
 </style>
