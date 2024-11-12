@@ -1,9 +1,9 @@
 import request from '@/util/request.js'
 
-export const loginApi = (account, password) => {
+export const loginApi = (phone, password) => {
   return request.get('/user/login', {
     params:{
-      account,
+      phone,
       password
     }
   })

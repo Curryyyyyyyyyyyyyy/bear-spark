@@ -1,11 +1,12 @@
 <script setup>
-  import useUser from '../store/user';
+  import { ElMessage, ElMessageBox } from 'element-plus';
+import useUser from '../store/user';
   import { storeToRefs } from 'pinia';
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   const router = useRouter()
   const userStore = useUser()
-  const {userId} = storeToRefs(userStore)
+  const {token} = storeToRefs(userStore)
   const emit = defineEmits(['openLogin'])
   let showWord = ref(true)
 
@@ -14,9 +15,23 @@
   }
   function toMainInterface() {
     const {href} = router.resolve({
-      path:`/mainInterface/${userId.value}`,
+      path:`/mainInterface`,
     })
     window.open(href, '_blank')
+  }
+  function logout() {
+    ElMessageBox.confirm('您确定退出登录吗？','温馨提示',{
+      confirmButtonText:'确定',
+      cancelButtonText:'取消',
+      type:'warning'      
+    }).then(()=>{
+      ElMessage({
+        type:'success',
+        message:'退出成功',
+        duration:1000
+      })
+      token.value = ''
+    })
   }
   // 防止刷新显示问题
   if(window.innerWidth < 1396) {
@@ -55,7 +70,7 @@
         </span>
       </div>
       <div class="nav-right">
-        <div v-if="!userId" class="login right-item">
+        <div v-if="!token" class="login right-item">
           <span class="nav-login" @click="openLogin">登录</span>
           <div class="mask"></div>
           <div class="children">
@@ -126,7 +141,7 @@
               <i class="iconfont icon-xiangyoujiantou"></i>
             </div>
             <div class="split-line"></div>
-            <div class="user-item logout">
+            <div class="user-item logout" @click="logout">
               <i class="iconfont icon-tuichu"></i>
               <span>退出登录</span>
             </div>

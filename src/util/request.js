@@ -34,6 +34,9 @@ instance.interceptors.response.use(function (response) {
       ElMessage.error('服务器异常')
       return Promise.reject('服务器异常')
     }
+    if(res.code === 400) {
+      localStorage.removeItem('bear-spark-user')
+    }
     ElMessage.error(res.msg)
     return Promise.reject(res.msg)
   }
