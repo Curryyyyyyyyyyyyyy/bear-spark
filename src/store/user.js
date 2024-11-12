@@ -8,6 +8,7 @@ const useUser = defineStore('user', {
   getters:{},
   actions:{},
   persist:{
+    key:'bear-spark-user',
     pick:['token']
   }
 })
