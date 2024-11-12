@@ -1,54 +1,103 @@
 <script setup>
   import { ref } from 'vue';
   import {loginApi,sendVEcodeApi,verifyVEcodeApi,registerPwdApi,modifyPwdApi} from '@/api/user.js'
+  import {regPhone,regPwd,regVEcode} from '@/util/reg.js'
+  import useUser from '../store/user';
 
   let showPwd = ref(false)
-  let account = ref('')
-  let password = ref('')
-  let newPassword1 = ref('')
-  let newPassword2 = ref('')
-  let regPhoneNum = ref('')
-  let regVEcode = ref('')
-  let findPhoneNum = ref('')
-  let findVEcode = ref('')
   let curWay = ref(0)
   let isReg = ref(false)
-  const markWay = ref()
+
   const inputBigBox = ref()
   const emit = defineEmits(['closeLogin'])
-  
   function closeLogin(){
     emit('closeLogin')
   }
+
+  let registerPhoneNum = ref('')
+  let registerVEcode = ref('')
   async function register(){
-    await verifyVEcodeApi(regPhoneNum.value,regVEcode.value)
+    if(!regPhone(registerPhoneNum.value)) return alert('请输入正确的手机号')
+    if(!regVEcode(registerVEcode.value)) return alert('请输入正确的验证码')
+    await verifyVEcodeApi(registerPhoneNum.value,registerVEcode.value)
+    registerPhoneNum.value = ''
+    registerVEcode.value = ''
     inputBigBox.value.style.transform = `translateX(${(-3)*375}px)`
     curWay.value = 3
     isReg.value = true
   }
+
+  let phone = ref('')
+  let password = ref('')
+  const userStore = useUser()
   async function login(){
-    await loginApi(account.value, password.value)
+    if(!regPhone(phone.value)) return alert('请输入正确的手机号')
+    if(!regPwd(password.value)) return alert('密码只能由数字、字母、下划线，8~16位')
+    const res = await loginApi(phone.value, password.value)
+    userStore.token = res.token
+    userStore.username = res.username
     closeLogin()
   }
-  async function sendVEcode(phoneNum) {
+
+  let registerCountDown = ref(60)
+  let findCountDown = ref(60)
+  let timer
+  async function sendVEcode(phoneNum,way) {
+    if(!regPhone(phoneNum)) return
     await sendVEcodeApi(phoneNum)
+    if(way === 'register') {
+      timer = setInterval(() => {
+        if(registerCountDown.value === 0) {
+          registerCountDown.value = 60
+          clearInterval(timer)
+          return
+        }
+        console.log(11)
+        registerCountDown.value = registerCountDown.value-1
+      }, 1000);
+    } else {
+      timer = setInterval(() => {
+        if(findCountDown.value === 0) {
+          findCountDown.value = 60
+          clearInterval(timer)
+          return
+        }
+        findCountDown.value = findCountDown.value-1
+      }, 1000);
+    }
   }
+
+  let findPhoneNum = ref('')
+  let findVEcode = ref('')
   async function submit() {
+    if(!regPhone(findPhoneNum.value)) return alert('请输入正确的手机号')
+    if(!regVEcode(findVEcode.value)) return alert('请输入正确的验证码')
+    findPhoneNum.value = ''
+    findVEcode.value = ''
     await verifyVEcodeApi(findPhoneNum.value,findVEcode.value)
     inputBigBox.value.style.transform = `translateX(${(-3)*375}px)`
     curWay.value = 3
     isReg.value = false
   }
+
+  let newPassword1 = ref('')
+  let newPassword2 = ref('')
   async function confirm(isReg){
-    if(newPassword1.value !== newPassword2.value) return
+    if(newPassword1.value !== newPassword2.value) return alert('密码不一致！')
+    if(!regPwd(newPassword1.value)) return alert('密码只能由数字、字母、下划线，8~16位')
     if(isReg) {
-      await registerPwdApi(regPhoneNum.value,newPassword2.value)
+      await registerPwdApi(registerPhoneNum.value,newPassword2.value)
     } else {
       await modifyPwdApi(findPhoneNum.value,newPassword2.value)
     }
+    newPassword1.value = ''
+    newPassword2.value = ''
     inputBigBox.value.style.transform = `translateX(0)`
     curWay.value = 0
+    changeWay(curWay.value)
   }
+
+  const markWay = ref()
   function changeWay(pos){
     markWay.value.style.left = `${51 + pos*116}px`
     inputBigBox.value.style.transform = `translateX(${(-pos)*375}px)`
@@ -72,8 +121,8 @@
       <div class="mark-way" ref="markWay"></div>
       <div ref="inputBigBox" class="input-big-box">
         <div class="input-box">
-          <div class="account">
-            <input type="text" placeholder="手机号" v-model="account">
+          <div class="phone">
+            <input type="text" placeholder="手机号" v-model="phone">
           </div>
           <div class="password">
             <input :type="showPwd ? 'text' : 'password'" placeholder="密码" v-model="password">
@@ -83,19 +132,21 @@
         <div class="input-box">
           <div class="phoneNum">
             <span>+86</span>
-            <input type="text" placeholder="请输入手机号" v-model="regPhoneNum">
-            <button @click="sendVEcode(regPhoneNum)">获取验证码</button>
+            <input type="text" placeholder="请输入手机号" v-model="registerPhoneNum">
+            <button v-if="registerCountDown === 60" :class="{'active':regPhone(registerPhoneNum)}" @click="sendVEcode(registerPhoneNum,'register')">获取验证码</button>
+            <button v-else>重新获取({{ registerCountDown }})</button>
           </div>
           <div class="VEcode">
             <span>验证码</span>
-            <input type="text" placeholder="请输入验证码" v-model="regVEcode">
+            <input type="text" placeholder="请输入验证码" v-model="registerVEcode">
           </div>
         </div>
         <div class="input-box">
           <div class="phoneNum">
             <span>+86</span>
             <input type="text" placeholder="请输入手机号" v-model="findPhoneNum">
-            <button @click="sendVEcode(findPhoneNum)">获取验证码</button>
+            <button v-if="findCountDown === 60" :class="{'active':regPhone(findPhoneNum)}" @click="sendVEcode(findPhoneNum,'find')">获取验证码</button>
+            <button v-else>重新获取({{ findCountDown }})</button>
           </div>
           <div class="VEcode">
             <span>验证码</span>
@@ -155,7 +206,8 @@
         margin-bottom:10px;
         text-align: center;
         .logo {
-          @include bgImg(40px,40px,'/imgs/logo.png',80px)
+          @include bgImg(40px,40px,'/imgs/logo.png',80px);
+          transform: translateX(9px);
         }
         .icon-cuowu {
           font-size: 20px;
@@ -201,7 +253,7 @@
         box-sizing: border-box;
         border-radius: 5px;
         margin-right: 25px;
-        .account,.password,.phoneNum,.VEcode,.mod-password {
+        .phone,.password,.phoneNum,.VEcode,.mod-password {
           height: 50px;
           line-height: 50px;
           padding: 0 15px;
@@ -215,7 +267,7 @@
             border: none;
           }
         }
-        .account {
+        .phone {
           border-bottom: 1px solid $colorF;
           input {
             width: 320px;
@@ -239,14 +291,18 @@
           width: 350px;
           border-bottom: 1px solid $colorF;
           input {
-            width: 180px;
+            width: 160px;
           }
           button {
             border: none;
-            padding-left: 10px;
+            padding-left: 20px;
             border-left: 1px solid $colorF;
             background-color: transparent;
             color: $colorE;
+            cursor: not-allowed;
+          }
+          .active {
+            color: $colorP;
             cursor: pointer;
           }
         }
@@ -274,7 +330,10 @@
         border-radius: 20px;
         cursor: pointer;
         background-color: $colorM;
-        color: $colorG
+        color: $colorG;
+        &:hover {
+          background-color: $colorP;
+        }
       }
     }
   }

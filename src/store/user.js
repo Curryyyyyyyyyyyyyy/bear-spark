@@ -2,10 +2,14 @@ import {defineStore} from 'pinia'
 
 const useUser = defineStore('user', {
   state: () => ({
-    userId:''
+    token:'',
+    username:''
   }),
   getters:{},
-  actions:{}
+  actions:{},
+  persist:{
+    pick:['token']
+  }
 })
 
 export default useUser
