@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ElMessage } from "element-plus";
 
 const instance = axios.create({
   baseURL:import.meta.env.VITE_BASE_URL,
@@ -27,7 +28,16 @@ instance.interceptors.request.use(function (config) {
 instance.interceptors.response.use(function (response) {
   // 2xx 范围内的状态码都会触发该函数。
   // 对响应数据做点什么
-  return response.data;
+  const res = response.data
+  if(res.code !== 200) {
+    if(res.code === 500) {
+      ElMessage.error('服务器异常')
+      return Promise.reject('服务器异常')
+    }
+    ElMessage.error(res.msg)
+    return Promise.reject(res.msg)
+  }
+  return res.data;
 }, function (error) {
   // 超出 2xx 范围的状态码都会触发该函数。
   // 对响应错误做点什么

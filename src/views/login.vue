@@ -3,6 +3,7 @@
   import {loginApi,sendVEcodeApi,verifyVEcodeApi,registerPwdApi,modifyPwdApi} from '@/api/user.js'
   import {regPhone,regPwd,regVEcode} from '@/util/reg.js'
   import useUser from '../store/user';
+  import { ElMessage } from 'element-plus';
 
   let showPwd = ref(false)
   let curWay = ref(0)
@@ -32,10 +33,15 @@
   const userStore = useUser()
   async function login(){
     if(!regPhone(phone.value)) return alert('请输入正确的手机号')
-    if(!regPwd(password.value)) return alert('密码只能由数字、字母、下划线，8~16位')
+    if(!regPwd(password.value)) return alert('密码只能由数字、字母、下划线，6~16位')
     const res = await loginApi(phone.value, password.value)
     userStore.token = res.token
     userStore.username = res.username
+    ElMessage({
+      type:'success',
+      message:'登录成功',
+      duration:1000
+    })
     closeLogin()
   }
 
@@ -84,11 +90,21 @@
   let newPassword2 = ref('')
   async function confirm(isReg){
     if(newPassword1.value !== newPassword2.value) return alert('密码不一致！')
-    if(!regPwd(newPassword1.value)) return alert('密码只能由数字、字母、下划线，8~16位')
+    if(!regPwd(newPassword1.value)) return alert('密码只能由数字、字母、下划线，6~16位')
     if(isReg) {
       await registerPwdApi(registerPhoneNum.value,newPassword2.value)
+      ElMessage({
+        type:'success',
+        message:'注册成功，请登录',
+        duration:1000
+      })
     } else {
       await modifyPwdApi(findPhoneNum.value,newPassword2.value)
+      ElMessage({
+        type:'success',
+        message:'修改成功，请重新登录',
+        duration:1000
+      })
     }
     newPassword1.value = ''
     newPassword2.value = ''
