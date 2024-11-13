@@ -229,6 +229,7 @@
           font-size: 20px;
           cursor: pointer;
           transition: transform .2s;
+          color: $colorB;
           &:hover {
             transform: scale(1.5);
           }
