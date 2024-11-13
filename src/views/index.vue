@@ -1,21 +1,13 @@
 <script setup>
   import NavHeader from '../components/NavHeader.vue';
-  import login from './login.vue';
   import { ref } from 'vue';
 
-  let showLogin =  ref(false)
   let fixedHeader = ref(false)
-  function closeLogin(){
-    showLogin.value = false
-  }
-  function openLogin(){
-    showLogin.value = true
-  }
 </script>
 
 <template>
   <div class="index-header">
-    <nav-header @openLogin="openLogin">
+    <nav-header>
       <template v-slot:nav>
         <a>
           <i v-if="fixedHeader" class="iconfont icon-shouye"></i>
@@ -25,7 +17,6 @@
       </template>
     </nav-header>
   </div>
-  <login v-if="showLogin" @closeLogin="closeLogin"></login>
 </template>
 
 <style lang="scss">
@@ -34,8 +25,5 @@
     height: 152px;
     background-color: pink;
     color: $colorG;
-  }
-  .container {
-    height: 50px;
   }
 </style>

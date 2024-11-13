@@ -1,17 +1,20 @@
 <script setup>
+  import login from '@/views/login.vue'
   import { ElMessage, ElMessageBox } from 'element-plus';
-import useUser from '../store/user';
+  import useUser from '../store/user';
   import { storeToRefs } from 'pinia';
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   const router = useRouter()
   const userStore = useUser()
   const {token} = storeToRefs(userStore)
-  const emit = defineEmits(['openLogin'])
-  let showWord = ref(true)
 
+  let showLogin = ref(false)
   function openLogin() {
-    emit('openLogin')
+    showLogin.value = true
+  }
+  function closeLogin() {
+    showLogin.value = false
   }
   function toMainInterface() {
     const {href} = router.resolve({
@@ -33,14 +36,17 @@ import useUser from '../store/user';
       token.value = ''
     })
   }
+  function toNews() {
+    router.push('/news')
+  }
   // 防止刷新显示问题
+  let showWord = ref(true)
   if(window.innerWidth < 1396) {
     showWord.value = false
   } else {
     showWord.value = true
   }
   window.addEventListener('resize', ()=> {
-    console.log(window.innerWidth)
     if(window.innerWidth < 1396) {
       showWord.value = false
     } else {
@@ -104,8 +110,8 @@ import useUser from '../store/user';
           <div class="avatar-children">
             <div class="nickname"  @click="toMainInterface">curyyyyyyyyyy</div>
             <div class="coins"  @click="toMainInterface">
+              功德：<span class="coin-num">1</span>
               硬币：<span class="coin-num">164</span>
-              B币：<span class="coin-num">1</span>
             </div>
             <div class="infos">
               <div class="info-item">
@@ -155,7 +161,7 @@ import useUser from '../store/user';
           <i class="iconfont icon-xiaoxi" :class="{'onlyIcon':!showWord}"></i>
           <p v-if="showWord">消息</p>
         </div>
-        <div class="right-item">
+        <div class="right-item"  @click="toNews">
           <i class="iconfont icon-dongtai" :class="{'onlyIcon':!showWord}"></i>
           <p v-if="showWord">动态</p>
         </div>
@@ -178,6 +184,7 @@ import useUser from '../store/user';
       </div>
     </div>
   </div>
+  <login v-if="showLogin" @closeLogin="closeLogin"></login>
 </template>
 
 <style lang="scss">
@@ -189,7 +196,8 @@ import useUser from '../store/user';
     max-width: $max-width;
     margin: 0 auto;
     // height: 152px;
-    padding: 10px 10px 20px 10px;
+    padding: 0 15px;
+    padding-top: 10px;
     box-sizing: border-box;
     // background-color: transparent;
     .wrapper {
@@ -398,7 +406,7 @@ import useUser from '../store/user';
             width: 36px;
             border-radius: 18px;
             cursor: pointer;
-            background: url('/imgs/default-avatat.png') no-repeat;
+            background: url('/imgs/default-avatar.png') no-repeat;
             background-size: 36px 36px;
             transition: all .3s;
           }
