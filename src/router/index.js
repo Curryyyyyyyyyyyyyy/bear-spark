@@ -1,4 +1,4 @@
-import {createRouter,createWebHistory} from 'vue-router'
+import {createRouter,createWebHashHistory} from 'vue-router'
 
 const routes = [
   {
@@ -14,11 +14,16 @@ const routes = [
     path:'/mainInterface',
     name:'mainInterface',
     component:()=>import('@/views/mainInterface.vue')
+  },
+  {
+    path:'/news',
+    name:'news',
+    component:()=>import('@/views/news.vue')
   }
 ]
 
 const router = createRouter({
-  history:createWebHistory(),
+  history:createWebHashHistory(),
   routes
 })
 
