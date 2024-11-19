@@ -70,7 +70,7 @@
         <a><i class="iconfont icon-xiazai"></i>下载客户端</a>
       </div>
       <div class="inp" :class="{'inp-small':!showWord}">
-        <input type="text" placeholder="尚硅谷">
+        <input name="keyword" type="text" placeholder="尚硅谷">
         <span class="icon-search">
           <i class="iconfont icon-search-1-copy"></i>
         </span>
