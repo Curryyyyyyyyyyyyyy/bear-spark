@@ -1,10 +1,31 @@
 <script setup>
+  import { nextTick, onBeforeUnmount, reactive, ref } from 'vue';
   import NavHeader from '@/components/NavHeader.vue'
-  import Modal from '../components/Modal.vue';
+  import Modal from '@/components/Modal.vue';
+  import BsSelect from '@/components/BsSelect.vue';
+  import BsOption from '../components/BsOption.vue';
   import { ElSelect,ElOption,ElDatePicker } from 'element-plus';
-  import { nextTick, reactive, ref } from 'vue';
   import {hourOptions,minuteOptions} from '@/hooks/timeOptions.js'
   import { publishNews } from '../api/news';
+  import useNews from '@/store/news.js'
+  import {useRouter} from 'vue-router'
+  import { storeToRefs } from 'pinia';
+
+  /* Store */
+  const newsStore = useNews()
+  /* Router */
+  const router = useRouter()
+
+  /* 页面卸载时清除定时器，清除pictureList */
+  window.addEventListener('pagehide',()=>{
+    pictureList.value = []
+    clearInterval(timer)
+  })
+  /* 组件卸载时清除定时器，清除pictureList */
+  onBeforeUnmount(()=>{
+    pictureList.value = []
+    clearInterval(timer)
+  })
 
   /* 选择标签 */
   const showTagCol = ref(false)
@@ -24,14 +45,24 @@
   function changePubContent(event) {
     pubContentNum.value = event.target.value.length
   }
-  /* 图片上传框 */
+  /* 图片上传 */
+  let timer
   const showUploadBox = ref(false)
-  const uploadPictureList = reactive([])
+  const {pictureList} = storeToRefs(newsStore)
+  if(pictureList.value.length > 0) showUploadBox.value = true
+  timer = setInterval(() => {
+    for (let i = 0; i < pictureList.value.length; i++) {
+      pictureList.value[i].remainTime--
+      if(!pictureList.value[i].remainTime) {
+        pictureList.value.shift()
+      }
+    }
+  }, 1000);
   function uploadPicture() {
-    uploadPictureList.push({src:'/imgs/logo.png'})
-    setTimeout(()=>{
-      uploadPictureList.splice(uploadPictureList.values.length-1)
-    },5000)
+    pictureList.value.push({src:'/imgs/logo.png',remainTime:20})
+  }
+  function deletePicture(index) {
+    pictureList.value.splice(index, 1)
   }
   /* 展示设置 */
   const settingCascaderDom = ref()
@@ -182,7 +213,7 @@
       <nav-header>
         <template v-slot:nav>
           <a>
-            <span class="logo"></span>
+            <span @click="router.push('/index')" class="logo"></span>
             <span>首页</span>
             <i class="iconfont icon-down"></i>
           </a>
@@ -213,11 +244,11 @@
           <div class="tag-desk">
             <div class="tag-search">
               <div class="tag-search-popover" :class="{'active':showTagCol}">
-                <label for="tagInput" class="tag-search-input">
+                <label class="tag-search-input">
                   <i v-if="!showTagCol" @click="showTagCol = true" class="iconfont icon-huati"></i>
                   <i v-if="showTagCol" class="iconfont icon-sousuo"></i>
                   <span v-if="!showTagCol" @click="showTagCol = true" class="tag-search-input-text">选择标签</span>
-                  <input id="tagInput" v-if="showTagCol" @blur="showTagCol = false" type="text" placeholder="搜索标签">
+                  <input v-if="showTagCol" @blur="showTagCol = false" type="text" placeholder="搜索标签">
                 </label>
                 <div v-if="showTagCol" class="tag-search-result">
                   <div class="tag-search-list">
@@ -262,18 +293,18 @@
               </div>
             </div>
           </div>
-          <input ref="pubTitleInput" v-model="newsTitle" @input="changePubTitle" maxlength="20" type="text" class="title" placeholder="标题 (选填，20字内)">
+          <input name="newsTitle" ref="pubTitleInput" v-model="newsTitle" @input="changePubTitle" maxlength="20" type="text" class="title" placeholder="标题 (选填，20字内)">
           <i v-if="pubTitleNum" @click="clearPubTitle" class="iconfont icon-cuowu1"></i>
           <span v-if="pubTitleNum" class="title-num">{{ pubTitleNum }}</span>
-          <textarea v-model="newsContent" @input="changePubContent" maxlength="500" class="content" placeholder="有什么想和大家分享的？"></textarea>
+          <textarea name="newsContent" v-model="newsContent" @input="changePubContent" maxlength="500" class="content" placeholder="有什么想和大家分享的？"></textarea>
           <div v-if="showUploadBox" class="pub-picture-list">
-            <div v-for="(item,index) in uploadPictureList" :key="index" class="picture-box">
+            <div v-for="(item,index) in pictureList" :key="index" class="picture-box">
               <img :src="item.src" alt="">
-              <div class="delete-btn">
+              <div class="delete-btn" @click="deletePicture(index)">
                 <i class="iconfont icon-cuowu"></i>
               </div>
               <div class="progress-bar">
-                <div class="progress"></div>
+                <div class="progress" :style="{width:item.remainTime/20*100+'%', backgroundColor:item.remainTime/20*100 > 70 ? '#88cc24' : (item.remainTime/20*100 > 20 ? '#e6a23c' : '#f56c6c')}"></div>
               </div>
             </div>
             <label for="upload-pic">
@@ -473,8 +504,8 @@
             <div class="news-item-header">
               <span class="news-item-author">尚硅谷</span>
               <p class="news-item-time">14小时前</p>
-              <div class="news-item-more-btn">
-                <i @mouseenter="showNewsCascader = true" @mouseleave="showNewsCascader = false" class="iconfont icon-gengduo1"></i>
+              <div  @mouseenter="showNewsCascader = true" @mouseleave="showNewsCascader = false" class="news-item-more-btn">
+                <i class="iconfont icon-gengduo1"></i>
                 <div v-if="showNewsCascader" class="new-item-cascader">
                   <div class="cascader-list">
                     <div class="cascader-item">取消关注</div>
@@ -642,11 +673,11 @@
           <div class="desc">更多设置</div>
           <div class="select-box">
             <span>单选/多选</span>
-            <el-select v-model="voteMaxSelectNum">
-              <el-option label="单选" value="1"></el-option>
-              <el-option label="最多选两项" value="2"></el-option>
-              <el-option label="最多选三项" value="3"></el-option>
-            </el-select>
+            <bs-select v-model="voteMaxSelectNum">
+              <bs-option label="单选" value="1"></bs-option>
+              <bs-option label="最多选两项" value="2"></bs-option>
+              <bs-option label="最多选三项" value="3"></bs-option>
+            </bs-select>
           </div>
         </div>
         <div class="vote-end-sec">
@@ -932,10 +963,11 @@
                 position: absolute;
                 top: 2px;
                 right: 2px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 height: 14px;
-                line-height: 14px;
                 width: 14px;
-                text-align: center;
                 border-radius: 7px;
                 background-color: #6c6e72;
                 color: $colorG;
@@ -960,19 +992,19 @@
                   background-color: #88cc24;
                   animation: progressBar 5s linear;
                 }
-                @keyframes progressBar {
-                  0%{
-                    width: 100%;
-                    background-color: #88cc24;
-                  }50%{
-                    background-color: #e6a23c;
-                  }80%{
-                    background-color: #f56c6c;
-                  }100% {
-                    width: 0%;
-                    background-color: #f56c6c;
-                  }
-                }
+                // @keyframes progressBar {
+                //   0%{
+                //     width: 100%;
+                //     background-color: #88cc24;
+                //   }50%{
+                //     background-color: #e6a23c;
+                //   }80%{
+                //     background-color: #f56c6c;
+                //   }100% {
+                //     width: 0%;
+                //     background-color: #f56c6c;
+                //   }
+                // }
               }
             }
             .pictrue-upload-box {
@@ -1403,13 +1435,14 @@
                 }
                 .new-item-cascader {
                   position: absolute;
-                  right: 5px;
-                  top: 32px;
-                  background-color: $colorG;
-                  border: 1px solid $colorN;
-                  border-radius: 6px;
-                  text-align: left;
+                  right: 0px;
+                  top: 24px;
+                  padding-top: 10px;
                   .cascader-list {
+                    background-color: $colorG;
+                    border: 1px solid $colorN;
+                    border-radius: 6px;
+                    text-align: left;
                     padding: 12px 0;
                     min-width: 132px;
                     .cascader-item {
