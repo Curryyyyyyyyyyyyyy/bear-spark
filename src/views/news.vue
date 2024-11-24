@@ -4,6 +4,9 @@
   import Modal from '@/components/Modal.vue';
   import BsSelect from '@/components/BsSelect.vue';
   import BsOption from '../components/BsOption.vue';
+  import BsEnjoy from '../components/BsEnjoy.vue';
+  import BsAtUl from '../components/BsAtUl.vue';
+  import BsAtLi from '../components/BsAtLi.vue';
   import { ElSelect,ElOption,ElDatePicker } from 'element-plus';
   import {hourOptions,minuteOptions} from '@/hooks/timeOptions.js'
   import { publishNews } from '../api/news';
@@ -30,22 +33,145 @@
   /* 选择标签 */
   const showTagCol = ref(false)
   //#region 发布
+  /* 发布 */
+  const newsTitle = ref('')
+  const publishDate = ref('')
+  const publishHour = ref('')
+  const publishMinute = ref('')
+  async function publish() {
+    await publishNews({
+      title:newsTitle.value,
+    })
+  }
   /* 监听title输入 */
   const pubTitleNum = ref(0)
-  const pubTitleInput = ref()
   function changePubTitle(event) {
     pubTitleNum.value = event.target.value.length
   }
   function clearPubTitle() {
-    pubTitleInput.value.value = ''
+    newsTitle.value = ''
     pubTitleNum.value = 0
   }
   /* 监听content输入 */
   const pubContentNum = ref(0)
-  function changePubContent(event) {
-    pubContentNum.value = event.target.value.length
+  let focusNode = reactive({}); // 存储光标聚焦节点
+  let focusOffset = ref(0); // 存储光标聚焦偏移量
+  let chatInputOffset = reactive({}); // 存储光标聚焦的元素
+  function handleContentNum() {
+    // 判断innerHtml的<数量
+    let htmlStr = contentDom.value.innerHTML.replace(/<div>|<br>|<\/div>|<\/span>/g,'')
+    htmlStr = htmlStr.replace(/<span.*?>/g,'')
+    let htmlArr = htmlStr.split('')
+    const htmlLtCount = htmlArr.reduce((prev,cur)=>{
+      return cur === '<' ? prev + 1 : prev
+    },0)
+    let textArr = contentDom.value.innerText.split('')
+    const textLtCount = textArr.reduce((prev, cur)=>{
+      return cur === '<' || cur === '>' ? prev + 1 : prev
+    }, 0)
+    pubContentNum.value = textArr.length + textLtCount*3 + htmlLtCount * 3
   }
-  /* 图片上传 */
+  function changePubContent(event) {
+    if(event.target.innerHTML === '<br>') {
+      event.target.innerText = ''
+    }
+    /* 监听@输入 */
+    if(event.data === '@') {
+      setTimeout(() => {
+        showAtSelect.value = true
+        // const {left, top} = getCursorPosition()
+        // atSelectPosition.left = left + 'px'
+        // atSelectPosition.top = top + 'px'
+        // console.log(left,top)
+      }, 200);
+    } else {
+      showAtSelect.value = false
+    }
+    handleContentNum()
+  }
+  function handleContentBlur() {
+    setTimeout(() => {
+      showAtSelect.value = false
+    }, 200);
+    if (window.getSelection) {
+      let sel = window.getSelection();
+      if (sel.getRangeAt && sel.rangeCount) {
+        focusNode = sel.focusNode;
+        focusOffset.value = sel.focusOffset;
+        chatInputOffset = sel.getRangeAt(0);
+      }
+    }
+  }
+  //#endregion
+  
+  //#region @艾特功能
+  const followList = [
+    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNum:111},
+    {avatarUrl:'/imgs/default-avatar.png',username:'谢家辉',fansNum:111},
+    {avatarUrl:'/imgs/default-avatar.png',username:'何昕',fansNum:111},
+    {avatarUrl:'/imgs/default-avatar.png',username:'叶凯乐',fansNum:111},
+    {avatarUrl:'/imgs/default-avatar.png',username:'王思杰',fansNum:111},
+    {avatarUrl:'/imgs/default-avatar.png',username:'卢家秦',fansNum:111},
+    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNum:111},
+    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNum:111},
+  ]
+  const showAtSelect = ref(false)
+  const atSelectPosition = reactive({
+    left:"0px",
+    top:"0px",
+  })
+  // function getCursorPosition() {
+  //   let selection = document.getSelection()
+  //   let range = new Range()
+  //   range.selectNode(selection.focusNode)
+  //   range.setStart(selection.focusNode, selection.focusOffset)
+  //   const {left, top} = range.getBoundingClientRect()
+  //   return {left, top}
+  // }
+  function handleClickAt() {
+    pubContentNum.value++
+    const atElement = '@'
+    if(!rangeOfContentBox) {
+      rangeOfContentBox = new Range()
+      rangeOfContentBox.selectNodeContents(contentDom.value)
+    }
+    const atNode = rangeOfContentBox.createContextualFragment(atElement)
+    if(rangeOfContentBox.collapsed) {
+      rangeOfContentBox.insertNode(atNode)
+    } else {
+      rangeOfContentBox.deleteContents()
+      rangeOfContentBox.insertNode(atNode)
+    }
+    rangeOfContentBox.collapse(false)
+    document.getSelection().removeAllRanges()
+    document.getSelection().addRange(rangeOfContentBox)
+    setTimeout(() => {
+      // const {left, top} = rangeOfContentBox.getBoundingClientRect()
+      // console.log(left,top)
+      // atSelectPosition.left = left + 'px'
+      // atSelectPosition.top = top + 'px'
+      showAtSelect.value = true
+    }, 200);
+  }
+  function selectAtUser(username) {
+    showAtSelect.value = false
+    chatInputOffset.setStart(focusNode,focusOffset.value-1)
+    chatInputOffset.setEnd(focusNode,focusOffset.value)
+    chatInputOffset.deleteContents()
+    const atElement = `<span class="username" contenteditable="false">@${username}</span>`
+    chatInputOffset.collapse(false)
+    const atNode = chatInputOffset.createContextualFragment(atElement)
+    let lastChild = atNode.lastChild
+    chatInputOffset.insertNode(atNode)
+    chatInputOffset.setEndAfter(lastChild)
+    chatInputOffset.setStartAfter(lastChild)
+    const selection = document.getSelection()
+    selection.removeAllRanges()
+    selection.addRange(chatInputOffset)
+    handleContentNum()
+  }
+  //#endregion
+  //#region 图片
   let timer
   const showUploadBox = ref(false)
   const {pictureList} = storeToRefs(newsStore)
@@ -59,83 +185,66 @@
     }
   }, 1000);
   function uploadPicture() {
-    pictureList.value.push({src:'/imgs/logo.png',remainTime:20})
+    pictureList.value.push({src:'/imgs/logo.png',remainTime:1800})
   }
   function deletePicture(index) {
     pictureList.value.splice(index, 1)
   }
-  /* 展示设置 */
-  const settingCascaderDom = ref()
-  const settingCascader1 = ref(false)
-  const settingCascader2 = ref(0) // 0:不展示二级层叠 1：可见范围 3:精选评论
-  function showSettingCascader() {
-    settingCascader1.value = true
-    nextTick(()=>{
-      settingCascaderDom.value.focus()
-    })
+  //#endregion
+  //#region 表情包
+  const showEnjoyBox = ref(false)
+  const enjoyBtnDom = ref()
+  const contentDom = ref()
+  let rangeOfContentBox
+  /* 展示表情包列表 */
+  function clickEnjoyBtn() {
+    showEnjoyBox.value = !showEnjoyBox.value
   }
-  function blurSettingCascader() {
-    settingCascader1.value = false
-    settingCascader2.value = 0
+  /* 表情包列表失焦 */
+  function handleEnjoyBoxBlur() {
+    showEnjoyBox.value = false
   }
-  function showSettingCascader2(num) {
-    settingCascader2.value = num
+  /* 处理光标 */
+  document.onselectionchange= () => {
+    let selection = document.getSelection()
+    if(selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0)
+      if(contentDom.value.contains(range.commonAncestorContainer)) {
+        rangeOfContentBox = range
+      }
+    }
   }
-  const newsSeePermission = ref(0) // 0:所有人可见 1:仅自己
-  const newsCommentPermission = ref(0) // 0:允许评论 1：关闭评论 2：精选评论
-  
-  /* 发布时间框 */
-  const PubTimeBox = ref(false)
-  function showPubTimeBox() {
-    PubTimeBox.value = true
-    settingCascader1.value = false
+  /* 插入表情包 */
+  function insertEnjoy(enjoyName) {
+    const enjoyImg = document.createElement('img')
+    enjoyImg.src = `/imgs/enjoys/${enjoyName}`
+    if(!rangeOfContentBox) {
+      rangeOfContentBox = new Range()
+      rangeOfContentBox.selectNodeContents(contentDom.value)
+    }
+    if(rangeOfContentBox.collapsed) {
+      rangeOfContentBox.insertNode(enjoyImg)
+    } else {
+      rangeOfContentBox.deleteContents()
+      rangeOfContentBox.insertNode(enjoyImg)
+    }
+    rangeOfContentBox.collapse(false)
+    pubContentNum.value += 3
   }
-  function deletePubTime() {
-    publishDate.value = ''
-    publishHour.value = ''
-    publishMinute.value = ''
-    PubTimeBox.value = false
+  /* 处理点击表情包光标移到表情包前 */
+  function handleContentBoxClick(event) {
+    setCaretForEnjoy(event.target)
   }
-  /* 发布 */
-  const newsTitle = ref('')
-  const newsContent = ref('')
-  const publishDate = ref('')
-  const publishHour = ref('')
-  const publishMinute = ref('')
-  async function publish() {
-    await publishNews({
-      title:newsTitle.value,
-      content:newsContent.value
-    })
+  function setCaretForEnjoy(target) {
+    if(target.tagName === 'IMG') {
+      let range = new Range()
+      range.setStartBefore(target)
+      range.collapse(true)
+      document.getSelection().removeAllRanges()
+      document.getSelection().addRange(range)
+    }
   }
   //#endregion
-
-  /* 页面尺寸缩放调整 */
-  let smallSize = ref(false)
-  window.addEventListener('resize', ()=> {
-    if(window.innerWidth < 1396) {
-      smallSize.value = true
-    } else {
-      smallSize.value = false
-    }
-  })
-  /* 切换 tab 栏样式 */
-  const activeNum = ref(0)
-  const highlight = ref()
-  function addActive(num) {
-    activeNum.value = num
-    if(num === 0) {
-      highlight.value.style.transform = 'translateX(37px)'
-    } else if(num === 1) {
-      highlight.value.style.transform = 'translateX(111px)'
-    } else if(num === 2) {
-      highlight.value.style.transform = 'translateX(199px)'
-    } else if(num === 3) {
-      highlight.value.style.transform = 'translateX(273px)'
-    }
-  }
-  /* 时间下拉框选项 */
-  
   //#region 投票功能
   /* 展示投票表单 */
   const showVoteModal = ref(false)
@@ -195,6 +304,39 @@
     showLivesModal.value = false
   }
   //#endregion
+  //#region 设置
+  const settingCascaderDom = ref()
+  const settingCascader1 = ref(false)
+  const settingCascader2 = ref(0) // 0:不展示二级层叠 1：可见范围 3:精选评论
+  function showSettingCascader() {
+    settingCascader1.value = true
+    nextTick(()=>{
+      settingCascaderDom.value.focus()
+    })
+  }
+  function blurSettingCascader() {
+    settingCascader1.value = false
+    settingCascader2.value = 0
+  }
+  function showSettingCascader2(num) {
+    settingCascader2.value = num
+  }
+  const newsSeePermission = ref(0) // 0:所有人可见 1:仅自己
+  const newsCommentPermission = ref(0) // 0:允许评论 1：关闭评论 2：精选评论
+  //#endregion
+  //#region 发布时间
+  const PubTimeBox = ref(false)
+  function showPubTimeBox() {
+    PubTimeBox.value = true
+    settingCascader1.value = false
+  }
+  function deletePubTime() {
+    publishDate.value = ''
+    publishHour.value = ''
+    publishMinute.value = ''
+    PubTimeBox.value = false
+  }
+  //#endregion
   //#region up列表
   const activeUpIndex = ref(-1)
   const upListDom = ref()
@@ -202,8 +344,34 @@
     upListDom.value.scrollLeft += n
   }
   //#endregion
+  //#region tab栏
+  const activeNum = ref(0)
+  const highlight = ref()
+  function addActive(num) {
+    activeNum.value = num
+    if(num === 0) {
+      highlight.value.style.transform = 'translateX(37px)'
+    } else if(num === 1) {
+      highlight.value.style.transform = 'translateX(111px)'
+    } else if(num === 2) {
+      highlight.value.style.transform = 'translateX(199px)'
+    } else if(num === 3) {
+      highlight.value.style.transform = 'translateX(273px)'
+    }
+  }
+  //#endregion
   //#region 动态
   const showNewsCascader = ref(false)
+  //#endregion
+  //#region 页面尺寸缩放调整
+  let smallSize = ref(false)
+  window.addEventListener('resize', ()=> {
+    if(window.innerWidth < 1396) {
+      smallSize.value = true
+    } else {
+      smallSize.value = false
+    }
+  })
   //#endregion
 </script>
 
@@ -293,10 +461,22 @@
               </div>
             </div>
           </div>
-          <input name="newsTitle" ref="pubTitleInput" v-model="newsTitle" @input="changePubTitle" maxlength="20" type="text" class="title" placeholder="标题 (选填，20字内)">
-          <i v-if="pubTitleNum" @click="clearPubTitle" class="iconfont icon-cuowu1"></i>
-          <span v-if="pubTitleNum" class="title-num">{{ pubTitleNum }}</span>
-          <textarea name="newsContent" v-model="newsContent" @input="changePubContent" maxlength="500" class="content" placeholder="有什么想和大家分享的？"></textarea>
+          <div class="publish-input">
+            <input name="newsTitle" v-model="newsTitle" @input="changePubTitle" maxlength="20" type="text" class="title" placeholder="标题 (选填，20字内)">
+            <i v-if="pubTitleNum" @click="clearPubTitle" class="iconfont icon-cuowu1"></i>
+            <span v-if="pubTitleNum" class="title-num">{{ pubTitleNum }}</span>
+            <div ref="contentDom" contenteditable="true" @blur="handleContentBlur" @click="handleContentBoxClick" @input="changePubContent" :class="{'content-empty':!pubContentNum}" class="content" placeholder="有什么想和大家分享的？"></div>
+            <bs-at-ul v-if="showAtSelect" :atSelectPosition="atSelectPosition">
+              <bs-at-li 
+                v-for="(item,index) in followList" :key="index"
+                :avatarUrl="item.avatarUrl"
+                :username="item.username"
+                :fansNum="item.fansNum"
+                @selectAtUser="selectAtUser"
+              >
+              </bs-at-li>
+            </bs-at-ul>
+          </div>
           <div v-if="showUploadBox" class="pub-picture-list">
             <div v-for="(item,index) in pictureList" :key="index" class="picture-box">
               <img :src="item.src" alt="">
@@ -304,7 +484,7 @@
                 <i class="iconfont icon-cuowu"></i>
               </div>
               <div class="progress-bar">
-                <div class="progress" :style="{width:item.remainTime/20*100+'%', backgroundColor:item.remainTime/20*100 > 70 ? '#88cc24' : (item.remainTime/20*100 > 20 ? '#e6a23c' : '#f56c6c')}"></div>
+                <div class="progress" :style="{width:item.remainTime/1800*100+'%', backgroundColor:item.remainTime/1800*100 > 70 ? '#88cc24' : (item.remainTime/1800*100 > 20 ? '#e6a23c' : '#f56c6c')}"></div>
               </div>
             </div>
             <label for="upload-pic">
@@ -333,7 +513,7 @@
             <el-date-picker
               v-model="publishDate"
               type="date"
-              placeholder="选择发布日期"
+              placeholder="日期"
               value-format="YYYY-MM-DD"
             />
             <el-select v-model="publishHour" placeholder="时" style="width: 100px">
@@ -363,12 +543,25 @@
             <span class="only-desc">开启后，将不支持分享、商业推广</span>
           </div>
           <div class="publish-controls">
-            <div>
-              <i class="iconfont icon-biaoqing"></i>
-              <i @click="showUploadBox = !showUploadBox" :class="{'active':showUploadBox}" class="iconfont icon-tupian"></i>
-              <i class="iconfont icon-aite"></i>
-              <i @click="showVoteModal = true" :class="{'active':showVoteBox}" class="iconfont icon-toupiao"></i>
-              <i @click="showLivesModal = true" :class="{'active':showLivesBox}" class="iconfont icon-zhibo"></i>
+            <div class="publish-controls-tool">
+              <div class="enjoy-btn" ref="enjoyBtnDom" tabindex="1" @blur="handleEnjoyBoxBlur">
+                <i @click="clickEnjoyBtn" :class="{'active':showEnjoyBox}" class="iconfont icon-biaoqing"></i>
+                <div v-if="showEnjoyBox" class="enjoy-box">
+                  <bs-enjoy @insertEnjoy="insertEnjoy"></bs-enjoy>
+                </div>
+              </div>
+              <div>
+                <i @click="showUploadBox = !showUploadBox" :class="{'active':showUploadBox}" class="iconfont icon-tupian"></i>
+              </div>
+              <div>
+                <i @click="handleClickAt" class="iconfont icon-aite"></i>
+              </div>
+              <div>
+                <i @click="showVoteModal = true" :class="{'active':showVoteBox}" class="iconfont icon-toupiao"></i>
+              </div>
+              <div>
+                <i @click="showLivesModal = true" :class="{'active':showLivesBox}" class="iconfont icon-zhibo"></i>
+              </div>
             </div>
             <div class="publish-controls-headquarters">
               <span class="content-num">{{ pubContentNum }} / 300</span>
@@ -920,28 +1113,50 @@
               }
             }
           }
-          .title {
-            margin-top: 10px;
-            width: 90%;
-            border: none;
-          }
-          .icon-cuowu1 {
-            margin-right: 10px;
-            color: $colorF;
-            font-size: $fontH;
-            cursor: pointer;
-          }
-          .title-num {
-            color: $colorF;
-            font-size: $fontJ;
-          }
-          .content {
-            margin-top: 5px;
-            margin-bottom: 15px;
-            width: 92%;
-            border: none;
-            resize: none;
-            font-weight: bold;
+          .publish-input {
+            position: relative;
+            .title {
+              margin-top: 10px;
+              width: 90%;
+              border: none;
+              font-size: $fontJ;
+              font-weight: bold;
+            }
+            .icon-cuowu1 {
+              margin-right: 4px;
+              color: $colorF;
+              font-size: $fontJ;
+              cursor: pointer;
+            }
+            .title-num {
+              color: $colorF;
+              font-size: $fontJ;
+            }
+            .content {
+              position: relative;
+              margin-top: 5px;
+              margin-bottom: 15px;
+              width: 92%;
+              border: none;
+              resize: none;
+              font-size: $fontJ;
+              img {
+                height: 20px;
+                width: 20px;
+                vertical-align: middle;
+              }
+              .username {
+                color: $colorM;
+              }
+            }
+            .content-empty {
+              &::after {
+                content: attr(placeholder);
+                position: absolute;
+                top: 0px;
+                color: $colorD;
+              }
+            }
           }
           .pub-picture-list {
             display: flex;
@@ -1142,26 +1357,41 @@
           .publish-controls {
             @include flex();
             height: 40px;
-            .iconfont {
-              font-size: $fontG;
-              margin-right: 15px;
-              color: $colorD;
-              cursor: pointer;
-              &:hover {
-                color: $colorQ;
+            .publish-controls-tool {
+              @include flex();
+              .iconfont {
+                font-size: $fontG;
+                margin-right: 15px;
+                color: $colorD;
+                cursor: pointer;
+                &:hover {
+                  color: $colorQ;
+                }
               }
-            }
-            .active {
-              color: $colorM;
+              .enjoy-btn {
+                position: relative;
+                .enjoy-box {
+                  z-index: 10;
+                  position: absolute;
+                  top: 35px;
+                  left: -5px;
+                  background-color: $colorG;
+                }
+              }
             }
             .publish-controls-headquarters {
               position: relative;
               .content-num {
                 height: 20px;
-                margin-right: 10px;
               }
               .icon-shezhi {
                 vertical-align: middle;
+                font-size: $fontH;
+                cursor: pointer;
+                margin: 0 10px;
+                &:hover {
+                  color: $colorM;
+                }
               }
               .cascader {
                 display: flex;
@@ -1193,7 +1423,7 @@
                       .icon-youjiantou {
                         position: absolute;
                         top: 10px;
-                        right: 0;
+                        right: 25px;
                         color: $colorB;
                         font-size: $fontK;
                         font-weight: bold;
@@ -1223,6 +1453,9 @@
                   background-color: $colorP;
                 }
               }
+            }
+            .active {
+              color: $colorM !important;
             }
           }
         }
@@ -1308,7 +1541,7 @@
           }
           &:hover {
             .left-btn,.right-btn {
-              opacity: .7;
+              opacity: 1;
             }
           }
           .left-btn,.right-btn {
@@ -1320,9 +1553,9 @@
             line-height: 20px;
             text-align: center;
             border-radius: 10px;
-            background-color: $colorG;
             box-shadow: 0 0 10px $colorF;
             opacity: 0;
+            background-color: $colorN;
             transition: opacity .3s;
             .iconfont {
               font-size: $fontF;
