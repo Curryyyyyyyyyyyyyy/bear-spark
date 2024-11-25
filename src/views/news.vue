@@ -4,7 +4,7 @@
   import Modal from '@/components/Modal.vue';
   import BsSelect from '@/components/BsSelect.vue';
   import BsOption from '../components/BsOption.vue';
-  import BsEnjoy from '../components/BsEnjoy.vue';
+  import BsEmoji from '../components/BsEmoji.vue';
   import BsAtUl from '../components/BsAtUl.vue';
   import BsAtLi from '../components/BsAtLi.vue';
   import { ElSelect,ElOption,ElDatePicker } from 'element-plus';
@@ -30,19 +30,42 @@
     clearInterval(timer)
   })
 
-  /* 选择标签 */
+  //#region 标签
   const showTagCol = ref(false)
+  const tagLoading = ref(true)
+  const selectTagName = ref('')
+  const tagSelected = ref(false)
+  function handleTagCol() {
+    showTagCol.value = true
+    setTimeout(()=>{
+      tagLoading.value = false
+    },500)
+  }
+  function handleTagBlur() {
+    setTimeout(()=>{
+      showTagCol.value = false
+    },100)
+  }
+  function handleSelectTag(tagName) {
+    selectTagName.value = tagName
+    tagSelected.value = true
+    console.log(111)
+  }
+  function deleteTag() {
+    selectTagName.value = ''
+    tagSelected.value = false
+  }
+  //#endregion
   //#region 发布
   /* 发布 */
   const newsTitle = ref('')
-  const publishDate = ref('')
-  const publishHour = ref('')
-  const publishMinute = ref('')
   async function publish() {
     await publishNews({
       title:newsTitle.value,
     })
   }
+  //#endregion
+  //#region title content
   /* 监听title输入 */
   const pubTitleNum = ref(0)
   function changePubTitle(event) {
@@ -88,6 +111,7 @@
       showAtSelect.value = false
     }
     handleContentNum()
+    console.log(contentDom)
   }
   function handleContentBlur() {
     setTimeout(() => {
@@ -103,7 +127,6 @@
     }
   }
   //#endregion
-  
   //#region @艾特功能
   const followList = [
     {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNum:111},
@@ -192,17 +215,17 @@
   }
   //#endregion
   //#region 表情包
-  const showEnjoyBox = ref(false)
-  const enjoyBtnDom = ref()
+  const showEmojiBox = ref(false)
+  const emojiBtnDom = ref()
   const contentDom = ref()
   let rangeOfContentBox
   /* 展示表情包列表 */
-  function clickEnjoyBtn() {
-    showEnjoyBox.value = !showEnjoyBox.value
+  function clickEmojiBtn() {
+    showEmojiBox.value = !showEmojiBox.value
   }
   /* 表情包列表失焦 */
-  function handleEnjoyBoxBlur() {
-    showEnjoyBox.value = false
+  function handleEmojiBoxBlur() {
+    showEmojiBox.value = false
   }
   /* 处理光标 */
   document.onselectionchange= () => {
@@ -215,27 +238,27 @@
     }
   }
   /* 插入表情包 */
-  function insertEnjoy(enjoyName) {
-    const enjoyImg = document.createElement('img')
-    enjoyImg.src = `/imgs/enjoys/${enjoyName}`
+  function insertEmoji(emojiName) {
+    const emojiImg = document.createElement('img')
+    emojiImg.src = `/imgs/emojis/${emojiName}`
     if(!rangeOfContentBox) {
       rangeOfContentBox = new Range()
       rangeOfContentBox.selectNodeContents(contentDom.value)
     }
     if(rangeOfContentBox.collapsed) {
-      rangeOfContentBox.insertNode(enjoyImg)
+      rangeOfContentBox.insertNode(emojiImg)
     } else {
       rangeOfContentBox.deleteContents()
-      rangeOfContentBox.insertNode(enjoyImg)
+      rangeOfContentBox.insertNode(emojiImg)
     }
     rangeOfContentBox.collapse(false)
     pubContentNum.value += 3
   }
   /* 处理点击表情包光标移到表情包前 */
   function handleContentBoxClick(event) {
-    setCaretForEnjoy(event.target)
+    setCaretForEmoji(event.target)
   }
-  function setCaretForEnjoy(target) {
+  function setCaretForEmoji(target) {
     if(target.tagName === 'IMG') {
       let range = new Range()
       range.setStartBefore(target)
@@ -326,6 +349,9 @@
   //#endregion
   //#region 发布时间
   const PubTimeBox = ref(false)
+  const publishDate = ref('')
+  const publishHour = ref('')
+  const publishMinute = ref('')
   function showPubTimeBox() {
     PubTimeBox.value = true
     settingCascader1.value = false
@@ -412,15 +438,16 @@
           <div class="tag-desk">
             <div class="tag-search">
               <div class="tag-search-popover" :class="{'active':showTagCol}">
-                <label class="tag-search-input">
-                  <i v-if="!showTagCol" @click="showTagCol = true" class="iconfont icon-huati"></i>
+                <label :class="{'tag-active':tagSelected}" class="tag-search-input">
+                  <i v-if="!showTagCol" @click="handleTagCol" class="iconfont icon-huati"></i>
+                  <span v-if="!showTagCol" @click="handleTagCol">{{ selectTagName ? selectTagName : '选择标签' }}</span>
+                  <span v-if="tagSelected && !showTagCol" @click="deleteTag" class="delete-tag-btn"><i class="iconfont icon-cuowu"></i></span>
                   <i v-if="showTagCol" class="iconfont icon-sousuo"></i>
-                  <span v-if="!showTagCol" @click="showTagCol = true" class="tag-search-input-text">选择标签</span>
-                  <input v-if="showTagCol" @blur="showTagCol = false" type="text" placeholder="搜索标签">
+                  <input v-if="showTagCol" @blur="handleTagBlur" type="text" placeholder="搜索标签">
                 </label>
-                <div v-if="showTagCol" class="tag-search-result">
-                  <div class="tag-search-list">
-                    <div class="tag-search-item">
+                <div v-if="showTagCol" v-loading="tagLoading" class="tag-search-result">
+                  <div v-if="!tagLoading" class="tag-search-list">
+                    <div @click="handleSelectTag('哈11111111111哈哈')" class="tag-search-item">
                       <i class="iconfont icon-huati"></i>
                       <span class="tag-search-item-title">巴黎最前线</span>
                       <p class="tag-search-item-desc">122浏览&middot;133讨论</p>
@@ -544,10 +571,10 @@
           </div>
           <div class="publish-controls">
             <div class="publish-controls-tool">
-              <div class="enjoy-btn" ref="enjoyBtnDom" tabindex="1" @blur="handleEnjoyBoxBlur">
-                <i @click="clickEnjoyBtn" :class="{'active':showEnjoyBox}" class="iconfont icon-biaoqing"></i>
-                <div v-if="showEnjoyBox" class="enjoy-box">
-                  <bs-enjoy @insertEnjoy="insertEnjoy"></bs-enjoy>
+              <div class="emoji-btn" ref="emojiBtnDom" tabindex="1" @blur="handleEmojiBoxBlur">
+                <i @click="clickEmojiBtn" :class="{'active':showEmojiBox}" class="iconfont icon-biaoqing"></i>
+                <div v-if="showEmojiBox" class="emoji-box">
+                  <bs-emoji @insertEmoji="insertEmoji"></bs-emoji>
                 </div>
               </div>
               <div>
@@ -1018,11 +1045,9 @@
           .tag-desk {
             .tag-search {
               height: 24px;
-              width: 96px;
               position: relative;
               .tag-search-popover {
                 z-index: 10;
-                width: 100%;
                 height: 100%;
                 position: absolute;
                 left: 0;
@@ -1031,6 +1056,7 @@
                 border-radius: 11px;
                 transition: all .4s;
                 .tag-search-input {
+                  position: relative;
                   display: flex;
                   align-items: center;
                   justify-content: center;
@@ -1038,7 +1064,6 @@
                   height: 22px;
                   padding: 0 10px 0 8px;
                   border-radius: 11px;
-                  background-color: $colorN;
                   color: $colorD;
                   cursor: pointer;
                   transition: all .4s;
@@ -1052,10 +1077,28 @@
                   input {
                     height: 20px;
                     width: 100%;
-                    background-color: inherit;
                     border: none;
                     outline: none;
                   }
+                  .delete-tag-btn {
+                    position: absolute;
+                    display: inline-block;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 14px;
+                    height: 14px;
+                    border-radius: 7px;
+                    background-color: #dff6fd;
+                    right: -20px;
+                    .icon-cuowu {
+                      font-size: $fontK;
+                    }
+                  }
+                }
+                .tag-active {
+                  color: $colorM;
+                  background-color: #dff6fd;
                 }
                 .tag-search-result {
                   height: 228px;
@@ -1109,6 +1152,7 @@
                 .tag-search-input {
                   height: 28px;
                   margin: 16px 16px 8px;
+                  background-color: $colorN;
                 }
               }
             }
@@ -1368,9 +1412,9 @@
                   color: $colorQ;
                 }
               }
-              .enjoy-btn {
+              .emoji-btn {
                 position: relative;
-                .enjoy-box {
+                .emoji-box {
                   z-index: 10;
                   position: absolute;
                   top: 35px;
