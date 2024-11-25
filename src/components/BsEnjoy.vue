@@ -119,7 +119,7 @@
   <div class="bs-enjoy">
     <ul class="bs-enjoy-list">
       <li @click="insertEnjoy" class="bs-enjoy-item" v-for="(item,index) in enjoyImgList" :key="index">
-        <img :src="'/imgs/enjoys/' + item + '.png'" alt="表情">
+        <img v-lazy="'/imgs/enjoys/' + item + '.png'" alt="表情">
       </li>
     </ul>
   </div>
