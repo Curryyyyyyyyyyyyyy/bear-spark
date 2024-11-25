@@ -1,6 +1,6 @@
 <script setup>
   import { ref } from 'vue';
-  const enjoyImgList = ref([
+  const emojiImgList = ref([
     'beaming-face-with-smiling-eyes',
     'cold-face',
     'confused-face',
@@ -103,23 +103,23 @@
     'call-me-hand',
     'clown-face',
   ])
-  const emit = defineEmits(['insertEnjoy'])
-  function insertEnjoy(event) {
-    let enjoyUrl
+  const emit = defineEmits(['insertEmoji'])
+  function insertEmoji(event) {
+    let emojiUrl
     if(event.target.tagName === 'LI') {
-      enjoyUrl = event.target.childNodes[0].src.split('/')
+      emojiUrl = event.target.childNodes[0].src.split('/')
     } else {
-      enjoyUrl = event.target.src.split('/')
+      emojiUrl = event.target.src.split('/')
     }
-    emit('insertEnjoy', enjoyUrl[enjoyUrl.length-1])
+    emit('insertEmoji', emojiUrl[emojiUrl.length-1])
   }
 </script>
 
 <template>
-  <div class="bs-enjoy">
-    <ul class="bs-enjoy-list">
-      <li @click="insertEnjoy" class="bs-enjoy-item" v-for="(item,index) in enjoyImgList" :key="index">
-        <img v-lazy="'/imgs/enjoys/' + item + '.png'" alt="表情">
+  <div class="bs-emoji">
+    <ul class="bs-emoji-list">
+      <li @click="insertEmoji" class="bs-emoji-item" v-for="(item,index) in emojiImgList" :key="index">
+        <img v-lazy="'/imgs/emojis/' + item + '.png'" alt="表情">
       </li>
     </ul>
   </div>
@@ -127,7 +127,7 @@
 
 <style lang="scss">
   @use '@/assets/sass/config.scss' as *;
-  .bs-enjoy {
+  .bs-emoji {
     display: flex;
     flex-direction: column;
     width: 384px;
@@ -137,13 +137,13 @@
     box-sizing: border-box;
     border-radius: 6px;
     box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.17);
-    .bs-enjoy-list {
+    .bs-emoji-list {
       width: 100%;
       height: 100%;
       display: flex;
       flex-wrap: wrap;
       overflow: auto;
-      .bs-enjoy-item {
+      .bs-emoji-item {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -160,10 +160,10 @@
         }
       }
     }
-    .bs-enjoy-list::-webkit-scrollbar {
+    .bs-emoji-list::-webkit-scrollbar {
       width: 4px;
     }
-    .bs-enjoy-list::-webkit-scrollbar-thumb {
+    .bs-emoji-list::-webkit-scrollbar-thumb {
       background-color: $colorE;
       border-radius: 2px;
     }
