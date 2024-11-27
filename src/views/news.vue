@@ -1,5 +1,5 @@
 <script setup>
-  import { nextTick, onBeforeUnmount, reactive, ref } from 'vue';
+  import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
   import NavHeader from '@/components/NavHeader.vue'
   import Modal from '@/components/Modal.vue';
   import BsSelect from '@/components/BsSelect.vue';
@@ -7,17 +7,107 @@
   import BsEmoji from '../components/BsEmoji.vue';
   import BsAtUl from '../components/BsAtUl.vue';
   import BsAtLi from '../components/BsAtLi.vue';
-  import { ElSelect,ElOption,ElDatePicker } from 'element-plus';
+  import { ElSelect,ElOption,ElDatePicker, ElMessage } from 'element-plus';
   import {hourOptions,minuteOptions} from '@/hooks/timeOptions.js'
-  import { publishNews } from '../api/news';
   import useNews from '@/store/news.js'
   import {useRouter} from 'vue-router'
   import { storeToRefs } from 'pinia';
+  import dayjs from 'dayjs';
+  import {publishNews,getNewsPrepare,getNewsList, getTagList} from '@/api/news.js'
+  import {upload} from '@/api/file.js'
+  import {getUserInfoApi} from '@/api/user.js'
+  import useUser from '../store/user';
 
   /* Store */
   const newsStore = useNews()
+  const {pictureList} = storeToRefs(newsStore)
   /* Router */
   const router = useRouter()
+  const userStore = useUser()
+  const {username} = storeToRefs(userStore)
+  /* Mounted */
+  const recentTagList = ref([])
+  const followerList = ref([])
+  const emojiUrlList = ref([])
+  const tagList = ref([])
+  const newsList = ref([])
+  const userInfo = ref('')
+  const backgroundUrl = ref('')
+  const sideBarUrl = ref('')
+  // recentTagList.value = [
+  //     {
+  //       content:'111',
+  //       viewNum:1,
+  //       discussNum:1,
+  //     },
+  //     {
+  //       content:'222',
+  //       viewNum:2,
+  //       discussNum:2,
+  //     },
+  //     {
+  //       content:'333',
+  //       viewNum:3,
+  //       discussNum:3,
+  //     },
+  //     {
+  //       content:'444',
+  //       viewNum:4,
+  //       discussNum:4,
+  //     },
+  //     {
+  //       content:'555',
+  //       viewNum:5,
+  //       discussNum:5,
+  //     },
+  //     {
+  //       content:'666',
+  //       viewNum:6,
+  //       discussNum:6,
+  //     },
+  //     {
+  //       content:'777',
+  //       viewNum:7,
+  //       discussNum:7,
+  //     },
+  //     {
+  //       content:'888',
+  //       viewNum:8,
+  //       discussNum:8,
+  //     },
+  // ]
+  // followerList.value = [
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNum:111},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'谢家辉',fansNum:222},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'何昕',fansNum:333},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'叶凯乐',fansNum:444},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'王思杰',fansNum:555},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'卢家秦',fansNum:666},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNum:777},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNum:888},
+  // ]
+  // userInfo.value = {
+  //   username:'curryyyyyyyyy',
+  //   avatarUrl:'/imgs/default-avatar.png',
+  //   fanInfo:0,
+  //   followerInfo:0,
+  //   happeningInfo:0
+  // }
+  onMounted(async () => {
+    /* 获取关注的列表、表情包列表、热门标签列表 */
+    const res = await getNewsPrepare()
+    recentTagList.value = res.recentTagList
+    followerList.value = res.followerList
+    emojiUrlList.value = res.emojiUrlList
+    backgroundUrl.value = res.backgroundUrl
+    sideBarUrl.value = res.sideBarUrl
+    /* 分页获取动态 */
+    const newsRes = await getNewsList(1, 10)
+    newsList.value = newsRes.records
+    /* 获取用户信息 */
+    const userInfoRes = await getUserInfoApi()
+    userInfo.value = userInfoRes
+  })
 
   /* 页面卸载时清除定时器，清除pictureList */
   window.addEventListener('pagehide',()=>{
@@ -35,21 +125,23 @@
   const tagLoading = ref(true)
   const selectTagName = ref('')
   const tagSelected = ref(false)
-  function handleTagCol() {
+  const tagId = ref('')
+  async function handleTagCol() {
     showTagCol.value = true
-    setTimeout(()=>{
-      tagLoading.value = false
-    },500)
+    /* 分页获取标签 */
+    const tagRes = await getTagList(1, 10)
+    tagList.value = tagRes.records
+    tagLoading.value = false
   }
   function handleTagBlur() {
     setTimeout(()=>{
       showTagCol.value = false
     },100)
   }
-  function handleSelectTag(tagName) {
+  function handleSelectTag(tagName,id) {
     selectTagName.value = tagName
     tagSelected.value = true
-    console.log(111)
+    tagId.value = id
   }
   function deleteTag() {
     selectTagName.value = ''
@@ -59,10 +151,37 @@
   //#region 发布
   /* 发布 */
   const newsTitle = ref('')
+  const imgUrlList = ref([])
   async function publish() {
+    let pubTime = ''
+    if(publishDate.value && publishHour.value && publishHour.value) {
+      pubTime = publishDate.value+'T'+publishHour.value+':'+publishMinute.value+':00Z'
+    }
     await publishNews({
       title:newsTitle.value,
+      content:contentDom.value.innerHTML,
+      imgUrlList:imgUrlList.value,
+      tagId:tagId.value,
+      voteId:voteId.value,
+      visibility:newsSeePermission.value,
+      advanceRelease:earlyPublish.value,
+      commentAble:newsCommentPermission.value,
+      bookLiveId:bookLiveId.value,
+      submissionId:'',
+      pubTime:pubTime
     })
+    ElMessage.success('发布成功')
+    //#region 清空表单
+    newsTitle.value = ''
+    contentDom.value.innerHTML = ''
+    imgUrlList.value = []
+    tagId.value = ''
+    newsSeePermission.value = 0
+    newsCommentPermission.value = 0
+    publishDate.value = ''
+    publishHour.value = ''
+    publishMinute.value = ''
+    //#endregion
   }
   //#endregion
   //#region title content
@@ -92,7 +211,7 @@
     const textLtCount = textArr.reduce((prev, cur)=>{
       return cur === '<' || cur === '>' ? prev + 1 : prev
     }, 0)
-    pubContentNum.value = textArr.length + textLtCount*3 + htmlLtCount * 3
+    return textArr.length + textLtCount*3 + htmlLtCount * 3
   }
   function changePubContent(event) {
     if(event.target.innerHTML === '<br>') {
@@ -110,8 +229,13 @@
     } else {
       showAtSelect.value = false
     }
-    handleContentNum()
-    console.log(contentDom)
+    if(handleContentNum() > 300) {
+      const overTextNum = handleContentNum() - 300
+      event.target.innerHTML = event.target.innerHTML.slice(0, event.target.innerHTML.length - overTextNum)
+      ElMessage.error('字数已达上限！')
+      event.target.blur()
+    }
+    pubContentNum.value = handleContentNum()
   }
   function handleContentBlur() {
     setTimeout(() => {
@@ -128,16 +252,6 @@
   }
   //#endregion
   //#region @艾特功能
-  const followList = [
-    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNum:111},
-    {avatarUrl:'/imgs/default-avatar.png',username:'谢家辉',fansNum:111},
-    {avatarUrl:'/imgs/default-avatar.png',username:'何昕',fansNum:111},
-    {avatarUrl:'/imgs/default-avatar.png',username:'叶凯乐',fansNum:111},
-    {avatarUrl:'/imgs/default-avatar.png',username:'王思杰',fansNum:111},
-    {avatarUrl:'/imgs/default-avatar.png',username:'卢家秦',fansNum:111},
-    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNum:111},
-    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNum:111},
-  ]
   const showAtSelect = ref(false)
   const atSelectPosition = reactive({
     left:"0px",
@@ -152,6 +266,7 @@
   //   return {left, top}
   // }
   function handleClickAt() {
+    if(pubContentNum.value + 1 > 300) return ElMessage.error('字数已达上限')
     pubContentNum.value++
     const atElement = '@'
     if(!rangeOfContentBox) {
@@ -177,6 +292,7 @@
     }, 200);
   }
   function selectAtUser(username) {
+    if(handleContentNum() + username.length + 1 > 300) return ElMessage.error('字数已达上限')
     showAtSelect.value = false
     chatInputOffset.setStart(focusNode,focusOffset.value-1)
     chatInputOffset.setEnd(focusNode,focusOffset.value)
@@ -191,13 +307,11 @@
     const selection = document.getSelection()
     selection.removeAllRanges()
     selection.addRange(chatInputOffset)
-    handleContentNum()
   }
   //#endregion
   //#region 图片
   let timer
   const showUploadBox = ref(false)
-  const {pictureList} = storeToRefs(newsStore)
   if(pictureList.value.length > 0) showUploadBox.value = true
   timer = setInterval(() => {
     for (let i = 0; i < pictureList.value.length; i++) {
@@ -207,8 +321,14 @@
       }
     }
   }, 1000);
-  function uploadPicture() {
-    pictureList.value.push({src:'/imgs/logo.png',remainTime:1800})
+  async function uploadPicture(event) {
+    const pictureFile = event.target.files[0]
+    const fd = new FormData()
+    fd.append('file',pictureFile)
+    const imgUrl = await upload(fd)
+    pictureList.value.push({src:imgUrl.data,remainTime:1800})
+    imgUrlList.value = pictureList.value.map(item => item.src)
+    event.target.value = null
   }
   function deletePicture(index) {
     pictureList.value.splice(index, 1)
@@ -238,9 +358,10 @@
     }
   }
   /* 插入表情包 */
-  function insertEmoji(emojiName) {
+  function insertEmoji(emojiUrl) {
+    if(pubContentNum.value + 3 > 300) return ElMessage.error('字数已达上限')
     const emojiImg = document.createElement('img')
-    emojiImg.src = `/imgs/emojis/${emojiName}`
+    emojiImg.src = emojiUrl
     if(!rangeOfContentBox) {
       rangeOfContentBox = new Range()
       rangeOfContentBox.selectNodeContents(contentDom.value)
@@ -274,11 +395,13 @@
   /* 展示投票栏 */
   const showVoteBox = ref(false)
   /* 监测标题数 */
+  const voteTitle = ref('')
   const voteTitleNum = ref(0)
   function changeVoteTitle(event) {
     voteTitleNum.value = event.target.value.length
   }
   /* 展示说明输入框 */
+  const voteDesc = ref('')
   const showDescInput = ref(false)
   /* 监测说明字数 */
   const voteDescNum = ref(0)
@@ -286,28 +409,232 @@
     voteDescNum.value = event.target.value.length
   }
   /* 投票类型 */
-  const voteType = ref(1)
+  const voteType = ref(1) // 1:文字 2:图片
   const textOptionList = reactive([{value:''},{value:''}])
-  function addTextOption() {
+  function addOption() {
     textOptionList.push({value:''})
+    pictureOptionList.push({value:'',pictureUrl:''})
   }
-  function deleteTextOption(index) {
+  function deleteOption(index) {
     textOptionList.splice(index, 1)
-  }
-  const pictureOptionList = reactive([{value:''},{value:''}])
-  function addPictureOption() {
-    pictureOptionList.push({value:''})
-  }
-  function deletePictureOption(index) {
     pictureOptionList.splice(index, 1)
   }
+  const pictureOptionList = reactive([{value:'',pictureUrl:''},{value:'',pictureUrl:''}])
+  /* 上传图片选项 */
+  async function uploadPictureOption(event,index) {
+    // const pictureFile = new FormData().append('file',event.target.files[0])
+    // const pictureUrl = await upload(pictureFile)
+    pictureOptionList[index].pictureUrl = '/imgs/default-avatar.png'
+    event.target.value = null
+  }
   /* 限选和截止时间 */
-  const voteMaxSelectNum = ref('单选')
+  const voteMaxSelectNum = ref('')
   const voteEndDate = ref('')
-  const VoteEndHour = ref('')
-  const VoteEndMinute = ref('')
+  const voteEndHour = ref('')
+  const voteEndMinute = ref('')
+  const voteHourOptions = ref(hourOptions)
+  const voteMinuteOptions = ref(minuteOptions)
+  const disabledVoteAndLiveDate = (time) => {
+    return time.getTime() < Date.now() - 8.46e7
+  }
+  function handleClickVote() {
+    showVoteModal.value = true
+    const defaultTime = dayjs(new Date().getTime() + 86400000)
+    voteEndDate.value = defaultTime.format('YYYY-MM-DD')
+  }
+  function changeVoteDate() {
+    const date = dayjs(voteEndDate.value)
+    if(date.$D === new Date().getDate()) {
+      voteHourOptions.value.splice(0, new Date().getHours())
+      if(livesEndHour.value === new Date().getHours()) {
+        voteMinuteOptions.value.splice(0, new Date().getMinutes() + 1)
+      }
+    } else {
+      voteHourOptions.value = [
+      {label:'0时',value:'00'},
+      {label:'1时',value:'01'},
+      {label:'2时',value:'02'},
+      {label:'3时',value:'03'},
+      {label:'4时',value:'04'},
+      {label:'5时',value:'05'},
+      {label:'6时',value:'06'},
+      {label:'7时',value:'07'},
+      {label:'8时',value:'08'},
+      {label:'9时',value:'09'},
+      {label:'10时',value:'10'},
+      {label:'11时',value:'11'},
+      {label:'12时',value:'12'},
+      {label:'13时',value:'13'},
+      {label:'14时',value:'14'},
+      {label:'15时',value:'15'},
+      {label:'16时',value:'16'},
+      {label:'17时',value:'17'},
+      {label:'18时',value:'18'},
+      {label:'19时',value:'19'},
+      {label:'20时',value:'20'},
+      {label:'21时',value:'21'},
+      {label:'22时',value:'22'},
+      {label:'23时',value:'23'},
+    ]
+      voteMinuteOptions.value = [
+        {"label":"0分","value":'00'},
+        {"label":"1分","value":'01'},
+        {"label":"2分","value":'02'},
+        {"label":"3分","value":'03'},
+        {"label":"4分","value":'04'},
+        {"label":"5分","value":'05'},
+        {"label":"6分","value":'06'},
+        {"label":"7分","value":'07'},
+        {"label":"8分","value":'08'},
+        {"label":"9分","value":'09'},
+        {"label":"10分","value":'10'},
+        {"label":"11分","value":'11'},
+        {"label":"12分","value":'12'},
+        {"label":"13分","value":'13'},
+        {"label":"14分","value":'14'},
+        {"label":"15分","value":'15'},
+        {"label":"16分","value":'16'},
+        {"label":"17分","value":'17'},
+        {"label":"18分","value":'18'},
+        {"label":"19分","value":'19'},
+        {"label":"20分","value":'20'},
+        {"label":"21分","value":'21'},
+        {"label":"22分","value":'22'},
+        {"label":"23分","value":'23'},
+        {"label":"24分","value":'24'},
+        {"label":"25分","value":'25'},
+        {"label":"26分","value":'26'},
+        {"label":"27分","value":'27'},
+        {"label":"28分","value":'28'},
+        {"label":"29分","value":'29'},
+        {"label":"30分","value":'30'},
+        {"label":"31分","value":'31'},
+        {"label":"32分","value":'32'},
+        {"label":"33分","value":'33'},
+        {"label":"34分","value":'34'},
+        {"label":"35分","value":'35'},
+        {"label":"36分","value":'36'},
+        {"label":"37分","value":'37'},
+        {"label":"38分","value":'38'},
+        {"label":"39分","value":'39'},
+        {"label":"40分","value":'40'},
+        {"label":"41分","value":'41'},
+        {"label":"42分","value":'42'},
+        {"label":"43分","value":'43'},
+        {"label":"44分","value":'44'},
+        {"label":"45分","value":'45'},
+        {"label":"46分","value":'46'},
+        {"label":"47分","value":'47'},
+        {"label":"48分","value":'48'},
+        {"label":"49分","value":'49'},
+        {"label":"50分","value":'50'},
+        {"label":"51分","value":'51'},
+        {"label":"52分","value":'52'},
+        {"label":"53分","value":'53'},
+        {"label":"54分","value":'54'},
+        {"label":"55分","value":'55'},
+        {"label":"56分","value":'56'},
+        {"label":"57分","value":'57'},
+        {"label":"58分","value":'58'},
+        {"label":"59分","value":'59'}
+      ]
+    }
+    voteEndHour.value = ''
+    voteEndMinute.value = ''
+  }
+  function changeVoteHour() {
+    const date = dayjs(voteEndDate.value)
+    if(date.$D === new Date().getDate() && voteEndHour.value === new Date().getHours()) {
+      voteMinuteOptions.value.splice(0, new Date().getMinutes() + 5)
+    } else {
+      voteMinuteOptions.value = [
+        {"label":"0分","value":'00'},
+        {"label":"1分","value":'01'},
+        {"label":"2分","value":'02'},
+        {"label":"3分","value":'03'},
+        {"label":"4分","value":'04'},
+        {"label":"5分","value":'05'},
+        {"label":"6分","value":'06'},
+        {"label":"7分","value":'07'},
+        {"label":"8分","value":'08'},
+        {"label":"9分","value":'09'},
+        {"label":"10分","value":'10'},
+        {"label":"11分","value":'11'},
+        {"label":"12分","value":'12'},
+        {"label":"13分","value":'13'},
+        {"label":"14分","value":'14'},
+        {"label":"15分","value":'15'},
+        {"label":"16分","value":'16'},
+        {"label":"17分","value":'17'},
+        {"label":"18分","value":'18'},
+        {"label":"19分","value":'19'},
+        {"label":"20分","value":'20'},
+        {"label":"21分","value":'21'},
+        {"label":"22分","value":'22'},
+        {"label":"23分","value":'23'},
+        {"label":"24分","value":'24'},
+        {"label":"25分","value":'25'},
+        {"label":"26分","value":'26'},
+        {"label":"27分","value":'27'},
+        {"label":"28分","value":'28'},
+        {"label":"29分","value":'29'},
+        {"label":"30分","value":'30'},
+        {"label":"31分","value":'31'},
+        {"label":"32分","value":'32'},
+        {"label":"33分","value":'33'},
+        {"label":"34分","value":'34'},
+        {"label":"35分","value":'35'},
+        {"label":"36分","value":'36'},
+        {"label":"37分","value":'37'},
+        {"label":"38分","value":'38'},
+        {"label":"39分","value":'39'},
+        {"label":"40分","value":'40'},
+        {"label":"41分","value":'41'},
+        {"label":"42分","value":'42'},
+        {"label":"43分","value":'43'},
+        {"label":"44分","value":'44'},
+        {"label":"45分","value":'45'},
+        {"label":"46分","value":'46'},
+        {"label":"47分","value":'47'},
+        {"label":"48分","value":'48'},
+        {"label":"49分","value":'49'},
+        {"label":"50分","value":'50'},
+        {"label":"51分","value":'51'},
+        {"label":"52分","value":'52'},
+        {"label":"53分","value":'53'},
+        {"label":"54分","value":'54'},
+        {"label":"55分","value":'55'},
+        {"label":"56分","value":'56'},
+        {"label":"57分","value":'57'},
+        {"label":"58分","value":'58'},
+        {"label":"59分","value":'59'}
+      ]
+    }
+    voteEndMinute.value = ''
+  }
   /* 提交投票表单 */
+  const voteId = ref('')
   function submitVote() {
+    /* 校验数据 */
+    if(
+      !voteTitle.value || 
+      !voteMaxSelectNum.value || 
+      !voteEndDate.value || 
+      !voteEndHour.value || 
+      !voteEndMinute.value
+    ) {
+      return ElMessage.error('请填写完整选项')
+    }
+    if(voteType.value === 1) {
+      for (let index = 0; index < textOptionList.length; index++) {
+        if(!textOptionList[index].value) return ElMessage.error('请填写完整选项')
+      }
+    } else {
+      for (let index = 0; index < pictureOptionList.length; index++) {
+        if(!pictureOptionList[index].value || !pictureOptionList[index].pictureUrl) return ElMessage.error('请填写完整选项')
+      }
+    }
+    
     showVoteModal.value = false
     showVoteBox.value = true
   }
@@ -315,14 +642,201 @@
   //#region 预约直播
   const showLivesBox = ref(false)
   const showLivesModal = ref(false)
-  const livesEndDate = ref('')
-  const livesEndHour = ref('')
-  const livesEndMinute = ref('')
+  const livesEndDate = ref('') // 预约日期
+  const livesEndHour = ref('') // 预约小时
+  const livesEndMinute = ref('') // 预约分钟
   const livesTitleNum = ref(0)
+  const livesHourOptions = ref(hourOptions)
+  const livesMinuteOptions = ref(minuteOptions)
+  const livesTitle = ref('')
+  function handleClickLive() {
+    showLivesModal.value = true
+    const defaultTime = dayjs(new Date().getTime() + 86400000)
+    livesEndDate.value = defaultTime.format('YYYY-MM-DD')
+  }
   function changeLivesTitle(event) {
     livesTitleNum.value = event.target.value.length
   }
+  function changeLivesDate() {
+    const date = dayjs(livesEndDate.value)
+    if(date.$D === new Date().getDate()) {
+      livesHourOptions.value.splice(0, new Date().getHours())
+      if(livesEndHour.value === new Date().getHours()) {
+        livesMinuteOptions.value.splice(0, new Date().getMinutes() + 1)
+      }
+    } else {
+      livesHourOptions.value = [
+        {label:'0时',value:'00'},
+        {label:'1时',value:'01'},
+        {label:'2时',value:'02'},
+        {label:'3时',value:'03'},
+        {label:'4时',value:'04'},
+        {label:'5时',value:'05'},
+        {label:'6时',value:'06'},
+        {label:'7时',value:'07'},
+        {label:'8时',value:'08'},
+        {label:'9时',value:'09'},
+        {label:'10时',value:'10'},
+        {label:'11时',value:'11'},
+        {label:'12时',value:'12'},
+        {label:'13时',value:'13'},
+        {label:'14时',value:'14'},
+        {label:'15时',value:'15'},
+        {label:'16时',value:'16'},
+        {label:'17时',value:'17'},
+        {label:'18时',value:'18'},
+        {label:'19时',value:'19'},
+        {label:'20时',value:'20'},
+        {label:'21时',value:'21'},
+        {label:'22时',value:'22'},
+        {label:'23时',value:'23'},
+      ]
+      livesMinuteOptions.value = [
+        {"label":"0分","value":'00'},
+        {"label":"1分","value":'01'},
+        {"label":"2分","value":'02'},
+        {"label":"3分","value":'03'},
+        {"label":"4分","value":'04'},
+        {"label":"5分","value":'05'},
+        {"label":"6分","value":'06'},
+        {"label":"7分","value":'07'},
+        {"label":"8分","value":'08'},
+        {"label":"9分","value":'09'},
+        {"label":"10分","value":'10'},
+        {"label":"11分","value":'11'},
+        {"label":"12分","value":'12'},
+        {"label":"13分","value":'13'},
+        {"label":"14分","value":'14'},
+        {"label":"15分","value":'15'},
+        {"label":"16分","value":'16'},
+        {"label":"17分","value":'17'},
+        {"label":"18分","value":'18'},
+        {"label":"19分","value":'19'},
+        {"label":"20分","value":'20'},
+        {"label":"21分","value":'21'},
+        {"label":"22分","value":'22'},
+        {"label":"23分","value":'23'},
+        {"label":"24分","value":'24'},
+        {"label":"25分","value":'25'},
+        {"label":"26分","value":'26'},
+        {"label":"27分","value":'27'},
+        {"label":"28分","value":'28'},
+        {"label":"29分","value":'29'},
+        {"label":"30分","value":'30'},
+        {"label":"31分","value":'31'},
+        {"label":"32分","value":'32'},
+        {"label":"33分","value":'33'},
+        {"label":"34分","value":'34'},
+        {"label":"35分","value":'35'},
+        {"label":"36分","value":'36'},
+        {"label":"37分","value":'37'},
+        {"label":"38分","value":'38'},
+        {"label":"39分","value":'39'},
+        {"label":"40分","value":'40'},
+        {"label":"41分","value":'41'},
+        {"label":"42分","value":'42'},
+        {"label":"43分","value":'43'},
+        {"label":"44分","value":'44'},
+        {"label":"45分","value":'45'},
+        {"label":"46分","value":'46'},
+        {"label":"47分","value":'47'},
+        {"label":"48分","value":'48'},
+        {"label":"49分","value":'49'},
+        {"label":"50分","value":'50'},
+        {"label":"51分","value":'51'},
+        {"label":"52分","value":'52'},
+        {"label":"53分","value":'53'},
+        {"label":"54分","value":'54'},
+        {"label":"55分","value":'55'},
+        {"label":"56分","value":'56'},
+        {"label":"57分","value":'57'},
+        {"label":"58分","value":'58'},
+        {"label":"59分","value":'59'}
+      ]
+    }
+    livesEndHour.value = ''
+    livesEndMinute.value = ''
+  }
+  function changeLivesHour() {
+    const date = dayjs(livesEndDate.value)
+    if(date.$D === new Date().getDate() && livesEndHour.value === new Date().getHours()) {
+      livesMinuteOptions.value.splice(0, new Date().getMinutes() + 5)
+    } else {
+      livesMinuteOptions.value = [
+        {"label":"0分","value":'00'},
+        {"label":"1分","value":'01'},
+        {"label":"2分","value":'02'},
+        {"label":"3分","value":'03'},
+        {"label":"4分","value":'04'},
+        {"label":"5分","value":'05'},
+        {"label":"6分","value":'06'},
+        {"label":"7分","value":'07'},
+        {"label":"8分","value":'08'},
+        {"label":"9分","value":'09'},
+        {"label":"10分","value":'10'},
+        {"label":"11分","value":'11'},
+        {"label":"12分","value":'12'},
+        {"label":"13分","value":'13'},
+        {"label":"14分","value":'14'},
+        {"label":"15分","value":'15'},
+        {"label":"16分","value":'16'},
+        {"label":"17分","value":'17'},
+        {"label":"18分","value":'18'},
+        {"label":"19分","value":'19'},
+        {"label":"20分","value":'20'},
+        {"label":"21分","value":'21'},
+        {"label":"22分","value":'22'},
+        {"label":"23分","value":'23'},
+        {"label":"24分","value":'24'},
+        {"label":"25分","value":'25'},
+        {"label":"26分","value":'26'},
+        {"label":"27分","value":'27'},
+        {"label":"28分","value":'28'},
+        {"label":"29分","value":'29'},
+        {"label":"30分","value":'30'},
+        {"label":"31分","value":'31'},
+        {"label":"32分","value":'32'},
+        {"label":"33分","value":'33'},
+        {"label":"34分","value":'34'},
+        {"label":"35分","value":'35'},
+        {"label":"36分","value":'36'},
+        {"label":"37分","value":'37'},
+        {"label":"38分","value":'38'},
+        {"label":"39分","value":'39'},
+        {"label":"40分","value":'40'},
+        {"label":"41分","value":'41'},
+        {"label":"42分","value":'42'},
+        {"label":"43分","value":'43'},
+        {"label":"44分","value":'44'},
+        {"label":"45分","value":'45'},
+        {"label":"46分","value":'46'},
+        {"label":"47分","value":'47'},
+        {"label":"48分","value":'48'},
+        {"label":"49分","value":'49'},
+        {"label":"50分","value":'50'},
+        {"label":"51分","value":'51'},
+        {"label":"52分","value":'52'},
+        {"label":"53分","value":'53'},
+        {"label":"54分","value":'54'},
+        {"label":"55分","value":'55'},
+        {"label":"56分","value":'56'},
+        {"label":"57分","value":'57'},
+        {"label":"58分","value":'58'},
+        {"label":"59分","value":'59'}
+      ]
+    }
+    livesEndMinute.value = ''
+  }
+  const bookLiveId = ref('')
   function submitLives() {
+    if(
+      !livesTitle.value || 
+      !livesEndDate.value || 
+      !livesEndHour.value || 
+      !livesEndMinute.value
+    ) {
+      return ElMessage.error('请填写完整选项')
+    }
     showLivesBox.value = true
     showLivesModal.value = false
   }
@@ -344,23 +858,209 @@
   function showSettingCascader2(num) {
     settingCascader2.value = num
   }
-  const newsSeePermission = ref(0) // 0:所有人可见 1:仅自己
+  const newsSeePermission = ref(0) // 0:所有人可见 1:仅粉丝可见 2:隐私
   const newsCommentPermission = ref(0) // 0:允许评论 1：关闭评论 2：精选评论
   //#endregion
   //#region 发布时间
   const PubTimeBox = ref(false)
-  const publishDate = ref('')
-  const publishHour = ref('')
-  const publishMinute = ref('')
-  function showPubTimeBox() {
+  const publishDate = ref()
+  const publishHour = ref()
+  const publishMinute = ref()
+  const pubHourOptions = ref(hourOptions)
+  const pubMinuteOptions = ref(minuteOptions)
+  const earlyPublish = ref(1) // 1:不提前发布 0：提前发布
+  /* 禁用某些日期 */
+  const disabledPubDate = (time) => {
+    if(earlyPublish.value) return time.getTime() < Date.now() - 8.64e7
+    else return time.getTime() > Date.now() - 8.64e7
+  }
+  function handleClickPubTime() {
     PubTimeBox.value = true
     settingCascader1.value = false
+    const defaultTime = dayjs(new Date().getTime() + 86400000)
+    publishDate.value = defaultTime.format('YYYY-MM-DD')
+  }
+  function changePubDate() {
+    const date = dayjs(publishDate.value)
+    if(date.$D === new Date().getDate()) {
+      pubHourOptions.value.splice(0, new Date().getHours())
+      if(publishHour.value === new Date().getHours()) {
+        pubMinuteOptions.value.splice(0, new Date().getMinutes() + 1)
+      }
+    } else {
+      pubHourOptions.value = [
+        {label:'0时',value:'00'},
+        {label:'1时',value:'01'},
+        {label:'2时',value:'02'},
+        {label:'3时',value:'03'},
+        {label:'4时',value:'04'},
+        {label:'5时',value:'05'},
+        {label:'6时',value:'06'},
+        {label:'7时',value:'07'},
+        {label:'8时',value:'08'},
+        {label:'9时',value:'09'},
+        {label:'10时',value:'10'},
+        {label:'11时',value:'11'},
+        {label:'12时',value:'12'},
+        {label:'13时',value:'13'},
+        {label:'14时',value:'14'},
+        {label:'15时',value:'15'},
+        {label:'16时',value:'16'},
+        {label:'17时',value:'17'},
+        {label:'18时',value:'18'},
+        {label:'19时',value:'19'},
+        {label:'20时',value:'20'},
+        {label:'21时',value:'21'},
+        {label:'22时',value:'22'},
+        {label:'23时',value:'23'},
+      ]
+      pubMinuteOptions.value = [
+        {"label":"0分","value":'00'},
+        {"label":"1分","value":'01'},
+        {"label":"2分","value":'02'},
+        {"label":"3分","value":'03'},
+        {"label":"4分","value":'04'},
+        {"label":"5分","value":'05'},
+        {"label":"6分","value":'06'},
+        {"label":"7分","value":'07'},
+        {"label":"8分","value":'08'},
+        {"label":"9分","value":'09'},
+        {"label":"10分","value":'10'},
+        {"label":"11分","value":'11'},
+        {"label":"12分","value":'12'},
+        {"label":"13分","value":'13'},
+        {"label":"14分","value":'14'},
+        {"label":"15分","value":'15'},
+        {"label":"16分","value":'16'},
+        {"label":"17分","value":'17'},
+        {"label":"18分","value":'18'},
+        {"label":"19分","value":'19'},
+        {"label":"20分","value":'20'},
+        {"label":"21分","value":'21'},
+        {"label":"22分","value":'22'},
+        {"label":"23分","value":'23'},
+        {"label":"24分","value":'24'},
+        {"label":"25分","value":'25'},
+        {"label":"26分","value":'26'},
+        {"label":"27分","value":'27'},
+        {"label":"28分","value":'28'},
+        {"label":"29分","value":'29'},
+        {"label":"30分","value":'30'},
+        {"label":"31分","value":'31'},
+        {"label":"32分","value":'32'},
+        {"label":"33分","value":'33'},
+        {"label":"34分","value":'34'},
+        {"label":"35分","value":'35'},
+        {"label":"36分","value":'36'},
+        {"label":"37分","value":'37'},
+        {"label":"38分","value":'38'},
+        {"label":"39分","value":'39'},
+        {"label":"40分","value":'40'},
+        {"label":"41分","value":'41'},
+        {"label":"42分","value":'42'},
+        {"label":"43分","value":'43'},
+        {"label":"44分","value":'44'},
+        {"label":"45分","value":'45'},
+        {"label":"46分","value":'46'},
+        {"label":"47分","value":'47'},
+        {"label":"48分","value":'48'},
+        {"label":"49分","value":'49'},
+        {"label":"50分","value":'50'},
+        {"label":"51分","value":'51'},
+        {"label":"52分","value":'52'},
+        {"label":"53分","value":'53'},
+        {"label":"54分","value":'54'},
+        {"label":"55分","value":'55'},
+        {"label":"56分","value":'56'},
+        {"label":"57分","value":'57'},
+        {"label":"58分","value":'58'},
+        {"label":"59分","value":'59'}
+      ]
+    }
+    publishHour.value = ''
+    publishMinute.value = ''
+  }
+  function changePubHour() {
+    const date = dayjs(publishDate.value)
+    if(date.$D === new Date().getDate() && publishHour.value === new Date().getHours()) {
+      pubMinuteOptions.value.splice(0, new Date().getMinutes() + 5)
+    } else {
+      pubMinuteOptions.value = [
+        {"label":"0分","value":'00'},
+        {"label":"1分","value":'01'},
+        {"label":"2分","value":'02'},
+        {"label":"3分","value":'03'},
+        {"label":"4分","value":'04'},
+        {"label":"5分","value":'05'},
+        {"label":"6分","value":'06'},
+        {"label":"7分","value":'07'},
+        {"label":"8分","value":'08'},
+        {"label":"9分","value":'09'},
+        {"label":"10分","value":'10'},
+        {"label":"11分","value":'11'},
+        {"label":"12分","value":'12'},
+        {"label":"13分","value":'13'},
+        {"label":"14分","value":'14'},
+        {"label":"15分","value":'15'},
+        {"label":"16分","value":'16'},
+        {"label":"17分","value":'17'},
+        {"label":"18分","value":'18'},
+        {"label":"19分","value":'19'},
+        {"label":"20分","value":'20'},
+        {"label":"21分","value":'21'},
+        {"label":"22分","value":'22'},
+        {"label":"23分","value":'23'},
+        {"label":"24分","value":'24'},
+        {"label":"25分","value":'25'},
+        {"label":"26分","value":'26'},
+        {"label":"27分","value":'27'},
+        {"label":"28分","value":'28'},
+        {"label":"29分","value":'29'},
+        {"label":"30分","value":'30'},
+        {"label":"31分","value":'31'},
+        {"label":"32分","value":'32'},
+        {"label":"33分","value":'33'},
+        {"label":"34分","value":'34'},
+        {"label":"35分","value":'35'},
+        {"label":"36分","value":'36'},
+        {"label":"37分","value":'37'},
+        {"label":"38分","value":'38'},
+        {"label":"39分","value":'39'},
+        {"label":"40分","value":'40'},
+        {"label":"41分","value":'41'},
+        {"label":"42分","value":'42'},
+        {"label":"43分","value":'43'},
+        {"label":"44分","value":'44'},
+        {"label":"45分","value":'45'},
+        {"label":"46分","value":'46'},
+        {"label":"47分","value":'47'},
+        {"label":"48分","value":'48'},
+        {"label":"49分","value":'49'},
+        {"label":"50分","value":'50'},
+        {"label":"51分","value":'51'},
+        {"label":"52分","value":'52'},
+        {"label":"53分","value":'53'},
+        {"label":"54分","value":'54'},
+        {"label":"55分","value":'55'},
+        {"label":"56分","value":'56'},
+        {"label":"57分","value":'57'},
+        {"label":"58分","value":'58'},
+        {"label":"59分","value":'59'}
+      ]
+    }
+    publishMinute.value = ''
   }
   function deletePubTime() {
     publishDate.value = ''
     publishHour.value = ''
     publishMinute.value = ''
     PubTimeBox.value = false
+  }
+  function handleClickEarlyPub() {
+    earlyPublish.value = Math.abs(earlyPublish.value-1)
+    publishDate.value = ''
+    publishHour.value = ''
+    publishMinute.value = ''
   }
   //#endregion
   //#region up列表
@@ -387,7 +1087,6 @@
   }
   //#endregion
   //#region 动态
-  const showNewsCascader = ref(false)
   //#endregion
   //#region 页面尺寸缩放调整
   let smallSize = ref(false)
@@ -402,33 +1101,35 @@
 </script>
 
 <template>
+  <div class="header">
+    <nav-header>
+      <template v-slot:nav>
+        <a>
+          <span @click="router.push('/index')" class="logo"></span>
+          <span>首页</span>
+          <i class="iconfont icon-down"></i>
+        </a>
+      </template>
+    </nav-header>
+  </div>
   <div class="news">
-    <div class="header">
-      <nav-header>
-        <template v-slot:nav>
-          <a>
-            <span @click="router.push('/index')" class="logo"></span>
-            <span>首页</span>
-            <i class="iconfont icon-down"></i>
-          </a>
-        </template>
-      </nav-header>
-    </div>
+    <!-- <div class="bgc"></div> -->
+    <div class="bg"></div>
     <div class="container" :class="{'container-small':smallSize}">
       <div class="user-box">
-        <img src="/imgs/default-avatar.png" alt="头像">
-        <span class="username">curyyyyyyyy</span>
+        <img @click="router.push('/mainInterface')" :src="userInfo.avatarUrl" alt="头像">
+        <span @click="router.push('/mainInterface')" class="username">{{ userInfo.username }}</span>
         <div class="infos">
-          <div class="info-box">
-            <p class="num">11</p>
+          <div @click="router.push('/mainInterface')" class="info-box">
+            <p class="num">{{ userInfo.followerInfo }}</p>
             <p class="desc">关注</p>
           </div>
-          <div class="info-box">
-            <p class="num">1</p>
+          <div @click="router.push('/mainInterface')" class="info-box">
+            <p class="num">{{ userInfo.fanInfo }}</p>
             <p class="desc">粉丝</p>
           </div>
-          <div class="info-box">
-            <p class="num">1</p>
+          <div @click="router.push('/mainInterface')" class="info-box">
+            <p class="num">{{ userInfo.happeningInfo }}</p>
             <p class="desc">动态</p>
           </div>
         </div>
@@ -447,40 +1148,10 @@
                 </label>
                 <div v-if="showTagCol" v-loading="tagLoading" class="tag-search-result">
                   <div v-if="!tagLoading" class="tag-search-list">
-                    <div @click="handleSelectTag('哈11111111111哈哈')" class="tag-search-item">
+                    <div v-for="(item,index) in tagList" :key="index" @click="handleSelectTag(item.content, item.tagId)" class="tag-search-item">
                       <i class="iconfont icon-huati"></i>
-                      <span class="tag-search-item-title">巴黎最前线</span>
-                      <p class="tag-search-item-desc">122浏览&middot;133讨论</p>
-                    </div>
-                    <div class="tag-search-item">
-                      <i class="iconfont icon-huati"></i>
-                      <span class="tag-search-item-title">巴黎最前线</span>
-                      <p class="tag-search-item-desc">122浏览&middot;133讨论</p>
-                    </div>
-                    <div class="tag-search-item">
-                      <i class="iconfont icon-huati"></i>
-                      <span class="tag-search-item-title">巴黎最前线</span>
-                      <p class="tag-search-item-desc">122浏览&middot;133讨论</p>
-                    </div>
-                    <div class="tag-search-item">
-                      <i class="iconfont icon-huati"></i>
-                      <span class="tag-search-item-title">巴黎最前线</span>
-                      <p class="tag-search-item-desc">122浏览&middot;133讨论</p>
-                    </div>
-                    <div class="tag-search-item">
-                      <i class="iconfont icon-huati"></i>
-                      <span class="tag-search-item-title">巴黎最前线</span>
-                      <p class="tag-search-item-desc">122浏览&middot;133讨论</p>
-                    </div>
-                    <div class="tag-search-item">
-                      <i class="iconfont icon-huati"></i>
-                      <span class="tag-search-item-title">巴黎最前线</span>
-                      <p class="tag-search-item-desc">122浏览&middot;133讨论</p>
-                    </div>
-                    <div class="tag-search-item">
-                      <i class="iconfont icon-huati"></i>
-                      <span class="tag-search-item-title">巴黎最前线</span>
-                      <p class="tag-search-item-desc">122浏览&middot;133讨论</p>
+                      <span class="tag-search-item-title">{{ item.content }}</span>
+                      <p class="tag-search-item-desc">{{item.viewInfo}}浏览&middot;{{item.discussInfo}}讨论</p>
                     </div>
                   </div>
                   <div v-if="false" class="tag-search-empty">还没有相关话题~</div>
@@ -489,16 +1160,16 @@
             </div>
           </div>
           <div class="publish-input">
-            <input name="newsTitle" v-model="newsTitle" @input="changePubTitle" maxlength="20" type="text" class="title" placeholder="标题 (选填，20字内)">
+            <input name="newsTitle" v-model="newsTitle" @input="changePubTitle" maxlength="20" type="text" class="title" placeholder="标题 (选填，20字内)" autocomplete="off">
             <i v-if="pubTitleNum" @click="clearPubTitle" class="iconfont icon-cuowu1"></i>
             <span v-if="pubTitleNum" class="title-num">{{ pubTitleNum }}</span>
             <div ref="contentDom" contenteditable="true" @blur="handleContentBlur" @click="handleContentBoxClick" @input="changePubContent" :class="{'content-empty':!pubContentNum}" class="content" placeholder="有什么想和大家分享的？"></div>
             <bs-at-ul v-if="showAtSelect" :atSelectPosition="atSelectPosition">
               <bs-at-li 
-                v-for="(item,index) in followList" :key="index"
+                v-for="(item,index) in followerList" :key="index"
                 :avatarUrl="item.avatarUrl"
                 :username="item.username"
-                :fansNum="item.fansNum"
+                :fansNum="item.fanInfo"
                 @selectAtUser="selectAtUser"
               >
               </bs-at-li>
@@ -518,20 +1189,20 @@
               <div class="pictrue-upload-box">
                 <i class="iconfont icon-jiahao"></i>
               </div>
-              <input @change="uploadPicture" id="upload-pic" type="file">
+              <input @change="uploadPicture" accept="image/*" id="upload-pic" type="file">
             </label>
           </div>
           <div v-if="showVoteBox" class="vote-box">
             <div class="vote-desc-box">
-              <div class="vote-box-title">哪个好看</div>
+              <div class="vote-box-title">{{ voteTitle }}</div>
               <p class="desc">0人参与投票</p>
             </div>
             <i @click="showVoteBox = false" class="iconfont icon-cuowu"></i>
           </div>
           <div v-if="showLivesBox" class="lives-box">
             <div class="lives-desc-box">
-              <div class="lives-box-title">直播预约：111</div>
-              <p class="desc">明天 18:00 直播</p>
+              <div class="lives-box-title">直播预约：{{ livesTitle }}</div>
+              <p class="desc">{{ livesEndDate }}&nbsp;{{ livesEndHour }}:{{ livesEndMinute }} 直播</p>
             </div>
             <i @click="showLivesBox = false" class="iconfont icon-cuowu"></i>
           </div>
@@ -542,10 +1213,12 @@
               type="date"
               placeholder="日期"
               value-format="YYYY-MM-DD"
+              :disabled-date="disabledPubDate"
+              @change="changePubDate"
             />
-            <el-select v-model="publishHour" placeholder="时" style="width: 100px">
+            <el-select v-model="publishHour" @change="changePubHour" placeholder="时" style="width: 100px">
               <el-option
-                v-for="item in hourOptions"
+                v-for="item in pubHourOptions"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -553,12 +1226,13 @@
             </el-select>
             <el-select v-model="publishMinute" placeholder="分" style="width: 100px">
               <el-option
-                v-for="item in minuteOptions"
+                v-for="item in pubMinuteOptions"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
               />
             </el-select>
+            <button @click="handleClickEarlyPub" :style="{backgroundColor:earlyPublish ? '#4844446c' : 'rgb(220, 31, 31)'}" class="early-publish-btn">提前发布</button>
             <i @click="deletePubTime" class="iconfont icon-cuowu"></i>
           </div>
           <div class="comment-permission">
@@ -566,6 +1240,10 @@
             <span v-if="newsCommentPermission === 2">开启后，评论都需要经过你的筛选后再向所有用户展示</span>
           </div>
           <div v-if="newsSeePermission === 1" class="only-box">
+            <span class="only-title"><i class="iconfont icon-suo"></i>仅粉丝可见</span>
+            <span class="only-desc">开启后，将不支持分享、商业推广</span>
+          </div>
+          <div v-if="newsSeePermission === 2" class="only-box">
             <span class="only-title"><i class="iconfont icon-suo"></i>仅自己可见</span>
             <span class="only-desc">开启后，将不支持分享、商业推广</span>
           </div>
@@ -574,7 +1252,7 @@
               <div class="emoji-btn" ref="emojiBtnDom" tabindex="1" @blur="handleEmojiBoxBlur">
                 <i @click="clickEmojiBtn" :class="{'active':showEmojiBox}" class="iconfont icon-biaoqing"></i>
                 <div v-if="showEmojiBox" class="emoji-box">
-                  <bs-emoji @insertEmoji="insertEmoji"></bs-emoji>
+                  <bs-emoji @insertEmoji="insertEmoji" :emojiUrlList="emojiUrlList"></bs-emoji>
                 </div>
               </div>
               <div>
@@ -584,10 +1262,10 @@
                 <i @click="handleClickAt" class="iconfont icon-aite"></i>
               </div>
               <div>
-                <i @click="showVoteModal = true" :class="{'active':showVoteBox}" class="iconfont icon-toupiao"></i>
+                <i @click="handleClickVote" :class="{'active':showVoteBox}" class="iconfont icon-toupiao"></i>
               </div>
               <div>
-                <i @click="showLivesModal = true" :class="{'active':showLivesBox}" class="iconfont icon-zhibo"></i>
+                <i @click="handleClickLive" :class="{'active':showLivesBox}" class="iconfont icon-zhibo"></i>
               </div>
             </div>
             <div class="publish-controls-headquarters">
@@ -600,7 +1278,7 @@
                       <div class="item-label">可见范围</div>
                       <i class="iconfont icon-youjiantou"></i>
                     </div>
-                    <div @click="showPubTimeBox" class="cascader-options-item">
+                    <div @click="handleClickPubTime" class="cascader-options-item">
                       <div class="item-label">定时发布</div>
                     </div>
                     <div @click="showSettingCascader2(3)" class="cascader-options-item">
@@ -618,6 +1296,10 @@
                     <div @click="newsSeePermission = 1,blurSettingCascader()" :class="{'is-active':newsSeePermission === 1}" class="cascader-options-item">
                       <i class="iconfont icon-suo"></i>
                       <div class="item-label">仅自己可见</div>
+                    </div>
+                    <div @click="newsSeePermission = 2,blurSettingCascader()" :class="{'is-active':newsSeePermission === 2}" class="cascader-options-item">
+                      <i class="iconfont icon-suo"></i>
+                      <div class="item-label">仅粉丝可见</div>
                     </div>
                   </div>
                   <div v-if="settingCascader2 === 3" class="cascader-options">
@@ -646,61 +1328,9 @@
                 <span><i class="iconfont icon-dongtai"></i></span>
                 <p>全部动态</p>
               </div>
-              <div @click="activeUpIndex = 0" class="up-box" :class="{'active':activeUpIndex === 0}">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>111</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>222</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>333</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>444</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>555</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>666</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>777</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>888</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>999</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>101010</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>AllSpark-工作室</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>AllSpark-工作室</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>AllSpark-工作室</p>
-              </div>
-              <div class="up-box">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <p>AllSpark-工作室</p>
+              <div v-for="(item,index) in followerList" :key="index" @click="activeUpIndex = index" class="up-box" :class="{'active':activeUpIndex === index}">
+                <img :src="item.avatarUrl" alt="头像">
+                <p>{{ item.username }}</p>
               </div>
             </div>
           </div>
@@ -717,19 +1347,94 @@
           <div ref="highlight" class="news-tabs-highlight"></div>
         </div>
         <div class="news-list">
-          <div class="news-item">
+          <div v-for="(item,index) in newsList" :key="index" class="news-item">
+            <div class="news-item-avatar">
+              <img :src="item.avatarUrl" alt="头像">
+            </div>
+            <div class="news-item-header">
+              <span class="news-item-author">{{ item.username }}</span>
+              <span v-if="earlyPublish === 0" class="news-item-early-pub">提前发布</span>
+              <p class="news-item-time">{{ item.pubTimeInfo }}</p>
+              <div @mouseenter="newsList[index].isOpen = true" @mouseleave="newsList[index].isOpen = false" class="news-item-more-btn">
+                <i class="iconfont icon-gengduo1"></i>
+                <div v-if="newsList[index].isOpen" class="new-item-cascader">
+                  <div v-if="username !== item.username" class="cascader-list">
+                    <div class="cascader-item">取消关注</div>
+                    <div class="cascader-item">举报</div>
+                  </div>
+                  <div v-else class="cascader-list">
+                    <div class="cascader-item">删除</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="news-item-body">
+              <div v-if="item.tag" class="news-tag">
+                <i class="iconfont icon-huati"></i>
+                <span>{{ item.tag }}</span>
+              </div>
+              <div class="news-title">{{ item.title }}</div>
+              <div class="news-text-content" v-html="item.content"></div>
+              <div v-if="item.imgUrlList" class="news-album">
+                <div class="news-album-preview grid">
+                  <div v-for="(item, index) in item.imgUrlList" :key="index" class="news-album-preview-picture">
+                    <img :src="item" alt="图片">
+                  </div>
+                </div>
+              </div>
+              <div class="news-video-card">
+                <a v-if="false" href="javascript:;" class="news-video-box">
+                  <div class="video-box-header">
+                    <video controls src="/imgs/video.mp4"></video>
+                  </div>
+                  <div class="video-box-body">
+                    <div class="video-title">vhosnvonvosnovl</div>
+                    <div class="video-stat">
+                      <div class="video-stat-item">
+                        <i class="iconfont icon-shipin"></i>
+                        22
+                      </div>
+                      <div class="video-stat-item">
+                        <i class="iconfont icon-icon"></i>
+                        11
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <div class="news-item-footer">
+              <div class="footer-item news-like">
+                <i class="iconfont icon-dianzan"></i>
+                {{ item.likeInfo === 0 ? '点赞' : item.likeInfo}}
+              </div>
+              <div class="footer-item item-comment">
+                <i class="iconfont icon-pinglun"></i>
+                {{ item.commentInfo === 0 ? '评论' : item.commentInfo }}
+              </div>
+              <div class="footer-item item-browse">
+                <i class="iconfont icon-yanjing"></i>
+                {{ item.viewInfo }}
+              </div>
+            </div>
+          </div>
+          <!-- <div class="news-item">
             <div class="news-item-avatar">
               <img src="/imgs/default-avatar.png" alt="头像">
             </div>
             <div class="news-item-header">
               <span class="news-item-author">尚硅谷</span>
+              <span v-if="earlyPublish === 0" class="news-item-early-pub">提前发布</span>
               <p class="news-item-time">14小时前</p>
               <div  @mouseenter="showNewsCascader = true" @mouseleave="showNewsCascader = false" class="news-item-more-btn">
                 <i class="iconfont icon-gengduo1"></i>
                 <div v-if="showNewsCascader" class="new-item-cascader">
-                  <div class="cascader-list">
+                  <div v-if="true" class="cascader-list">
                     <div class="cascader-item">取消关注</div>
                     <div class="cascader-item">举报</div>
+                  </div>
+                  <div v-else class="cascader-list">
+                    <div class="cascader-item">删除</div>
                   </div>
                 </div>
               </div>
@@ -786,35 +1491,20 @@
                 0
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
       <div class="slide">
         <div class="slide-banner">
-          <img src="/imgs/slide-bar.jpg" alt="">
+          <img :src="sideBarUrl" alt="">
         </div>
         <div class="slide-tags">
-          <h2>话题</h2>
+          <h2>标签</h2>
           <ul class="tag-list">
-            <li class="tag-item">
+            <li class="tag-item" v-for="(item,index) in recentTagList" :key="index">
               <i class="iconfont icon-huati"></i>
-              <div class="tag-item-title">曝姆巴佩存在精神问题</div>
-              <span class="tag-item-stat">13浏览&middot;199讨论</span>
-            </li>
-            <li class="tag-item">
-              <i class="iconfont icon-huati"></i>
-              <div class="tag-item-title">曝姆巴佩存在精神问题</div>
-              <span class="tag-item-stat">13浏览&middot;199讨论</span>
-            </li>
-            <li class="tag-item">
-              <i class="iconfont icon-huati"></i>
-              <div class="tag-item-title">曝姆巴佩存在精神问题</div>
-              <span class="tag-item-stat">13浏览&middot;199讨论</span>
-            </li>
-            <li class="tag-item">
-              <i class="iconfont icon-huati"></i>
-              <div class="tag-item-title">曝姆巴佩存在精神问题</div>
-              <span class="tag-item-stat">13浏览&middot;199讨论</span>
+              <div class="tag-item-title">{{ item.content }}</div>
+              <span class="tag-item-stat">{{ item.viewInfo }}浏览&middot;{{ item.discussInfo }}讨论</span>
             </li>
           </ul>
         </div>
@@ -827,7 +1517,7 @@
         <div class="vote-title-sec">
           <p class="desc">投票标题</p>
           <div class="input-box">
-            <input @input="changeVoteTitle" type="text" placeholder="请填写标题" maxlength="32"/>
+            <input v-model="voteTitle" @input="changeVoteTitle" type="text" placeholder="请填写标题" maxlength="32"/>
             <span class="stat">{{ voteTitleNum }}/32</span>
           </div>
         </div>
@@ -838,7 +1528,7 @@
           </div>
           <p v-if="showDescInput" class="desc">投票说明<span>(选填)</span></p>
           <div v-if="showDescInput" class="input-box">
-            <textarea @input="changeDesc" type="text" placeholder="请填写投票说明(选填)" maxlength="100"></textarea>
+            <textarea v-model="voteDesc" @input="changeDesc" type="text" placeholder="请填写投票说明(选填)" maxlength="100"></textarea>
             <span class="stat">{{ voteDescNum }}/100</span>
           </div>
         </div>
@@ -856,11 +1546,11 @@
               <div class="input-box">
                 <input v-model="item.value" type="text" maxlength="20" :placeholder="`请填写选项${index+1}内容，最多20字`">
                 <div v-if="textOptionList.length > 2" class="delete-icon-box">
-                  <i @click="deleteTextOption(index)" class="iconfont icon-shanchu"></i>
+                  <i @click="deleteOption(index)" class="iconfont icon-shanchu"></i>
                 </div>
               </div>
             </div>
-            <div @click="addTextOption" class="add-option">
+            <div @click="addOption" class="add-option">
               <i class="iconfont icon-jiahao"></i>
               <span>添加选项</span>
             </div>
@@ -869,19 +1559,20 @@
             <div v-for="(item,index) in pictureOptionList" :key="index" class="picture-option-item">
               <div class="info">
                 <span class="info-name">选项{{ index+1 }}</span>
-                <i @click="deletePictureOption(index)" v-if="pictureOptionList.length > 2" class="iconfont icon-shanchu"></i>
+                <i @click="deleteOption(index)" v-if="pictureOptionList.length > 2" class="iconfont icon-shanchu"></i>
               </div>
               <div class="picture-box">
-                <label for="picture">
+                <label :for="'picture'+index">
                   <div class="upload-box">
-                    <i class="iconfont icon-jiahao"></i>
+                    <img v-if="item.pictureUrl" :src="item.pictureUrl" alt="">
+                    <i v-else class="iconfont icon-jiahao"></i>
                   </div>
-                  <input id="picture" type="file">
                 </label>
-                <textarea maxlength="20" class="desc" :placeholder="`请填写选项${index+1}内容，不超过20个字`"></textarea>
+                <textarea v-model="item.value" maxlength="20" class="desc" :placeholder="`请填写选项${index+1}内容，不超过20个字`"></textarea>
               </div>
+              <input v-show="false" @change="uploadPictureOption($event,index)" accept="image/*" :id="'picture'+index" type="file">
             </div>
-            <div @click="addPictureOption" class="picture-add-box">
+            <div @click="addOption" class="picture-add-box">
               <div>
                 <i class="iconfont icon-jiahao"></i>
                 <span>添加选项</span>
@@ -893,10 +1584,13 @@
           <div class="desc">更多设置</div>
           <div class="select-box">
             <span>单选/多选</span>
-            <bs-select v-model="voteMaxSelectNum">
-              <bs-option label="单选" value="1"></bs-option>
-              <bs-option label="最多选两项" value="2"></bs-option>
-              <bs-option label="最多选三项" value="3"></bs-option>
+            <bs-select placeholder="请选择" v-model="voteMaxSelectNum">
+              <bs-option
+                v-for="(item,index) in textOptionList"
+                :key="index"
+                :label=" index+1 > 1 ? `最多选${index+1}项` : '单选'"
+                :value="index+1">
+              </bs-option>
             </bs-select>
           </div>
         </div>
@@ -908,18 +1602,20 @@
               v-model="voteEndDate"
               placeholder="请选择截止日期"
               value-format="YYYY-MM-DD"
+              :disabled-date="disabledVoteAndLiveDate"
+              @change="changeVoteDate"
             />
-            <el-select v-model="VoteEndHour" placeholder="时" style="width: 100px">
+            <el-select v-model="voteEndHour" @change="changeVoteHour" placeholder="时" style="width: 100px">
               <el-option
-                v-for="item in hourOptions"
+                v-for="item in voteHourOptions"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
               />
             </el-select>
-            <el-select v-model="VoteEndMinute" placeholder="分" style="width: 100px">
+            <el-select v-model="voteEndMinute" placeholder="分" style="width: 100px">
               <el-option
-                v-for="item in minuteOptions"
+                v-for="item in voteMinuteOptions"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -935,7 +1631,7 @@
       <div class="modal-lives-box">
         <p class="lives-box-title">发起新预约</p>
         <div class="title-input-box">
-          <input @input="changeLivesTitle" maxlength="14" type="text" placeholder="请填写预约标题">
+          <input v-model="livesTitle" @input="changeLivesTitle" maxlength="14" type="text" placeholder="请填写预约标题">
           <span class="stat">{{ livesTitleNum }}/14</span>
         </div>
         <div class="time-box">
@@ -944,10 +1640,13 @@
             v-model="livesEndDate"
             placeholder="请选择预约日期"
             value-format="YYYY-MM-DD"
+            :disabled-date="disabledVoteAndLiveDate"
+            :default-value="new Date(new Date().getTime() + 86400000)"
+            @change="changeLivesDate"
           />
-          <el-select v-model="livesEndHour" placeholder="时" style="width: 100px">
+          <el-select v-model="livesEndHour" @change="changeLivesHour" placeholder="时" style="width: 100px">
             <el-option
-              v-for="item in hourOptions"
+              v-for="item in livesHourOptions"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -955,7 +1654,7 @@
           </el-select>
           <el-select v-model="livesEndMinute" placeholder="分" style="width: 100px">
             <el-option
-              v-for="item in minuteOptions"
+              v-for="item in livesMinuteOptions"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -970,30 +1669,48 @@
 <style lang="scss">
   @use '../assets/sass/config.scss' as *;
   @use '../assets/sass/mixin.scss' as *;
-  .news {
-    .header {
-      z-index: 100;
-      position: fixed;
-      top: 0px;
-      left: 0;
-      right: 0;
-      height: 64px;
-      padding-bottom: 10px;
-      box-sizing: border-box;
+  .header {
+    z-index: 100;
+    position: fixed;
+    top: 0px;
+    left: 0;
+    right: 0;
+    height: 64px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+    background-color: $colorG;
+    box-shadow: 0 3px 5px $colorF;
+    .nav-header{
+      color: $colorI;
       background-color: $colorG;
-      box-shadow: 0 3px 5px $colorF;
-      .nav-header{
-        color: $colorI;
-        background-color: $colorG;
-        .submit,.login {
-          color: $colorG;
-        }
+      .submit,.login {
+        color: $colorG;
       }
+    }
+  }
+  .news {
+    background-size: cover;
+    // .bgc {
+    //   position: fixed;
+    //   width: $max-width;
+    //   height: 100vh;
+    //   background: linear-gradient(225deg, #00bdcd, #00bacf);
+    // }
+    .bg {
+      position: fixed;
+      bottom: 0;
+      height: 100vh;
+      width: $max-width;
+      background-image: url('/imgs/news-background.png');
+      background-size: cover;
+      // background-position: bottom;
     }
     .container {
       display: flex;
       padding-top: 74px;
       .user-box {
+        position: sticky;
+        top: 76px;
         width: 22%;
         height: 140px;
         padding: 20px;
@@ -1214,7 +1931,7 @@
               margin-bottom: 10px;
               box-shadow: 0 0 1px $colorD;
               img {
-                width: 80%;
+                width: 100%;
                 height: 100%;
                 border-radius: 6px;
               }
@@ -1298,7 +2015,7 @@
             padding: 0 16px;
             box-sizing: border-box;
             border-radius: 6px;
-            background-color: $colorN;
+            background-color: $colorR;
             margin-top: 10px;
             .vote-desc-box {
               cursor: pointer;
@@ -1329,7 +2046,7 @@
             padding: 0 16px;
             box-sizing: border-box;
             border-radius: 6px;
-            background-color: $colorN;
+            background-color: $colorR;
             margin-top: 10px;
             .lives-desc-box {
               cursor: pointer;
@@ -1360,7 +2077,7 @@
             padding: 0 16px;
             box-sizing: border-box;
             border-radius: 6px;
-            background-color: $colorN;
+            background-color: $colorR;
             margin-top: 10px;
             .el-date-editor--date {
               width: 130px;
@@ -1368,6 +2085,15 @@
             }
             .el-select__wrapper {
               margin-right: 5px;
+            }
+            .early-publish-btn {
+              position: absolute;
+              right: 40px;
+              padding: 4px 10px;
+              border: none;
+              border-radius: 6px;
+              color: $colorG;
+              cursor: pointer;
             }
             .icon-cuowu {
               position: absolute;
@@ -1568,6 +2294,8 @@
                 }
                 p {
                   color: $colorD;
+                  word-break: break-all;
+                  overflow: hidden;
                 }
               }
               .active {
@@ -1689,6 +2417,14 @@
                 color: $colorA;
                 font-weight: bold;
               }
+              .news-item-early-pub {
+                display: inline-block;
+                padding: 2px 4px;
+                border-radius: 6px;
+                margin-left: 10px;
+                color: $colorG;
+                background-color: #6b09ac;
+              }
               .news-item-time {
                 color: $colorD;
                 margin-top: 8px
@@ -1753,6 +2489,14 @@
               .news-text-content {
                 margin-top: 10px;
                 font-size: $fontJ;
+                img{
+                  height: 20px;
+                  width: 20px;
+                  vertical-align: middle;
+                }
+                .username {
+                  color: $colorM;
+                }
               }
               .news-album {
                 width: 470px;
@@ -1861,6 +2605,8 @@
           }
         }
         .slide-tags {
+          position: sticky;
+          top: 76px;
           width: 100%;
           padding: 20px 5px 5px 5px;
           box-sizing: border-box;
@@ -2088,9 +2834,10 @@
               font-size: $fontB;
               color: $colorE;
             }
-          }
-          #picture {
-            display: none;
+            img {
+              width: 100%;
+              height: 100%;
+            }
           }
           .desc {
             width: 100%;
