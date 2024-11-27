@@ -3,12 +3,20 @@
   import { ElMessage, ElMessageBox } from 'element-plus';
   import useUser from '../store/user';
   import { storeToRefs } from 'pinia';
-  import { ref } from 'vue';
+  import { ref, onMounted} from 'vue';
   import { useRouter } from 'vue-router';
+  import {getUserInfoApi} from '@/api/user.js'
+
+  /* Router */
   const router = useRouter()
   const userStore = useUser()
-  const {token} = storeToRefs(userStore)
-
+  const {token,username} = storeToRefs(userStore)
+  /* Mounted */
+  let userInfo = ref('')
+  onMounted(async () => {
+    userInfo.value = await getUserInfoApi()
+    username.value = userInfo.value.username
+  })
   let showLogin = ref(false)
   function openLogin() {
     showLogin.value = true
@@ -106,24 +114,26 @@
           </div>
         </div>
         <div v-else class="avatar-box right-item">
-          <div class="avatar"  @click="toMainInterface"></div>
+          <div class="avatar" @click="toMainInterface">
+            <img :src="userInfo.avatarUrl" alt="">
+          </div>
           <div class="avatar-children">
-            <div class="nickname"  @click="toMainInterface">curyyyyyyyyyy</div>
+            <div class="nickname"  @click="toMainInterface">{{ userInfo.username }}</div>
             <div class="coins"  @click="toMainInterface">
-              功德：<span class="coin-num">1</span>
-              硬币：<span class="coin-num">164</span>
+              功德：<span class="coin-num">{{ userInfo.meritInfo }}</span>
+              硬币：<span class="coin-num">{{ userInfo.coinInfo }}</span>
             </div>
             <div class="infos">
               <div class="info-item">
-                <span class="count">222</span>
+                <span class="count">{{ userInfo.followerInfo }}</span>
                 <p class="desc">关注</p>
               </div>
               <div class="info-item">
-                <span class="count">1</span>
+                <span class="count">{{ userInfo.fanInfo }}</span>
                 <p class="desc">粉丝</p>
               </div>
               <div class="info-item">
-                <span class="count">1</span>
+                <span class="count">{{ userInfo.happeningInfo }}</span>
                 <p class="desc">动态</p>
               </div>
             </div>
@@ -406,9 +416,13 @@
             width: 36px;
             border-radius: 18px;
             cursor: pointer;
-            background: url('/imgs/default-avatar.png') no-repeat;
             background-size: 36px 36px;
             transition: all .3s;
+            img {
+              width: 100%;
+              height: 100%;
+              border-radius: 50%;
+            }
           }
           .avatar-children {
             display: none;
@@ -536,5 +550,12 @@
   }
   .jump:hover {
     animation: jump .5s;
+  }
+  @keyframes jump {
+    from {
+      
+    } to {
+      font-size: 20px;
+    }
   }
 </style>

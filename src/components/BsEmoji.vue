@@ -1,125 +1,23 @@
 <script setup>
-  import { ref } from 'vue';
-  const emojiImgList = ref([
-    'beaming-face-with-smiling-eyes',
-    'cold-face',
-    'confused-face',
-    'drooling-face',
-    'enraged-face',
-    'face-blowing-a-kiss',
-    'face-exhaling',
-    'face-holding-back-tears',
-    'face-savoring-food',
-    'face-screaming-in-fear',
-    'face-vomiting',
-    'face-with-crossed-out-eyes',
-    'face-with-hand-over-mouth',
-    'face-with-head-bandage',
-    'face-with-medical-mask',
-    'face-with-monocle',
-    'face-with-peeking-eye',
-    'face-with-raised-eyebrow',
-    'face-with-rolling-eyes',
-    'face-with-spiral-eyes',
-    'face-with-steam-from-nose',
-    'face-with-symbols-on-mouth',
-    'face-with-tears-of-joy',
-    'face-with-thermometer',
-    'face-with-thermometer',
-    'face-with-tongue',
-    'face-without-mouth',
-    'fearful-face',
-    'flexed-biceps',
-    'flushed-face',
-    'folded-hands',
-    'frowning-face',
-    'ghost',
-    'grimacing-face',
-    'grinning-face-with-sweat',
-    'grinning-face',
-    'grinning-squinting-face',
-    'hand-with-index-finger-and-thumb-crossed',
-    'head-shaking-horizontally',
-    'hear-no-evil-monkey',
-    'heart-with-arrow',
-    'heart-with-ribbon',
-    'hot-face',
-    'hundred-points',
-    'hushed-face',
-    'kiss-mark',
-    'kissing-face',
-    'love-letter',
-    'melting-face',
-    'mending-heart',
-    'money-mouth-face',
-    'nerd-face',
-    'neutral-face',
-    'OK-hand',
-    'oudly-crying-face',
-    'partying-face',
-    'pensive-face',
-    'pile-of-poo',
-    'pinched-fingers',
-    'pinching-hand',
-    'pleading-face',
-    'raised-fist',
-    'red-heart',
-    'relieved-face',
-    'rolling-on-the-floor-laughing',
-    'sad-but-relieved-face',
-    'saluting-face',
-    'ear',
-    'see-no-evil-monkey',
-    'shushing-face',
-    'skull-and-crossbones',
-    'skull',
-    'sleeping-face',
-    'sleepy-face',
-    'slightly-smiling-face',
-    'smiling-face-with-halo',
-    'smiling-face-with-heart-eyes',
-    'smiling-face-with-hearts',
-    'smiling-face-with-horns',
-    'smiling-face-with-open-hands',
-    'smiling-face-with-smiling-eyes',
-    'smiling-face-with-sunglasses',
-    'smirking-face',
-    'speak-no-evil-monkey',
-    'sweat-droplets',
-    'thinking-face',
-    'thumbs-down',
-    'thumbs-up',
-    'unamused-face',
-    'upside-down-face',
-    'victory-hand',
-    'winking-face-with-tongue',
-    'winking-face',
-    'woozy-face',
-    'worried-face',
-    'zipper-mouth-face',
-    'anger-symbol',
-    'beating-heart',
-    'broken-heart',
-    'call-me-hand',
-    'clown-face',
-  ])
+  // import { ref } from 'vue';
   const emit = defineEmits(['insertEmoji'])
+  const props = defineProps(['emojiUrlList'])
   function insertEmoji(event) {
     let emojiUrl
     if(event.target.tagName === 'LI') {
-      emojiUrl = event.target.childNodes[0].src.split('/')
+      emojiUrl = event.target.childNodes[0].src
     } else {
-      emojiUrl = event.target.src.split('/')
+      emojiUrl = event.target.src
     }
-    emit('insertEmoji', emojiUrl[emojiUrl.length-1])
+    emit('insertEmoji', emojiUrl)
   }
 </script>
 
 <template>
   <div class="bs-emoji">
     <ul class="bs-emoji-list">
-      <li @click="insertEmoji" class="bs-emoji-item" v-for="(item,index) in emojiImgList" :key="index">
-        <img v-lazy="'/imgs/emojis/' + item + '.png'" alt="表情">
+      <li @click="insertEmoji" class="bs-emoji-item" v-for="(item,index) in props.emojiUrlList" :key="index">
+        <img v-lazy="item" alt="表情">
       </li>
     </ul>
   </div>

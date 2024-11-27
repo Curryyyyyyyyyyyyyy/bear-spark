@@ -1,9 +1,10 @@
 <script setup>
   import { ref } from 'vue';
   const emit = defineEmits(['update:modelValue'])
+  const props = defineProps(['placeholder'])
   const selectInputDom = ref()
   const showOptions = ref(false)
-  const selectLabel = ref('select')
+  const selectLabel = ref('')
   function focusSelect() {
     selectInputDom.value.focus()
     showOptions.value = true
@@ -23,7 +24,7 @@
   <div class="bs-select">
     <div class="bs-select-box">
       <div @blur="blurSelect" @click="focusSelect" :class="{'active':showOptions}" tabindex="1" ref="selectInputDom" class="bs-select-input">
-        <span class="bs-select-value">{{ selectLabel }}</span>
+        <span class="bs-select-value">{{ selectLabel || props.placeholder }}</span>
         <i class="iconfont icon-down"></i>
       </div>
       <div @click="selectOption" v-if="showOptions" class="bs-option-list">

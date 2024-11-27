@@ -17,3 +17,12 @@ export const getNewsList = (pageNum, pageSize) => {
     }
   })
 }
+/* 分页获取标签 */
+export const getTagList = (pageNum, pageSize) => {
+  return request.get('/tag', {
+    params:{
+      pageNum,
+      pageSize
+    }
+  })
+}

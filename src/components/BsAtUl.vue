@@ -22,7 +22,7 @@
   .bs-at-ul {
     z-index: 10;
     position: absolute;
-    bottom: -280px;
+    bottom: -180px;
     width: 200px;
     border: 1px solid #e3e5e7;
     border-radius: 6px;
