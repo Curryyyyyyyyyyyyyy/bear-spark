@@ -1,5 +1,5 @@
 <script setup>
-  const props = defineProps(['title','buttonText'])
+  const props = defineProps(['title','buttonText','buttonNum'])
   const emit = defineEmits(['closeModal','submit'])
   function closeModal() {
     emit('closeModal')
@@ -10,7 +10,7 @@
 </script>
 
 <template>
-  <div class="modal">
+  <div class="bs-modal">
     <div class="mask"></div>
     <div class="modal-box">
       <div class="modal-header">
@@ -20,7 +20,7 @@
       <div class="modal-body">
         <slot name="modal"></slot>
       </div>
-      <div class="modal-footer">
+      <div v-if="buttonNum !== '0'" class="modal-footer">
         <button @click="submit">{{ props.buttonText || '完成' }}</button>
       </div>
     </div>
@@ -29,7 +29,7 @@
 
 <style lang="scss">
   @use '../assets/sass/config.scss' as *;
-  .modal {
+  .bs-modal {
     .mask {
       z-index: 200;
       position: fixed;
@@ -74,7 +74,7 @@
         }
       }
       .modal-body {
-        max-height: 400px;
+        max-height: 420px;
         overflow-x: hidden;
         overflow-y: scroll;
         padding: 20px 40px;
