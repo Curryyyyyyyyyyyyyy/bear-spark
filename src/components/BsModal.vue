@@ -1,10 +1,13 @@
 <script setup>
-  const props = defineProps(['title','buttonText','buttonNum'])
+  const props = defineProps(['title','button1Text','button1BackgroundColor','button2Text','button2BackgroundColor','button1Color','button2Color','buttonNum'])
   const emit = defineEmits(['closeModal','submit'])
   function closeModal() {
     emit('closeModal')
   }
-  function submit() {
+  function handleClickBtn2() {
+
+  }
+  function handleClickBtn1() {
     emit('submit')
   }
 </script>
@@ -21,7 +24,8 @@
         <slot name="modal"></slot>
       </div>
       <div v-if="buttonNum !== '0'" class="modal-footer">
-        <button @click="submit">{{ props.buttonText || '完成' }}</button>
+        <button v-if="buttonNum === '2'" @click="handleClickBtn2" :style="{backgroundColor:button2BackgroundColor,color:button2Color}">{{ props.button2Text || '取消' }}</button>
+        <button @click="handleClickBtn1" :style="{backgroundColor:button1BackgroundColor,color:button1Color}">{{ props.button1Text || '完成' }}</button>
       </div>
     </div>
   </div>
@@ -92,7 +96,7 @@
         height: 60px;
         width: 560px;
         display: flex;
-        justify-content: center;
+        justify-content: space-evenly;
         align-items: center;
         border-top: 1px solid $colorF;
         button {
@@ -103,9 +107,6 @@
           border-radius: 6px;
           color: $colorG;
           cursor: pointer;
-          &:hover {
-            background-color: $colorP;
-          }
         }
       }
     }

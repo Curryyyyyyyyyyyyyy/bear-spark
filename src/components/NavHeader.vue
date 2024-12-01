@@ -14,8 +14,18 @@
   /* Mounted */
   let userInfo = ref('')
   onMounted(async () => {
-    userInfo.value = await getUserInfoApi()
-    username.value = userInfo.value.username
+    // userInfo.value = await getUserInfoApi()
+    // username.value = userInfo.value.username
+    userInfo.value = {
+      username: "bs_user_1732606984918",
+      avatarUrl: "/imgs/default-avatar.png",
+      followerInfo: "2",
+      fanInfo: "0",
+      happeningInfo: "0",
+      meritInfo: "0",
+      coinInfo: "0"
+    }
+    username.value = "bs_user_1732606984918"
   })
   let showLogin = ref(false)
   function openLogin() {
@@ -43,9 +53,6 @@
       })
       token.value = ''
     })
-  }
-  function toNews() {
-    router.push('/news')
   }
   // 防止刷新显示问题
   let showWord = ref(true)
@@ -163,30 +170,30 @@
             </div>
           </div>
         </div>
-        <div class="right-item">
-          <i class="iconfont icon-huiyuan" :class="{'onlyIcon':!showWord}"></i>
+        <a class="right-item">
+          <i class="iconfont icon-huiyuan jump" :class="{'onlyIcon':!showWord}"></i>
           <p v-if="showWord">大会员</p>
-        </div>
-        <div class="right-item">
-          <i class="iconfont icon-xiaoxi" :class="{'onlyIcon':!showWord}"></i>
+        </a>
+        <a class="right-item">
+          <i class="iconfont icon-xiaoxi jump" :class="{'onlyIcon':!showWord}"></i>
           <p v-if="showWord">消息</p>
-        </div>
-        <div class="right-item"  @click="toNews">
-          <i class="iconfont icon-dongtai" :class="{'onlyIcon':!showWord}"></i>
+        </a>
+        <a class="right-item" href="/#/news" target="_blank">
+          <i class="iconfont icon-dongtai jump" :class="{'onlyIcon':!showWord}"></i>
           <p v-if="showWord">动态</p>
-        </div>
-        <div class="right-item">
-          <i class="iconfont icon-shoucang" :class="{'onlyIcon':!showWord}"></i>
+        </a>
+        <a class="right-item">
+          <i class="iconfont icon-shoucang jump" :class="{'onlyIcon':!showWord}"></i>
           <p v-if="showWord">收藏</p>
-        </div>
-        <div class="right-item">
-          <i class="iconfont icon-lishi" :class="{'onlyIcon':!showWord}"></i>
+        </a>
+        <a class="right-item">
+          <i class="iconfont icon-lishi jump" :class="{'onlyIcon':!showWord}"></i>
           <p v-if="showWord">历史</p>
-        </div>
-        <div class="right-item">
-          <i class="iconfont icon-chuangzuozhongxin" :class="{'onlyIcon':!showWord}"></i>
+        </a>
+        <a class="right-item">
+          <i class="iconfont icon-chuangzuozhongxin jump" :class="{'onlyIcon':!showWord}"></i>
           <p v-if="showWord">创作中心</p>
-        </div>
+        </a>
         <div class="submit right-item">
           <i class="iconfont icon-shangchuan" :class="{'onlyIcon':!showWord}"></i>
           <span v-if="showWord">投稿</span>
@@ -225,13 +232,12 @@
         height: 40px;
         line-height: 40px;
         .logo {
-          height: 40px;
-          width: 40px;
           vertical-align: middle;
-          @include bgImg(40px,40px,'/imgs/logo.png',80px 80px);
+          @include bgImg(30px,30px,'/imgs/logo.png',50px 50px);
           margin-right:10px;
         }
         a {
+          display: inline-block;
           margin-right: 10px;
           cursor: pointer;
           &:first-child:hover {
@@ -249,6 +255,15 @@
         }
         .icon-down {
           font-size: $fontH;
+          transition: all .3s;
+        }
+        .jump-enter-from,.jump-leave-to {
+          transform: translateY(0);
+        }
+        .jump-enter-to,.jump-leave-from {
+          transform: translateY(-10px);
+        }
+        .jump-enter-active,.jump-leave-active {
           transition: all .3s;
         }
       }
@@ -308,6 +323,13 @@
           margin-left: 2.5%;
           text-align: center;
           cursor: pointer;
+          .iconfont {
+            display: inline-block;
+            font-size: $fontH;
+          }
+          &:visited{
+            color: inherit;
+          }
           .onlyIcon {
             line-height: 36px;
             font-size: 24px;
@@ -538,7 +560,7 @@
           border-radius: 15px;
           background-color: $colorA;
           span {
-            margin-left: 10px;
+            margin-left: 6px;
           }
           &:hover {
             cursor: pointer;
@@ -549,13 +571,15 @@
     }
   }
   .jump:hover {
-    animation: jump .5s;
+    animation: jump .3s;
   }
   @keyframes jump {
-    from {
-      
-    } to {
-      font-size: 20px;
+    0% {
+      transform: translateY(0);
+    } 50% {
+      transform: translateY(-6px);
+    } 100% {
+      transform: translateY(0);
     }
   }
 </style>
