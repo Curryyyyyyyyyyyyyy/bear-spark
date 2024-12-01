@@ -1,31 +1,16 @@
 <script setup>
   import { ref } from 'vue';
 
+  defineProps(['tagList'])
+  const emit = defineEmits(['getTagList','getSelectTagId'])
+
   const showTagCol = ref(false)
   const tagLoading = ref(true)
   const selectTagName = ref('')
   const tagSelected = ref(false)
-  const tagId = ref('')
-  const tagList = ref([])
   async function handleTagCol() {
     showTagCol.value = true
-    /* 分页获取标签 */
-    // const tagRes = await getTagListApi(1, 10)
-    // tagList.value = tagRes.records
-    tagList.value = [
-      {
-          "id": 98,
-          "viewNumInfo": "21",
-          "discussNumInfo": "93",
-          "content": "laboris anim pariatur"
-      },
-      {
-          "id": 59,
-          "viewNumInfo": "97",
-          "discussNumInfo": "65",
-          "content": "laboris irure ut dolor nulla"
-      }
-    ]
+    emit('getTagList')
     tagLoading.value = false
   }
   function handleTagBlur() {
@@ -36,11 +21,12 @@
   function handleSelectTag(tagName,id) {
     selectTagName.value = tagName
     tagSelected.value = true
-    tagId.value = id
+    emit('getSelectTagId', id)
   }
   function deleteTag() {
     selectTagName.value = ''
     tagSelected.value = false
+    emit('getSelectTagId', '')
   }
 </script>
 
@@ -57,7 +43,7 @@
         </label>
         <div v-if="showTagCol" v-loading="tagLoading" class="tag-search-result">
           <div v-if="!tagLoading" class="tag-search-list">
-            <div v-for="(item,index) in tagList" :key="index" @click="handleSelectTag(item.content, item.tagId)" class="tag-search-item">
+            <div v-for="(item,index) in tagList" :key="index" @click="handleSelectTag(item.content, item.id)" class="tag-search-item">
               <i class="iconfont icon-huati"></i>
               <span class="tag-search-item-title">{{ item.content }}</span>
               <p class="tag-search-item-desc">{{item.viewNumInfo}}浏览&middot;{{item.discussNumInfo}}讨论</p>
