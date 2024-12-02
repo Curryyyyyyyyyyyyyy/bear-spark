@@ -38,5 +38,5 @@ export const modifyPwdApi = (phone, password) => {
 }
 /* 获取用户信息 */
 export const getUserInfoApi = () => {
-  return request.get('/index/user')
+  return request.get('/info/user')
 }

@@ -1,7 +1,7 @@
 import axios from "axios"
 
 /* 上传文件 */
-export const upload = (file) => {
+export const uploadApi = (file) => {
   return axios({
     method:'post',
     url:'http://192.168.1.220:3732/bear-spark/file/upload',

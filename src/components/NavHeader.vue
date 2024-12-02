@@ -14,18 +14,18 @@
   /* Mounted */
   let userInfo = ref('')
   onMounted(async () => {
-    // userInfo.value = await getUserInfoApi()
-    // username.value = userInfo.value.username
-    userInfo.value = {
-      username: "bs_user_1732606984918",
-      avatarUrl: "/imgs/default-avatar.png",
-      followerInfo: "2",
-      fanInfo: "0",
-      happeningInfo: "0",
-      meritInfo: "0",
-      coinInfo: "0"
-    }
-    username.value = "bs_user_1732606984918"
+    userInfo.value = await getUserInfoApi()
+    username.value = userInfo.value.username
+    // userInfo.value = {
+    //   username: "bs_user_1732606984918",
+    //   avatarUrl: "/imgs/default-avatar.png",
+    //   followerInfo: "2",
+    //   fanInfo: "0",
+    //   happeningInfo: "0",
+    //   meritInfo: "0",
+    //   coinInfo: "0"
+    // }
+    // username.value = "bs_user_1732606984918"
   })
   let showLogin = ref(false)
   function openLogin() {
@@ -127,20 +127,20 @@
           <div class="avatar-children">
             <div class="nickname"  @click="toMainInterface">{{ userInfo.username }}</div>
             <div class="coins"  @click="toMainInterface">
-              功德：<span class="coin-num">{{ userInfo.meritInfo }}</span>
-              硬币：<span class="coin-num">{{ userInfo.coinInfo }}</span>
+              功德：<span class="coin-num">{{ userInfo.meritNumInfo }}</span>
+              硬币：<span class="coin-num">{{ userInfo.coinNumInfo }}</span>
             </div>
             <div class="infos">
               <div class="info-item">
-                <span class="count">{{ userInfo.followerInfo }}</span>
+                <span class="count">{{ userInfo.followerNumInfo }}</span>
                 <p class="desc">关注</p>
               </div>
               <div class="info-item">
-                <span class="count">{{ userInfo.fanInfo }}</span>
+                <span class="count">{{ userInfo.fanNumInfo }}</span>
                 <p class="desc">粉丝</p>
               </div>
               <div class="info-item">
-                <span class="count">{{ userInfo.happeningInfo }}</span>
+                <span class="count">{{ userInfo.happeningNumInfo }}</span>
                 <p class="desc">动态</p>
               </div>
             </div>

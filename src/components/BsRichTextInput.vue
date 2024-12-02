@@ -5,22 +5,25 @@
   import { ref,reactive } from 'vue';
 
   defineProps(['placeholder'])
+  const contentDom = ref(null)
 
+  //#region 表情包
+  let rangeOfContentBox
   /* 处理光标 */
   document.onselectionchange= () => {
     let selection = document.getSelection()
     if(selection.rangeCount > 0) {
       const range = selection.getRangeAt(0)
+      console.log(contentDom.value.contains(range.commonAncestorContainer))
       if(contentDom.value.contains(range.commonAncestorContainer)) {
         rangeOfContentBox = range
+        console.log(range)
       }
     }
   }
-  //#region 表情包
-  let rangeOfContentBox
   /* 插入表情包 */
   function insertEmoji(emojiUrl) {
-    if(pubContentNum.value + 3 > 300) return ElMessage.error('字数已达上限')
+    if(contentNum.value + 3 > 300) return ElMessage.error('字数已达上限')
     const emojiImg = document.createElement('img')
     emojiImg.src = emojiUrl
     if(!rangeOfContentBox) {
@@ -34,7 +37,7 @@
       rangeOfContentBox.insertNode(emojiImg)
     }
     rangeOfContentBox.collapse(false)
-    pubContentNum.value += 3
+    contentNum.value += 3
   }
   /* 处理点击表情包光标移到表情包前 */
   function handleContentBoxClick(event) {
@@ -51,8 +54,7 @@
   }
   //#endregion
   //#region 监听content
-  const contentDom = ref()
-  const pubContentNum = ref(0)
+  const contentNum = ref(0)
   function handleContentNum() {
     // 判断innerHtml的<数量
     let htmlStr = contentDom.value.innerHTML.replace(/<div>|<br>|<\/div>|<\/span>/g,'')
@@ -91,7 +93,7 @@
       ElMessage.error('字数已达上限！')
       event.target.blur()
     }
-    pubContentNum.value = handleContentNum()
+    contentNum.value = handleContentNum()
   }
   function handleContentBlur() {
     setTimeout(() => {
@@ -125,8 +127,8 @@
   //   return {left, top}
   // }
   function handleClickAt() {
-    if(pubContentNum.value + 1 > 300) return ElMessage.error('字数已达上限')
-    pubContentNum.value++
+    if(contentNum.value + 1 > 300) return ElMessage.error('字数已达上限')
+    contentNum.value++
     const atElement = '@'
     if(!rangeOfContentBox) {
       rangeOfContentBox = new Range()
@@ -166,7 +168,7 @@
     const selection = document.getSelection()
     selection.removeAllRanges()
     selection.addRange(chatInputOffset)
-    pubContentNum.value = handleContentNum()
+    contentNum.value = handleContentNum()
   }
   const followerList = [
     {
@@ -196,7 +198,7 @@
     insertEmoji,
     handleClickAt,
     selectAtUser,
-    pubContentNum,
+    contentNum,
     contentDom
   })
 </script>
@@ -208,7 +210,7 @@
     @blur="handleContentBlur"
     @click="handleContentBoxClick"
     @input="changePubContent"
-    :class="{'input-empty':!pubContentNum}"
+    :class="{'input-empty':!contentNum}"
     class="bs-rich-text-input"
     :placeholder="placeholder"
     tabindex="0"
