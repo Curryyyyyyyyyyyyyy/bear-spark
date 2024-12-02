@@ -221,7 +221,7 @@
         margin-bottom:10px;
         text-align: center;
         .logo {
-          @include bgImg(40px,40px,'/imgs/logo.png',80px);
+          @include bgImg(40px,40px,'/imgs/logo.png',60px);
           transform: translateX(9px);
         }
         .icon-cuowu {

@@ -1,7 +1,15 @@
 <script setup>
   // import { ref } from 'vue';
   const emit = defineEmits(['insertEmoji'])
-  const props = defineProps(['emojiUrlList'])
+  defineProps(['emojiUrlList'])
+  // const emojiUrlList = [
+  //   '/imgs/default-avatar.png',
+  //   '/imgs/default-avatar.png',
+  //   '/imgs/default-avatar.png',
+  //   '/imgs/default-avatar.png',
+  //   '/imgs/default-avatar.png',
+  //   '/imgs/default-avatar.png',
+  // ]
   function insertEmoji(event) {
     let emojiUrl
     if(event.target.tagName === 'LI') {
@@ -16,7 +24,7 @@
 <template>
   <div class="bs-emoji">
     <ul class="bs-emoji-list">
-      <li @click="insertEmoji" class="bs-emoji-item" v-for="(item,index) in props.emojiUrlList" :key="index">
+      <li @click="insertEmoji" class="bs-emoji-item" v-for="(item,index) in emojiUrlList" :key="index">
         <img v-lazy="item" alt="表情">
       </li>
     </ul>
