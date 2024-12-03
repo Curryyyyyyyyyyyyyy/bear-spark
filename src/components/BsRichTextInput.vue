@@ -10,17 +10,15 @@
   //#region 表情包
   let rangeOfContentBox
   /* 处理光标 */
-  document.onselectionchange= () => {
-    let selection = document.getSelection()
-    if(selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0)
-      console.log(contentDom.value.contains(range.commonAncestorContainer))
-      if(contentDom.value.contains(range.commonAncestorContainer)) {
-        rangeOfContentBox = range
-        console.log(range)
-      }
-    }
-  }
+  // document.onselectionchange= () => {
+  //   let selection = document.getSelection()
+  //   if(selection.rangeCount > 0) {
+  //     const range = selection.getRangeAt(0)
+  //     if(contentDom.value.contains(range.commonAncestorContainer)) {
+  //       rangeOfContentBox = range
+  //     }
+  //   }
+  // }
   /* 插入表情包 */
   function insertEmoji(emojiUrl) {
     if(contentNum.value + 3 > 300) return ElMessage.error('字数已达上限')
@@ -199,7 +197,8 @@
     handleClickAt,
     selectAtUser,
     contentNum,
-    contentDom
+    contentDom,
+    rangeOfContentBox
   })
 </script>
 
