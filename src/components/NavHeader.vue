@@ -571,7 +571,7 @@
     }
   }
   .jump:hover {
-    animation: jump .3s;
+    animation: jump .3s .07s;
   }
   @keyframes jump {
     0% {

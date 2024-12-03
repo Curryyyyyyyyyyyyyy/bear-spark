@@ -36,3 +36,8 @@ export const getVoteDetailApi = (params) => {
     params
   })
 }
+
+/* 投票 */
+export const voteApi = (params) => {
+  return request.post('/vote/vote', params)
+}

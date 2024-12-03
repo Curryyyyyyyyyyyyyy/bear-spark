@@ -1,5 +1,5 @@
 <script setup>
-  import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+  import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
   import NavHeader from '@/components/NavHeader.vue'
   import BsModal from '@/components/BsModal.vue';
   import BsSelect from '@/components/BsSelect.vue';
@@ -10,13 +10,14 @@
   import BsTagSelect from '../components/BsTagSelect.vue';
   import { ElSelect,ElOption,ElDatePicker, ElMessage, ElMessageBox } from 'element-plus';
   import {hourOptions,minuteOptions} from '@/hooks/timeOptions.js'
+  import {insertEmoji,handleContentBoxClick,handleContentNum,changePubContent} from '../hooks/richTextInput'
   import {timeFormat} from '@/hooks/timeFormat.js'
   import useNews from '@/store/news.js'
   import {useRouter} from 'vue-router'
   import { storeToRefs } from 'pinia';
   import dayjs from 'dayjs';
   import useUser from '../store/user';
-  import {publishNewsApi,getNewsPrepareApi,getNewsListApi,getTagListApi,getVoteDetailApi} from '@/api/news.js'
+  import {publishNewsApi,getNewsPrepareApi,getNewsListApi,getTagListApi,getVoteDetailApi,fowardNewsApi} from '@/api/news.js'
   import {uploadApi} from '@/api/file.js'
   import {getUserInfoApi} from '@/api/user.js'
   import {revokeBookLiveApi,modBookLiveStateApi} from '@/api/bookLive.js'
@@ -33,215 +34,136 @@
   const followerList = ref([])
   const emojiUrlList = ref([])
   const tagList = ref([])
-  const newsList = ref([])
+  const newsList = ref('')
   const userInfo = ref('')
   const backgroundUrl = ref('')
   const sideBarUrl = ref('')
-  // recentTagList.value = [
-  //     {
-  //       content:'111',
-  //       viewNum:1,
-  //       discussNum:1,
-  //     },
-  //     {
-  //       content:'222',
-  //       viewNum:2,
-  //       discussNum:2,
-  //     },
-  //     {
-  //       content:'333',
-  //       viewNum:3,
-  //       discussNum:3,
-  //     },
-  //     {
-  //       content:'444',
-  //       viewNum:4,
-  //       discussNum:4,
-  //     },
-  //     {
-  //       content:'555',
-  //       viewNum:5,
-  //       discussNum:5,
-  //     },
-  //     {
-  //       content:'666',
-  //       viewNum:6,
-  //       discussNum:6,
-  //     },
-  //     {
-  //       content:'777',
-  //       viewNum:7,
-  //       discussNum:7,
-  //     },
-  //     {
-  //       content:'888',
-  //       viewNum:8,
-  //       discussNum:8,
-  //     },
-  // ]
-  // followerList.value = [
-  //   {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:111},
-  //   {avatarUrl:'/imgs/default-avatar.png',username:'谢家辉',fansNumInfo:222},
-  //   {avatarUrl:'/imgs/default-avatar.png',username:'何昕',fansNumInfo:333},
-  //   {avatarUrl:'/imgs/default-avatar.png',username:'叶凯乐',fansNumInfo:444},
-  //   {avatarUrl:'/imgs/default-avatar.png',username:'王思杰',fansNumInfo:555},
-  //   {avatarUrl:'/imgs/default-avatar.png',username:'卢家秦',fansNumInfo:666},
-  //   {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:777},
-  //   {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:888},
-  // ]
-  // userInfo.value = {
-  //   username:'curryyyyyyyyy',
-  //   avatarUrl:'/imgs/default-avatar.png',
-  //   fanNumInfo:0,
-  //   followerNumInfo:0,
-  //   happeningNumInfo:0
-  // }
-  // newsList.value = [
-  //   {
-  //       "username": "万超",
-  //       "avatarUrl": "http://dummyimage.com/100x100",
-  //       "title": "现无称点进其原",
-  //       "content": "mollit reprehenderit in",
-  //       "tag": "pariatur eiusmod aliqua labore reprehenderit",
-  //       "viewNumInfo": "41",
-  //       "likeNumInfo": "50",
-  //       "commentNumInfo": "95",
-  //       "commentAble": 0,
-  //       "advanceRelease": 0,
-  //       "bookLiveInfo": {
-  //           "bookLiveId": 36,
-  //           "anchorName": "备料目积照之",
-  //           "title": "活而场有解济",
-  //           "liveTimeInfo": "2017-06-05 01:55:57",
-  //           "bookNumInfo": "67",
-  //           "booked": 1,
-  //           "canceled": 1,
-  //           "dead": 0
-  //       },
-  //       "voteSimpleInfo": {
-  //           "voteId": 8,
-  //           "title": "需观反干分取必",
-  //           "voteNumInfo": "43"
-  //       },
-  //       "quotedHappening": {
-  //           "username": "吴芳",
-  //           "avatarUrl": "http://dummyimage.com/100x100",
-  //           "title": "究运平统",
-  //           "content": "reprehenderit",
-  //           "tag": "minim",
-  //           "viewNumInfo": "93",
-  //           "likeNumInfo": "94",
-  //           "commentNumInfo": "35",
-  //           "commentAble": 0,
-  //           "advanceRelease": 1,
-  //           "bookLiveInfo": {
-  //               "bookLiveId": 6,
-  //               "anchorName": "群电其保",
-  //               "title": "书队效群",
-  //               "liveTimeInfo": "1986-01-04 10:42:59",
-  //               "bookNumInfo": "40",
-  //               "booked": 0,
-  //               "canceled": 0,
-  //               "dead": 0
-  //           },
-  //           "voteSimpleInfo": {
-  //               "voteId": 88,
-  //               "title": "年常基速土",
-  //               "voteNumInfo": "14"
-  //           },
-  //           "quotedHappening": {
-  //               "username": "余娜",
-  //               "avatarUrl": "http://dummyimage.com/100x100",
-  //               "title": "转出参",
-  //               "content": "nostrud",
-  //               "tag": "et eu minim ut anim",
-  //               "viewNumInfo": "16",
-  //               "likeNumInfo": "5",
-  //               "commentNumInfo": "57",
-  //               "commentAble": 0,
-  //               "advanceRelease": 1,
-  //               "bookLiveInfo": {
-  //                   "bookLiveId": 81,
-  //                   "anchorName": "资做称百程",
-  //                   "title": "军干并设",
-  //                   "liveTimeInfo": "1973-09-16 16:35:07",
-  //                   "bookNumInfo": "51",
-  //                   "booked": 0,
-  //                   "canceled": 0,
-  //                   "dead": 0
-  //               },
-  //               "voteSimpleInfo": {
-  //                   "voteId": 74,
-  //                   "title": "应况据响",
-  //                   "voteNumInfo": "92"
-  //               },
-  //               "quotedHappening": {
-  //                   "username": "袁艳",
-  //                   "avatarUrl": "http://dummyimage.com/100x100",
-  //                   "title": "那月美具",
-  //                   "content": "nostrud in occaecat amet",
-  //                   "tag": "cillum Ut",
-  //                   "viewNumInfo": "95",
-  //                   "likeNumInfo": "99",
-  //                   "commentNumInfo": "31",
-  //                   "commentAble": 1,
-  //                   "advanceRelease": 1,
-  //                   "bookLiveInfo": {
-  //                       "bookLiveId": 53,
-  //                       "anchorName": "话反空经分作",
-  //                       "title": "易越志也图件易",
-  //                       "liveTimeInfo": "1995-10-06 04:23:05",
-  //                       "bookNumInfo": "36",
-  //                       "booked": 0,
-  //                       "canceled": 1,
-  //                       "dead": 0
-  //                   },
-  //                   "voteSimpleInfo": {
-  //                       "voteId": 58,
-  //                       "title": "当口图太",
-  //                       "voteNumInfo": "31"
-  //                   },
-  //                   "quotedHappening": {
-  //                       "description": "引用的动态"
-  //                   },
-  //                   "imgUrlList": [
-  //                       "http://dummyimage.com/400x400",
-  //                       "http://dummyimage.com/400x400"
-  //                   ],
-  //                   "pubTimeInfo": "2010-08-31 16:02:39"
-  //               },
-  //               "imgUrlList": [
-  //                   "http://dummyimage.com/400x400",
-  //                   "http://dummyimage.com/400x400",
-  //                   "http://dummyimage.com/400x400"
-  //               ],
-  //               "pubTimeInfo": "2015-12-26 00:30:15"
-  //           },
-  //           "imgUrlList": [
-  //               "http://dummyimage.com/400x400"
-  //           ],
-  //           "pubTimeInfo": "2006-02-08 06:15:20"
-  //       },
-  //       "imgUrlList": [
-  //           "http://dummyimage.com/400x400"
-  //       ],
-  //       "pubTimeInfo": "1975-04-15 04:31:03"
-  //   }
-  // ]
-  onMounted(async () => {
-    /* 获取关注的列表、表情包列表、热门标签列表 */
-    const res = await getNewsPrepareApi()
-    recentTagList.value = res.recentTagList
-    followerList.value = res.followerList
-    emojiUrlList.value = res.emojiUrlList
-    backgroundUrl.value = res.backgroundUrl
-    sideBarUrl.value = res.sideBarUrl
-    /* 分页获取动态 */
-    const newsRes = await getNewsListApi(1, 10)
-    newsList.value = newsRes.records
-    /* 获取用户信息 */
-    userInfo.value = await getUserInfoApi()
-  })
+  recentTagList.value = [
+      {
+        content:'111',
+        viewNum:1,
+        discussNum:1,
+      },
+      {
+        content:'222',
+        viewNum:2,
+        discussNum:2,
+      },
+      {
+        content:'333',
+        viewNum:3,
+        discussNum:3,
+      },
+      {
+        content:'444',
+        viewNum:4,
+        discussNum:4,
+      },
+      {
+        content:'555',
+        viewNum:5,
+        discussNum:5,
+      },
+      {
+        content:'666',
+        viewNum:6,
+        discussNum:6,
+      },
+      {
+        content:'777',
+        viewNum:7,
+        discussNum:7,
+      },
+      {
+        content:'888',
+        viewNum:8,
+        discussNum:8,
+      },
+  ]
+  followerList.value = [
+    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:111},
+    {avatarUrl:'/imgs/default-avatar.png',username:'谢家辉',fansNumInfo:222},
+    {avatarUrl:'/imgs/default-avatar.png',username:'何昕',fansNumInfo:333},
+    {avatarUrl:'/imgs/default-avatar.png',username:'叶凯乐',fansNumInfo:444},
+    {avatarUrl:'/imgs/default-avatar.png',username:'王思杰',fansNumInfo:555},
+    {avatarUrl:'/imgs/default-avatar.png',username:'卢家秦',fansNumInfo:666},
+    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:777},
+    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:888},
+  ]
+  userInfo.value = {
+    username:'curryyyyyyyyy',
+    avatarUrl:'/imgs/default-avatar.png',
+    fanNumInfo:0,
+    followerNumInfo:0,
+    happeningNumInfo:0
+  }
+  newsList.value = [
+    {
+        "id":1,
+        "username": "万超",
+        "avatarUrl": "http://dummyimage.com/100x100",
+        "title": "现无称点进其原",
+        "content": "mollit reprehenderit in",
+        "tag": "pariatur eiusmod aliqua labore reprehenderit",
+        "viewNumInfo": "41",
+        "likeNumInfo": "50",
+        "commentNumInfo": "95",
+        "commentAble": 0,
+        "advanceRelease": 0,
+        "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+        },
+        "imgUrlList": [
+            "http://dummyimage.com/400x400"
+        ],
+        "pubTimeInfo": "1975-04-15 04:31:03"
+    },
+    {
+        "id":2,
+        "username": "万超",
+        "avatarUrl": "http://dummyimage.com/100x100",
+        "title": "现无称点进其原",
+        "content": "mollit reprehenderit in",
+        "tag": "pariatur eiusmod aliqua labore reprehenderit",
+        "viewNumInfo": "41",
+        "likeNumInfo": "50",
+        "commentNumInfo": "95",
+        "commentAble": 0,
+        "advanceRelease": 0,
+        "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+        },
+        "imgUrlList": [
+            "http://dummyimage.com/400x400"
+        ],
+        "pubTimeInfo": "1975-04-15 04:31:03"
+    },
+  ]
+  emojiUrlList.value = [
+    '/imgs/default-avatar.png',
+    '/imgs/default-avatar.png',
+    '/imgs/default-avatar.png',
+    '/imgs/default-avatar.png',
+    '/imgs/default-avatar.png',
+  ]
+  // onMounted(async () => {
+  //   /* 获取关注的列表、表情包列表、热门标签列表 */
+  //   const res = await getNewsPrepareApi()
+  //   recentTagList.value = res.recentTagList
+  //   followerList.value = res.followerList
+  //   emojiUrlList.value = res.emojiUrlList
+  //   backgroundUrl.value = res.backgroundUrl
+  //   sideBarUrl.value = res.sideBarUrl
+  //   /* 获取用户信息 */
+  //   userInfo.value = await getUserInfoApi()
+  //   /* 分页获取动态 */
+  //   const newsRes = await getNewsListApi(1, 10)
+  //   newsList.value = newsRes.records
+  // })
   //#endregion
   
   /* 页面卸载时清除定时器，清除pictureList */
@@ -263,37 +185,34 @@
   }
   /* 分页获取标签 */
   async function getTagList() {
-    const tagRes = await getTagListApi(1, 10)
-    tagList.value = tagRes.records
-    // tagList.value = [
-    //   {
-    //     "id": 98,
-    //     "viewNumInfo": "21",
-    //     "discussNumInfo": "93",
-    //     "content": "laboris anim pariatur"
-    //   },
-    //   {
-    //     "id": 59,
-    //     "viewNumInfo": "97",
-    //     "discussNumInfo": "65",
-    //     "content": "laboris irure ut dolor nulla"
-    //   }
-    // ]
+    // const tagRes = await getTagListApi(1, 10)
+    // tagList.value = tagRes.records
+    tagList.value = [
+      {
+        "id": 98,
+        "viewNumInfo": "21",
+        "discussNumInfo": "93",
+        "content": "laboris anim pariatur"
+      },
+      {
+        "id": 59,
+        "viewNumInfo": "97",
+        "discussNumInfo": "65",
+        "content": "laboris irure ut dolor nulla"
+      }
+    ]
   }
   /* forwardTagId */
-  const forwardTagId = ref('')
-  function changeForwardTagId(id) {
-    forwardTagId.value = id
+  const forwardTagIdList = ref([])
+  function changeForwardTagId(index,id) {
+    forwardTagIdList.value[index] = id
   }
-  /* 富文本 */
-  const richTextInputForward = ref()
-  console.log(richTextInputForward)
   //#endregion
   //#region 发布
   /* 发布 */
   const newsTitle = ref('')
   const imgUrlList = ref([])
-  const bookLiveInfo = ref({})
+  const bookLiveInfo = ref(null)
   async function publish() {
     if(!richTextInputPub.value.contentDom.innerHTML) return ElMessage.error('内容不能为空')
     let pubTime = ''
@@ -322,9 +241,11 @@
     imgUrlList.value = []
     newsSeePermission.value = 0
     newsCommentPermission.value = 0
-    publishDate.value = ''
-    publishHour.value = ''
-    publishMinute.value = ''
+    pubTime = ''
+    showLivesBox.value = false
+    bookLiveInfo.value = ''
+    showVoteBox.value = false
+    voteInfo.value = ''
     //#endregion
   }
   //#endregion
@@ -381,8 +302,9 @@
     showEmojiBoxPub.value = !showEmojiBoxPub.value
   }
   /* 表情包列表失焦 */
-  function handleEmojiBoxBlur() {
+  function handleEmojiBoxBlur(index) {
     showEmojiBoxPub.value = false
+    newsList.value[index].showEmojiBox = false
   }
   /* 输入表情包 */
   function insertEmojiPub(emojiUrl) {
@@ -410,16 +332,16 @@
   }
   /* 投票类型 */
   const voteType = ref(1) // 1:文字 2:图片
-  const textOptionList = ref([{value:''},{value:''}])
+  const textOptionList = ref([{optionContent:''},{optionContent:''}])
   function addOption() {
-    textOptionList.value.push({value:''})
-    pictureOptionList.value.push({value:'',pictureUrl:''})
+    textOptionList.value.push({optionContent:''})
+    pictureOptionList.value.push({optionContent:'',optionPhotoUrl:''})
   }
   function deleteOption(index) {
     textOptionList.value.splice(index, 1)
     pictureOptionList.value.splice(index, 1)
   }
-  const pictureOptionList = ref([{value:'',pictureUrl:''},{value:'',pictureUrl:''}])
+  const pictureOptionList = ref([{optionContent:'',optionPhotoUrl:''},{optionContent:'',optionPhotoUrl:''}])
   /* 上传图片选项 */
   async function uploadPictureOption(event,index) {
     const pictureFile = event.target.files[0]
@@ -428,8 +350,8 @@
     }
     const fd = new FormData()
     fd.append('file',pictureFile)
-    const pictureUrl = await uploadApi(fd)
-    pictureOptionList.value[index].pictureUrl = pictureUrl
+    const optionPhotoUrl = await uploadApi(fd)
+    pictureOptionList.value[index].optionPhotoUrl = optionPhotoUrl.data
     event.target.value = null
   }
   /* 限选和截止时间 */
@@ -618,7 +540,6 @@
     voteEndMinute.value = ''
   }
   /* 提交投票表单 */
-  const voteId = ref('')
   /* 清空表单 */
   function clearVoteForm() {
     voteTitle.value = ''
@@ -628,10 +549,10 @@
     voteEndDate.value = ''
     voteEndHour.value = ''
     voteEndMinute.value = ''
-    textOptionList.value = [{value:''},{value:''}]
-    pictureOptionList.value = [{value:'',pictureUrl:''},{value:'',pictureUrl:''}]
+    textOptionList.value = [{optionContent:''},{optionContent:''}]
+    pictureOptionList.value = [{optionContent:'',optionPhotoUrl:''},{optionContent:'',optionPhotoUrl:''}]
   }
-  const voteInfo = ref({})
+  const voteInfo = ref(null)
   async function submitVote() {
     /* 校验数据 */
     if(
@@ -646,12 +567,12 @@
     let optionList = []
     if(voteType.value === 1) {
       for (let index = 0; index < textOptionList.value.length; index++) {
-        if(!textOptionList.value[index].value) return ElMessage.error('请填写完整选项')
+        if(!textOptionList.value[index].optionContent) return ElMessage.error('请填写完整选项')
       }
       optionList = textOptionList.value
     } else {
       for (let index = 0; index < pictureOptionList.value.length; index++) {
-        if(!pictureOptionList.value[index].value || !pictureOptionList.value[index].pictureUrl) return ElMessage.error('请填写完整选项')
+        if(!pictureOptionList.value[index].optionContent || !pictureOptionList.value[index].optionPhotoUrl) return ElMessage.error('请填写完整选项')
       }
       optionList = pictureOptionList.value
     }
@@ -673,10 +594,16 @@
     }
     showPubVoteModal.value = false
     showVoteBox.value = true
+    /* 禁止预约直播和发布时间 */
+    bookLiveInfo.value = null
+    showLivesBox.value = false
+    publishDate.value = null
+    publishHour.value = null
+    publishMinute.value = null
+    pubTimeBox.value = false
   }
   function deleteVoteBox() {
     showVoteBox.value = false
-    voteId.value = ''
     clearVoteForm()
   }
   //#endregion
@@ -888,8 +815,15 @@
     }
     showLivesBox.value = true
     showPubBookLivesModal.value = false
+    /* 禁止发布投票和设定发布时间 */
+    showVoteBox.value = false
+    voteInfo.value = null
+    publishDate.value = null
+    publishHour.value = null
+    publishMinute.value = null
+    pubTimeBox.value = false
   }
-  function revokeBookLive(bookLiveId) {
+  function revokeBookLive(bookLiveId,index) {
     ElMessageBox.confirm(
       '撤销预约后，将提醒已预约用户',
       '提示',
@@ -902,6 +836,7 @@
       await revokeBookLiveApi({
         bookLiveId
       })
+      newsList.value[index].bookLiveInfo.canceled = 1
       ElMessage({ 
         type: 'info',
         message: '已撤销',
@@ -911,18 +846,20 @@
   function cancelRevokeBookLive() {
     ElMessage.info('该直播预约已撤销')
   }
-  async function bookLive(bookLiveId) {
+  async function bookLive(bookLiveId,index) {
     await modBookLiveStateApi({
       bookLiveId,
       booked:0
     })
+    newsList.value[index].bookLiveInfo.booked = 0
     ElMessage.success('预约成功')
   }
-  async function cancelBookLive(bookLiveId) {
+  async function cancelBookLive(bookLiveId,index) {
     await modBookLiveStateApi({
       bookLiveId,
-      state:1
+      booked:1
     })
+    newsList.value[index].bookLiveInfo.booked = 1
     ElMessage.info('已取消预约')
   }
   //#endregion
@@ -947,7 +884,7 @@
   const newsCommentPermission = ref(0) // 0:允许评论 1：关闭评论 2：精选评论
   //#endregion
   //#region 发布时间
-  const PubTimeBox = ref(false)
+  const pubTimeBox = ref(false)
   const publishDate = ref()
   const publishHour = ref()
   const publishMinute = ref()
@@ -960,10 +897,15 @@
     else return time.getTime() > Date.now() - 8.64e7
   }
   function handleClickPubTime() {
-    PubTimeBox.value = true
+    pubTimeBox.value = true
     settingCascader1.value = false
     const defaultTime = dayjs(new Date().getTime() + 86400000)
     publishDate.value = defaultTime.format('YYYY-MM-DD')
+    /* 禁止发布投票和预约直播 */
+    bookLiveInfo.value = null
+    showLivesBox.value = false
+    voteInfo.value = null
+    showVoteBox.value = false
   }
   function changePubDate() {
     const date = dayjs(publishDate.value)
@@ -1139,7 +1081,7 @@
     publishDate.value = ''
     publishHour.value = ''
     publishMinute.value = ''
-    PubTimeBox.value = false
+    pubTimeBox.value = false
   }
   function handleClickEarlyPub() {
     earlyPublish.value = Math.abs(earlyPublish.value-1)
@@ -1177,7 +1119,9 @@
     showVoteModal.value = false
   }
   const voteDetailInfo = ref({})
+  const voteId = ref(null)
   async function handleShowVoteModal(id) {
+    voteId.value = id
     voteDetailInfo.value = await getVoteDetailApi({
       voteId:id
     })
@@ -1233,10 +1177,99 @@
   }
   function showForwardInput(index, showForward) {
     !showForward ? newsList.value[index].showForward = true : newsList.value[index].showForward = false
+    curRangeIndex.value = index
   }
-  const showEmojiBoxForward = ref(false)
+  function showEmojiBoxForward(index,showEmojiBox){
+    !showEmojiBox ? newsList.value[index].showEmojiBox = true : newsList.value[index].showEmojiBox = false
+  }
+  //#endregion
+  //#region 动态转发输入框
+  const mineRefList = reactive([])
+  const contentNumList = reactive(new Array(4).fill(0))
+  const showAtSelect = reactive(new Array(4).fill(false))
+  let curRangeIndex = ref('')
+  function getMineRef(el, index) {
+    if(el) {
+      mineRefList[index] = el
+    }
+  }
+
+  let rangeOfContentBoxList = reactive([])
+  let focusNode = reactive({}); // 存储光标聚焦节点
+  let focusOffset = ref(0); // 存储光标聚焦偏移量
+  let chatInputOffset = reactive({}); // 存储光标聚焦的元素
+  const atSelectPosition = reactive({
+    left:"0px",
+    top:"0px",
+  })
+
+  /* 处理光标 */
+  document.onselectionchange = () => {
+    let selection = document.getSelection()
+    if(selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0)
+      mineRefList.forEach((item,index) => {
+        if(item.contains(range.commonAncestorContainer)) {
+          rangeOfContentBoxList[index] = range
+          curRangeIndex.value = index
+        }
+      })
+      /* 处理publish输入框光标 */
+      if(richTextInputPub.value.contentDom.contains(range.commonAncestorContainer)) {
+        richTextInputPub.value.rangeOfContentBox = range
+      }
+    }
+  }
+  /* 处理输入框失焦 */
+  function handleContentBlur(index) {
+    setTimeout(() => {
+      showAtSelect[index] = false
+    }, 200);
+    if (window.getSelection) {
+      let sel = window.getSelection();
+      if (sel.getRangeAt && sel.rangeCount) {
+        focusNode = sel.focusNode;
+        focusOffset.value = sel.focusOffset;
+        chatInputOffset = sel.getRangeAt(0);
+      }
+    }
+  }
+  /* @ */
+  function selectAtUser(username) {
+    let index = curRangeIndex.value
+    console.log(curRangeIndex.value)
+    if(handleContentNum(mineRefList[index]) + username.length + 1 > 300) return ElMessage.error('字数已达上限')
+    showAtSelect[index] = false
+    chatInputOffset.setStart(focusNode,focusOffset.value-1)
+    chatInputOffset.setEnd(focusNode,focusOffset.value)
+    chatInputOffset.deleteContents()
+    const atElement = `<span class="username" contenteditable="false">@${username}</span>`
+    chatInputOffset.collapse(false)
+    const atNode = chatInputOffset.createContextualFragment(atElement)
+    let lastChild = atNode.lastChild
+    chatInputOffset.insertNode(atNode)
+    chatInputOffset.setEndAfter(lastChild)
+    chatInputOffset.setStartAfter(lastChild)
+    const selection = document.getSelection()
+    selection.removeAllRanges()
+    selection.addRange(chatInputOffset)
+    contentNumList[index] = handleContentNum(mineRefList[index])
+  }
+  /* 输入表情包 */
   function insertEmojiForward(emojiUrl) {
-    richTextInputForward.value.insertEmoji(emojiUrl)
+    insertEmoji(emojiUrl,curRangeIndex.value,contentNumList,rangeOfContentBoxList,mineRefList)
+  }
+
+  /* 转发动态 */
+  async function forwardNews(index) {
+    let content = mineRefList[index].innerHTML ? mineRefList[index].innerHTML : '转发动态'
+    let tagId = forwardTagIdList.value[index]
+    let quotedHappeningId = newsList.value[index].quotedHappening ? newsList.value[index].quotedHappening.id : newsList.value[index].id
+    await fowardNewsApi({
+      quotedHappeningId,
+      content,
+      tagId
+    })
   }
   //#endregion
   //#region 页面尺寸缩放调整
@@ -1325,7 +1358,7 @@
             </div>
             <i @click="showLivesBox = false" class="iconfont icon-cuowu"></i>
           </div>
-          <div v-if="PubTimeBox" class="pubTime-box">
+          <div v-if="pubTimeBox" class="pubTime-box">
             <span>发布时间：</span>
             <el-date-picker
               v-model="publishDate"
@@ -1521,41 +1554,41 @@
                   </div>
                 </a>
               </div>
-              <div v-if="false" class="news-book-lives">
+              <div v-if="item.bookLiveInfo" class="news-book-lives">
                 <div class="lives-detail">
                   <p class="lives-title">直播预约：{{ item.bookLiveInfo.title }}</p>
                   <p class="lives-stat">
                     <span class="lives-time">{{ item.bookLiveInfo.liveTimeInfo }} 直播</span>
-                    <span class="book-num">{{ item.bookLiveInfo.bookInfo }}人预约</span>
+                    <span class="book-num">{{ item.bookLiveInfo.bookNumInfo }}人预约</span>
                   </p>
                 </div>
                 <div class="lives-btn-box">
-                  <div v-if="true" class="revoke-btn-box">
-                    <button v-if="true" @click="revokeBookLive(item.bookLiveInfo.bookLiveId)" class="book-lives-btn revoke-btn">撤销</button>
+                  <div v-if="username === item.username" class="revoke-btn-box">
+                    <button v-if="!item.bookLiveInfo.canceled" @click="revokeBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn revoke-btn">撤销</button>
                     <button v-else @click="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
                   </div>
                   <div v-else class="book-btn-box">
-                    <button  v-if="false" @click="bookLive(item.bookLiveInfo.bookLiveId)" class="book-lives-btn book-btn">
+                    <button  v-if="item.bookLiveInfo.booked" @click="bookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn book-btn">
                       <span><i class="iconfont icon-icon-tixing"></i>预约</span>
                     </button>
-                    <button v-else @click="cancelBookLive(item.bookLiveInfo.bookLiveId)" class="book-lives-btn booked-btn">已预约</button>
+                    <button v-else @click="cancelBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn booked-btn">已预约</button>
                   </div>
                 </div>
               </div>
-              <div class="news-vote">
+              <div v-if="item.voteSimpleInfo" class="news-vote">
                 <div @click="handleShowVoteModal(item.voteSimpleInfo.voteId)" class="news-vote-card">
                   <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
                   <div class="vote-detail">
                     <p class="vote-title">{{ item.voteSimpleInfo.title }}</p>
-                    <p class="vote-stat">{{ item.voteSimpleInfo.voteNumInfo }}人参与</p>
+                    <p class="vote-stat">{{ item.voteSimpleInfo.voteNumInfo }}人参与&nbsp;&nbsp;{{ item.voteSimpleInfo.deadlineInfo }}</p>
                   </div>
                   <div class="vote-btn-box">
-                    <button class="vote-btn">{{ username === item.username ? '查看' : '参与'}}</button>
+                    <button class="vote-btn">详情</button>
                   </div>
                 </div>
               </div>
             </div>
-            <div v-if="true" class="news-item-body" :class="{'news-reference':true}">
+            <div v-if="item.quotedHappening" class="news-item-body" :class="{'news-reference':true}">
               <div class="refer-author-box">
                 <div class="author-info">
                   <img :src="item.quotedHappening.avatarUrl" alt="头像">
@@ -1563,13 +1596,13 @@
                   <span class="refer-text">投稿了文章</span>
                 </div>
               </div>
-              <div class="news-tag">
+              <div v-if="item.quotedHappening.tag" class="news-tag">
                 <i class="iconfont icon-huati"></i>
                 <span>{{ item.quotedHappening.tag }}</span>
               </div>
               <div class="news-title">{{ item.quotedHappening.title }}</div>
               <div class="news-text-content">{{ item.quotedHappening.content }}</div>
-              <div class="news-album">
+              <div v-if="item.quotedHappening.imgUrlList" class="news-album">
                 <div class="news-album-preview grid">
                   <div v-for="(item,index) in item.quotedHappening.imgUrlList" :key="index" class="news-album-preview-picture">
                     <img :src="item" alt="图片">
@@ -1596,7 +1629,7 @@
                   </div>
                 </a>
               </div>
-              <div v-if="false" class="news-book-lives">
+              <div v-if="item.quotedHappening.bookLiveInfo" class="news-book-lives">
                 <div class="lives-detail">
                   <p class="lives-title">直播预约：{{item.quotedHappening.bookLiveInfo.title}}</p>
                   <p class="lives-stat">
@@ -1617,21 +1650,21 @@
                   </div>
                 </div>
               </div>
-              <div class="news-vote">
+              <div v-if="item.quotedHappening.voteSimpleInfo" class="news-vote">
                 <div @click="handleShowVoteModal(item.quotedHappening.voteSimpleInfo.voteId)" class="news-vote-card">
                   <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
                   <div class="vote-detail">
                     <p class="vote-title">{{item.quotedHappening.voteSimpleInfo.title}}</p>
-                    <p class="vote-stat">{{item.quotedHappening.voteSimpleInfo.voteNumInfo}}人参与</p>
+                    <p class="vote-stat">{{item.quotedHappening.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ item.quotedHappening.voteSimpleInfo.deadlineInfo }}</p>
                   </div>
                   <div class="vote-btn-box">
-                    <button class="vote-btn">查看</button>
+                    <button class="vote-btn">详情</button>
                   </div>
                 </div>
               </div>
             </div>
             <div class="news-item-footer">
-              <div @click="showForwardInput(index,item.showForward)" class="footer-item news-zhuanfa">
+              <div @click="showForwardInput(index,item.showForward)" class="footer-item news-zhuanfa" :class="{'highlight':item.showForward}">
                 <i class="iconfont icon-zhuanfa"></i>
                 {{ !item.likeInfo ? '转发' : item.likeInfo}}
               </div>
@@ -1644,26 +1677,49 @@
                 {{ !item.likeInfo ? '点赞' : item.likeInfo}}
               </div>
             </div>
-            <div v-if="item.showForward" class="item-forward-box">
+            <div v-show="item.showForward" class="item-forward-box">
               <div class="forward-body">
                 <div class="avatar-box">
                   <img src="/imgs/default-avatar.png" alt="头像">
                 </div>
                 <div class="forward-input-box">
-                  <bs-tag-select :tagList="tagList" @getSelectTagId="changeForwardTagId" @getTagList="getTagList"></bs-tag-select>
-                  <bs-rich-text-input ref="richTextInputForward" placeholder="有什么想说的呢"></bs-rich-text-input>
+                  <bs-tag-select :tagList="tagList" @getSelectTagId="changeForwardTagId(index,$event)" @getTagList="getTagList"></bs-tag-select>
+                  <div class="forward-input">
+                    <div 
+                      :ref="el => getMineRef(el,index)"
+                      contenteditable="true"
+                      :class="{'empty-input':!contentNumList[index]}"
+                      placeholder="有什么想说的呢"
+                      @click="handleContentBoxClick"
+                      tabindex="0"
+                      @input="changePubContent($event,index,showAtSelect,mineRefList,contentNumList)"
+                      @blur="handleContentBlur(index,showAtSelect,focusNode,focusOffset,chatInputOffset)"
+                    >
+                    </div>
+                    <bs-at-ul v-if="showAtSelect[index]" contenteditable="false" :atSelectPosition="atSelectPosition">
+                      <bs-at-li 
+                        v-for="(item,index) in followerList"
+                        :key="index"
+                        :avatarUrl="item.avatarUrl"
+                        :username="item.username"
+                        :fansNum="item.fanNumInfo"
+                        @selectAtUser="selectAtUser"
+                      >
+                      </bs-at-li>
+                    </bs-at-ul>
+                  </div>
                 </div>
               </div>
               <div class="forward-footer">
-                <div class="emoji-btn" tabindex="1" @blur="handleEmojiBoxBlur">
-                  <i @click="showEmojiBoxForward = !showEmojiBoxForward" :class="{'active':showEmojiBoxForward}" class="iconfont icon-biaoqing"></i>
-                  <div v-if="showEmojiBoxForward" class="emoji-box">
+                <div class="emoji-btn" tabindex="1" @blur="handleEmojiBoxBlur(index)">
+                  <i @click="showEmojiBoxForward(index,item.showEmojiBox)" :class="{'active':item.showEmojiBox}" class="iconfont icon-biaoqing"></i>
+                  <div v-if="item.showEmojiBox" class="emoji-box">
                     <bs-emoji @insertEmoji="insertEmojiForward" :emojiUrlList="emojiUrlList"></bs-emoji>
                   </div>
                 </div>
                 <div class="wrapper">
-                  <span class="stat">{{ richTextInputForward ? 300-richTextInputForward[0].contentNum : 300}}</span>
-                  <button class="forward-btn">转发</button>
+                  <span class="stat">{{ 300-contentNumList[index] }}</span>
+                  <button @click="forwardNews(index)" class="forward-btn">转发</button>
                 </div>
               </div>
             </div>
@@ -1922,7 +1978,7 @@
             <div v-for="(item,index) in textOptionList" :key="index" class="option-item">
               <span class="item-name">选项{{ index+1 }}</span>
               <div class="input-box">
-                <input v-model="item.value" type="text" maxlength="20" :placeholder="`请填写选项${index+1}内容，最多20字`">
+                <input v-model="item.optionContent" type="text" maxlength="20" :placeholder="`请填写选项${index+1}内容，最多20字`">
                 <div v-if="textOptionList.length > 2" class="delete-icon-box">
                   <i @click="deleteOption(index)" class="iconfont icon-shanchu"></i>
                 </div>
@@ -1942,11 +1998,11 @@
               <div class="picture-box">
                 <label :for="'picture'+index">
                   <div class="upload-box">
-                    <img v-if="item.pictureUrl" :src="item.pictureUrl" alt="">
+                    <img v-if="item.optionPhotoUrl" :src="item.optionPhotoUrl" alt="">
                     <i v-else class="iconfont icon-jiahao"></i>
                   </div>
                 </label>
-                <textarea v-model="item.value" maxlength="20" class="desc" :placeholder="`请填写选项${index+1}内容，不超过20个字`"></textarea>
+                <textarea v-model="item.optionContent" maxlength="20" class="desc" :placeholder="`请填写选项${index+1}内容，不超过20个字`"></textarea>
               </div>
               <input v-show="false" @change="uploadPictureOption($event,index)" accept="image/*" :id="'picture'+index" type="file">
             </div>
@@ -2050,7 +2106,8 @@
   <bs-vote-modal
     v-if="showVoteModal"
     @closeVoteModal="closeVoteModal"
-    :voteDetailInfo="voteDetailInfo"
+    :voteDetail="voteDetailInfo"
+    :voteId="voteId"
   >
   </bs-vote-modal>
 </template>
@@ -2998,6 +3055,9 @@
                 &:hover {
                   color: $colorM;
                 }
+                &.highlight {
+                  color: $colorM;
+                }
               }
             }
             .item-forward-box {
@@ -3022,8 +3082,17 @@
                   &:hover {
                     border: 1px solid $colorM;
                   }
-                  .bs-rich-text-input {
-                    margin-top: 5px
+                  .forward-input {
+                    position: relative;
+                    margin-top: 6px;
+                    .empty-input {
+                      &::after {
+                        content: attr(placeholder);
+                        position: absolute;
+                        top: 0px;
+                        color: $colorD;
+                      }
+                    }
                   }
                 }
               }
@@ -3033,6 +3102,7 @@
                 margin-top: 12px;
                 box-sizing: border-box;
                 .emoji-btn {
+                  position: relative;
                   cursor: pointer;
                   &:hover {
                     color: $colorM;
@@ -3040,6 +3110,14 @@
                   .icon-biaoqing {
                     font-weight: bold;
                     font-size: $fontH;
+                  }
+                  .emoji-box {
+                    z-index: 10;
+                    position: absolute;
+                    top: 35px;
+                    left: -5px;
+                    background-color: $colorG;
+                    border-radius: 6px;
                   }
                 }
                 .wrapper {

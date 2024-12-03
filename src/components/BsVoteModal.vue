@@ -1,28 +1,47 @@
 <script setup>
   import { ref } from 'vue';
+  import useUser from '../store/user';
+  import { ElMessage } from 'element-plus';
+  import {voteApi,getVoteDetailApi} from '@/api/news.js'
 
+  const userStore = useUser()
+  const {username} = userStore
   const emit = defineEmits(['closeVoteModal'])
-  const props = defineProps(['voteDetailInfo'])
-  const showVoteDetail = ref(0) // 1:show 0:hidden
+  const props = defineProps(['voteId','voteDetail'])
+
+  const voteDetailInfo = ref(props.voteDetail)
+
   function closeVoteModal() {
     emit('closeVoteModal')
   }
+  const showVoteDetail = ref(0) // 1:show 0:hidden
   const synchronous = ref(1) // 0：同步，1：不同步
   const anonymous = ref(1)   // 0：匿名，1：不匿名
   const selectOptionIdList = ref([])
-  function handleClickOption(id) {
+  function handleClickOption(id, lim) {
     const index = selectOptionIdList.value.indexOf(id)
     if(index === -1) {
+      if(selectOptionIdList.value.length >= lim) return ElMessage.warning(`最多选择${lim}项`)
       selectOptionIdList.value.push(id)
     } else {
       selectOptionIdList.value.splice(index,1)
     }
   }
   function isChecked(id) {
-    console.log(111)
     return selectOptionIdList.value.includes(id)
   }
-  console.log(props.voteDetailInfo)
+  async function handleVote() {
+    if(!selectOptionIdList.value.length) return ElMessage.warning('请先选择选项')
+    await voteApi({
+      voteId:props.voteId,
+      optionIdList:selectOptionIdList.value,
+      synchronous:synchronous.value,
+      anonymous:anonymous.value
+    })
+    voteDetailInfo.value = await getVoteDetailApi({
+      voteId:props.voteId
+    })
+  }
 </script>
 
 <template>
@@ -36,26 +55,38 @@
       <div class="bs-vote-container" :style="{transform:`translateX(${-showVoteDetail*560}px)`}">
         <div class="vote-main-wrapper">
           <div class="bs-vote-body">
-            <div class="vote-title">hahaha</div>
+            <div class="vote-title">{{voteDetailInfo.title}}</div>
             <div class="vote-info">
               <div class="author-info">
-                <img src="/imgs/default-avatar.png" alt="头像">
-                <span class="author-username">currrryyyyyyyy</span>
+                <img :src="voteDetailInfo.avatarUrl" alt="头像">
+                <span class="author-username">{{ voteDetailInfo.username }}</span>
               </div>
               <div class="vote-text">发起</div>
-              <div class="vote-stat"><span class="involveNum">10人</span>参与</div>
+              <div class="vote-stat"><span class="involveNum">{{voteDetailInfo.voteNumInfo}}人</span>参与</div>
             </div>
-            <div class="vote-desc">哈哈哈哈哈哈哈啊哈哈</div>
+            <div class="vote-desc">{{ voteDetailInfo.desc }}</div>
             <div class="vote-options">
               <div class="vote-limit">
                 <div>投票选项</div>
-                <div>最多选1项</div>
+                <div>最多选{{voteDetailInfo.voteLim}}项</div>
               </div>
               <ul class="option-list">
-                <div class="option-item image-vote" @click="handleClickOption(2)">
+                <div v-for="(item,index) in voteDetailInfo.optionList" :key="index" class="option-item" :class="{'image-vote':voteDetailInfo.voteType===2}" @click="handleClickOption(item.optionId,voteDetailInfo.voteLim)">
                   <div class="option-photo">
-                    <img src="/imgs/logo.png" alt="">
+                    <img :src="item.optionPhotoUrl" alt="">
                   </div>
+                  <div class="option-content-wrap">
+                    <div v-if="!voteDetailInfo.voted || username === voteDetailInfo.username" class="percentage-bar" :class="{'full':item.optionPercent==='100'}" :style="{width:`${item.optionPercent}%`,backgroundColor: item.selected?'#e3e5e7':'#8dd0ff'}"></div>
+                    <div class="option-content">
+                      <p>{{ item.optionContent }}</p>
+                    </div>
+                    <p v-if="voteDetailInfo.username === username || !voteDetailInfo.voted" class="option-percentage" :style="{color:item.selected?'#999999':(item.optionPercent === '100' ? '#ffffff' : '#8dd0ff')}">{{item.optionPercent}}%</p>
+                    <p v-if="voteDetailInfo.username !== username && voteDetailInfo.voted" class="select-btn" :class="{'checked':isChecked(item.optionId)}">
+                      <i v-if="isChecked(item.optionId)" class="iconfont icon-gou"></i>
+                    </p>
+                  </div>
+                </div>
+                <!-- <div class="option-item" @click="handleClickOption(1)">
                   <div class="option-content-wrap">
                     <div v-if="true" class="percentage-bar" :class="{'full':false}" :style="{width:'50%',backgroundColor: false?'#e3e5e7':'#8dd0ff'}"></div>
                     <div class="option-content">
@@ -66,20 +97,8 @@
                       <i v-if="isChecked(2)" class="iconfont icon-gou"></i>
                     </p>
                   </div>
-                </div>
-                <div class="option-item" @click="handleClickOption(1)">
-                  <div class="option-content-wrap">
-                    <div v-if="true" class="percentage-bar" :class="{'full':false}" :style="{width:'50%',backgroundColor: false?'#e3e5e7':'#8dd0ff'}"></div>
-                    <div class="option-content">
-                      <p>1111</p>
-                    </div>
-                    <p v-if="true" class="option-percentage" :style="{color:false?'#999999':'#8dd0ff'}">50%</p>
-                    <p v-if="false" class="select-btn" :class="{'checked':isChecked(2)}">
-                      <i v-if="isChecked(2)" class="iconfont icon-gou"></i>
-                    </p>
-                  </div>
-                </div>
-                <div v-if="false" class="vote-privacy">
+                </div> -->
+                <div v-if="username !== voteDetailInfo.username && voteDetailInfo.voted" class="vote-privacy">
                   <div @click="synchronous = Math.abs(synchronous-1)" class="share-to-news">
                     <span class="select-btn" :style="{backgroundColor:synchronous ? '#ffffff' : '#03a0d6'}">
                       <i v-if="synchronous === 0" class="iconfont icon-gou"></i>
@@ -97,22 +116,22 @@
             </div>
           </div>
           <div class="bs-vote-footer">
-            <div v-if="false" class="follower-vote">
+            <div v-if="username === voteDetailInfo.username && voteDetailInfo.voterInfoList.length" class="follower-vote">
               <div @click="showVoteDetail = 1" class="desc">
                 <p>你关注的人</p>
                 <p>也参与了投票</p>
               </div>
               <div @click="showVoteDetail = 1" class="follower-avatar-list">
-                <div class="follower-avatar-item">
-                  <img src="/imgs/default-avatar.png" alt="">
-                </div>
-                <div class="follower-avatar-item">
-                  <img src="/imgs/default-avatar.png" alt="">
+                <div v-for="(item,index) in voteDetailInfo.voterInfoList" :key="index" class="follower-avatar-item">
+                  <img :src="item.avatarUrl" alt="">
                 </div>
               </div>
             </div>
-            <button v-if="true" class="vote-btn" :style="{backgroundColor:'#e5e9ef',color:'#999999'}">投票</button>
-            <div v-if="false" @click="showVoteDetail = 1" class="vote-detail-btn">
+            <!-- <button v-if="username !== voteDetailInfo.username" class="vote-btn" :style="{backgroundColor:!voteDetailInfo.voted || voteDetailInfo.dead?'#e5e9ef':'#00aeec',color:!voteDetailInfo.voted||voteDetailInfo.dead?'#999999':'#ffffff'}">{{ !voteDetailInfo.voted ? '感谢你的投票' : (voteDetailInfo.dead ? '投票已结束' : '投票') }}</button> -->
+            <button v-if="voteDetailInfo.dead" class="vote-btn" :style="{backgroundColor:'#e5e9ef',color:'#999999'}">投票已结束</button>
+            <button v-else-if="username !== voteDetailInfo.username && voteDetailInfo.voted" @click="handleVote()" class="vote-btn" :style="{backgroundColor:'#00aeec',color:'#ffffff'}">投票</button>
+            <button v-else-if="username !== voteDetailInfo.username && !voteDetailInfo.voted" class="vote-btn" :style="{backgroundColor:'#e5e9ef',color:'#999999'}">感谢你的投票</button>
+            <div v-if="username === voteDetailInfo.username && !voteDetailInfo.voterInfoList.length" @click="showVoteDetail = 1" class="vote-detail-btn">
               <span>投票详情</span>
               <i class="iconfont icon-youjiantou"></i>
             </div>
@@ -121,67 +140,20 @@
         <div class="vote-detail-wrapper">
           <div class="bs-vote-body">
             <ul class="vote-detail-list">
-              <li class="vote-detail-item">
+              <li v-for="(item,index) in voteDetailInfo.voterInfoList" :key="index" class="vote-detail-item">
                 <div class="avatar-box">
-                  <img src="/imgs/default-avatar.png" alt="">
+                  <img :src="item.avatarUrl" alt="">
                 </div>
                 <div class="vote-detail">
-                  <span class="voter-username">currrryyyyyyyy</span>
+                  <span class="voter-username">{{ item.username }}</span>
                   <span class="text">投给了</span>
-                  <p class="vote-content">"帅"、"帅帅帅"</p>
-                </div>
-              </li>
-              <li class="vote-detail-item">
-                <div class="avatar-box">
-                  <img src="/imgs/default-avatar.png" alt="">
-                </div>
-                <div class="vote-detail">
-                  <span class="voter-username">currrryyyyyyyy</span>
-                  <span class="text">投给了</span>
-                  <p class="vote-content">"帅"、"帅帅帅"</p>
-                </div>
-              </li>
-              <li class="vote-detail-item">
-                <div class="avatar-box">
-                  <img src="/imgs/default-avatar.png" alt="">
-                </div>
-                <div class="vote-detail">
-                  <span class="voter-username">currrryyyyyyyy</span>
-                  <span class="text">投给了</span>
-                  <p class="vote-content">"帅"、"帅帅帅"</p>
-                </div>
-              </li>
-              <li class="vote-detail-item">
-                <div class="avatar-box">
-                  <img src="/imgs/default-avatar.png" alt="">
-                </div>
-                <div class="vote-detail">
-                  <span class="voter-username">currrryyyyyyyy</span>
-                  <span class="text">投给了</span>
-                  <p class="vote-content">"帅"、"帅帅帅"</p>
-                </div>
-              </li>
-              <li class="vote-detail-item">
-                <div class="avatar-box">
-                  <img src="/imgs/default-avatar.png" alt="">
-                </div>
-                <div class="vote-detail">
-                  <span class="voter-username">currrryyyyyyyy</span>
-                  <span class="text">投给了</span>
-                  <p class="vote-content">"帅"、"帅帅帅"</p>
-                </div>
-              </li>
-              <li class="vote-detail-item">
-                <div class="avatar-box">
-                  <img src="/imgs/default-avatar.png" alt="">
-                </div>
-                <div class="vote-detail">
-                  <span class="voter-username">currrryyyyyyyy</span>
-                  <span class="text">投给了</span>
-                  <p class="vote-content">"帅"、"帅帅帅"</p>
+                  <p class="vote-content">{{ item.optionsInfo }}</p>
                 </div>
               </li>
             </ul>
+            <div v-if="!voteDetailInfo.voterInfoList?.length" class="vote-detail-empty">
+              <span>暂时没有人参与投票哦</span>
+            </div>
           </div>
           <div class="bs-vote-footer">
             <button @click="showVoteDetail = 0" class="back-to-vote">返回投票窗口</button>
@@ -451,6 +423,9 @@
         }
         .vote-detail-wrapper {
           flex-shrink: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
           width: 560px;
           border-bottom-left-radius: 6px;
           border-bottom-right-radius: 6px;
@@ -501,6 +476,11 @@
                   }
                 }
               }
+            }
+            .vote-detail-empty {
+              margin-top: 200px;
+              text-align: center;
+              font-size: $fontJ;
             }
           }
           .bs-vote-footer {
