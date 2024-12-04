@@ -1,9 +1,81 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
+  import {getTagListApi} from '@/api/news'
 
-  defineProps(['tagList'])
-  const emit = defineEmits(['getTagList','getSelectTagId'])
+  const emit = defineEmits(['getSelectTagId'])
 
+  const tagList = ref([])
+  const pageNum = ref(1)
+  const pageSize = ref(10)
+  onMounted(async () => {
+    const tagRes = await getTagListApi({
+      pageNum:pageNum.value,
+      pageSize:pageSize.value
+    })
+    tagList.value = tagRes.records
+    // tagList.value = [
+    //   {
+    //     "id": 98,
+    //     "viewNumInfo": "21",
+    //     "discussNumInfo": "93",
+    //     "content": "laboris anim pariatur"
+    //   },
+    //   {
+    //     "id": 59,
+    //     "viewNumInfo": "97",
+    //     "discussNumInfo": "65",
+    //     "content": "laboris irure ut dolor nulla"
+    //   },
+    //   {
+    //     "id": 59,
+    //     "viewNumInfo": "97",
+    //     "discussNumInfo": "65",
+    //     "content": "laboris irure ut dolor nulla"
+    //   },
+    //   {
+    //     "id": 59,
+    //     "viewNumInfo": "97",
+    //     "discussNumInfo": "65",
+    //     "content": "laboris irure ut dolor nulla"
+    //   },
+    //   {
+    //     "id": 59,
+    //     "viewNumInfo": "97",
+    //     "discussNumInfo": "65",
+    //     "content": "laboris irure ut dolor nulla"
+    //   },
+    //   {
+    //     "id": 59,
+    //     "viewNumInfo": "97",
+    //     "discussNumInfo": "65",
+    //     "content": "laboris irure ut dolor nulla"
+    //   },
+    //   {
+    //     "id": 59,
+    //     "viewNumInfo": "97",
+    //     "discussNumInfo": "65",
+    //     "content": "laboris irure ut dolor nulla"
+    //   },
+    //   {
+    //     "id": 59,
+    //     "viewNumInfo": "97",
+    //     "discussNumInfo": "65",
+    //     "content": "laboris irure ut dolor nulla"
+    //   },
+    //   {
+    //     "id": 59,
+    //     "viewNumInfo": "97",
+    //     "discussNumInfo": "65",
+    //     "content": "laboris irure ut dolor nulla"
+    //   },
+    //   {
+    //     "id": 59,
+    //     "viewNumInfo": "97",
+    //     "discussNumInfo": "65",
+    //     "content": "laboris irure ut dolor nulla"
+    //   },
+    // ]
+  })
   const showTagCol = ref(false)
   const tagLoading = ref(true)
   const selectTagName = ref('')
@@ -28,6 +100,22 @@
     tagSelected.value = false
     emit('getSelectTagId', '')
   }
+  /* 滚动加载 */
+  const busy = ref(false)
+  const loadingTag = ref(false)
+  function loadMoreTag() {
+    busy.value = true
+    loadingTag.value = true
+    setTimeout(async () => {
+      const tagRes = await getTagListApi({
+        pageNum:++pageNum.value,
+        pageSize:pageSize.value
+      })
+      tagList.value = tagList.value.concat(tagRes.records)
+      busy.value = false
+      loadingTag.value = false
+    }, 1000);
+  }
 </script>
 
 <template>
@@ -47,6 +135,13 @@
               <i class="iconfont icon-huati"></i>
               <span class="tag-search-item-title">{{ item.content }}</span>
               <p class="tag-search-item-desc">{{item.viewNumInfo}}浏览&middot;{{item.discussNumInfo}}讨论</p>
+            </div>
+            <div class="load-more-tag"
+              v-infinite-scroll="loadMoreTag" 
+              :infinite-scroll-disabled="busy" 
+              infinite-scroll-distance="50"
+            >
+              <img src="/imgs/loading-svg/loading-spinning-bubbles.svg" v-show="loadingTag">
             </div>
           </div>
           <div v-if="false" class="tag-search-empty">还没有相关话题~</div>
@@ -139,6 +234,13 @@
                 margin-top: 1px;
                 font-size: $fontK;
                 color: $colorD;
+              }
+            }
+            .load-more-tag {
+              text-align: center;
+              img {
+                width: 30px;
+                height: 30px;
               }
             }
           }

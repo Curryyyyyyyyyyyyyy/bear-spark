@@ -18,7 +18,7 @@ const routes = [
   {
     path:'/news',
     name:'news',
-    component:()=>import('@/views/news.vue')
+    component:()=>import('@/views/news/news.vue')
   }
 ]
 
