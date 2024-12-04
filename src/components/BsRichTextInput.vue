@@ -8,7 +8,7 @@
   const contentDom = ref(null)
 
   //#region 表情包
-  let rangeOfContentBox
+  let rangeOfContentBox = ref('')
   /* 处理光标 */
   // document.onselectionchange= () => {
   //   let selection = document.getSelection()
@@ -24,17 +24,17 @@
     if(contentNum.value + 3 > 300) return ElMessage.error('字数已达上限')
     const emojiImg = document.createElement('img')
     emojiImg.src = emojiUrl
-    if(!rangeOfContentBox) {
-      rangeOfContentBox = new Range()
-      rangeOfContentBox.selectNodeContents(contentDom.value)
+    if(!rangeOfContentBox.value) {
+      rangeOfContentBox.value = new Range()
+      rangeOfContentBox.value.selectNodeContents(contentDom.value)
     }
-    if(rangeOfContentBox.collapsed) {
-      rangeOfContentBox.insertNode(emojiImg)
+    if(rangeOfContentBox.value.collapsed) {
+      rangeOfContentBox.value.insertNode(emojiImg)
     } else {
-      rangeOfContentBox.deleteContents()
-      rangeOfContentBox.insertNode(emojiImg)
+      rangeOfContentBox.value.deleteContents()
+      rangeOfContentBox.value.insertNode(emojiImg)
     }
-    rangeOfContentBox.collapse(false)
+    rangeOfContentBox.value.collapse(false)
     contentNum.value += 3
   }
   /* 处理点击表情包光标移到表情包前 */
@@ -128,18 +128,18 @@
     if(contentNum.value + 1 > 300) return ElMessage.error('字数已达上限')
     contentNum.value++
     const atElement = '@'
-    if(!rangeOfContentBox) {
-      rangeOfContentBox = new Range()
-      rangeOfContentBox.selectNodeContents(contentDom.value)
+    if(!rangeOfContentBox.value) {
+      rangeOfContentBox.value = new Range()
+      rangeOfContentBox.value.selectNodeContents(contentDom.value)
     }
-    const atNode = rangeOfContentBox.createContextualFragment(atElement)
-    if(rangeOfContentBox.collapsed) {
-      rangeOfContentBox.insertNode(atNode)
+    const atNode = rangeOfContentBox.value.createContextualFragment(atElement)
+    if(rangeOfContentBox.value.collapsed) {
+      rangeOfContentBox.value.insertNode(atNode)
     } else {
-      rangeOfContentBox.deleteContents()
-      rangeOfContentBox.insertNode(atNode)
+      rangeOfContentBox.value.deleteContents()
+      rangeOfContentBox.value.insertNode(atNode)
     }
-    rangeOfContentBox.collapse(false)
+    rangeOfContentBox.value.collapse(false)
     document.getSelection().removeAllRanges()
     document.getSelection().addRange(rangeOfContentBox)
     setTimeout(() => {

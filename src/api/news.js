@@ -9,21 +9,15 @@ export const getNewsPrepareApi = () => {
   return request.get('/happening/prepare')
 }
 /* 获取动态列表 */
-export const getNewsListApi = (pageNum, pageSize) => {
+export const getNewsListApi = (params) => {
   return request.get('/happening', {
-    params:{
-      pageNum,
-      pageSize
-    }
+    params
   })
 }
 /* 分页获取标签 */
-export const getTagListApi = (pageNum, pageSize) => {
+export const getTagListApi = (params) => {
   return request.get('/tag', {
-    params:{
-      pageNum,
-      pageSize
-    }
+    params
   })
 }
 /* 转发动态 */
