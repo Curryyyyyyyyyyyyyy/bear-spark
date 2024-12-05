@@ -1,5 +1,11 @@
 <script setup>
-
+  import useUser from '@/store/user';
+  const userStore = useUser()
+  if(Date.now() - userStore.expires > 1.296e9) {
+    userStore.token = ''
+  } else {
+    userStore.expires = Date.now()
+  }
 </script>
 
 <template>

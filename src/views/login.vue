@@ -38,6 +38,7 @@
     if(!regPwd(password.value)) return alert('密码只能由数字、字母、下划线，6~16位')
     const res = await loginApi(phone.value, password.value)
     userStore.token = res.token
+    userStore.expires = Date.now()
     updateUserInfo()
     ElMessage({
       type:'success',
