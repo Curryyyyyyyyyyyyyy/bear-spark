@@ -11,6 +11,7 @@
   import {uploadApi} from '@/api/file'
   import useNews from '@/store/news.js'
   import { storeToRefs } from 'pinia';
+import { throttle } from '../../hooks/performance';
 
   defineProps(['emojiUrlList'])
   /* Store */
@@ -28,7 +29,7 @@
   const newsTitle = ref('')
   const imgUrlList = ref([])
   const bookLiveInfo = ref(null)
-  async function publish() {
+  const publish = throttle(async () => {
     if(!richTextInputPub.value.contentDom.innerHTML) return ElMessage.error('内容不能为空')
     let pubTime = ''
     if(publishDate.value && publishHour.value && publishHour.value) {
@@ -49,20 +50,20 @@
     })
     ElMessage.success('发布成功')
     //#region 清空表单
-    newsTitle.value = ''
-    pubTitleNum.value = 0
-    richTextInputPub.value.contentDom.innerHTML = ''
-    richTextInputPub.value.contentNum = 0
-    imgUrlList.value = []
-    newsSeePermission.value = 0
-    newsCommentPermission.value = 0
-    pubTime = ''
-    showLivesBox.value = false
-    bookLiveInfo.value = ''
-    showVoteBox.value = false
-    voteInfo.value = ''
-    //#endregion
-  }
+      newsTitle.value = ''
+      pubTitleNum.value = 0
+      richTextInputPub.value.contentDom.innerHTML = ''
+      richTextInputPub.value.contentNum = 0
+      imgUrlList.value = []
+      newsSeePermission.value = 0
+      newsCommentPermission.value = 0
+      pubTime = ''
+      showLivesBox.value = false
+      bookLiveInfo.value = ''
+      showVoteBox.value = false
+      voteInfo.value = ''
+      //#endregion
+  }, 1000) 
   //#endregion
   //#region title
   /* 监听title输入 */

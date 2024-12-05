@@ -2,8 +2,11 @@
   import { ref } from 'vue';
   import {loginApi,sendVEcodeApi,verifyVEcodeApi,registerPwdApi,modifyPwdApi} from '@/api/user.js'
   import {regPhone,regPwd,regVEcode} from '@/util/reg.js'
-  import useUser from '../store/user';
   import { ElMessage } from 'element-plus';
+  import useUser from '@/store/user';
+  import {updateUserInfo} from '@/hooks/handleUserInfo';
+
+  const userStore = useUser()
 
   let showPwd = ref(false)
   let curWay = ref(0)
@@ -30,12 +33,12 @@
 
   let phone = ref('')
   let password = ref('')
-  const userStore = useUser()
   async function login(){
     if(!regPhone(phone.value)) return alert('请输入正确的手机号')
     if(!regPwd(password.value)) return alert('密码只能由数字、字母、下划线，6~16位')
     const res = await loginApi(phone.value, password.value)
     userStore.token = res.token
+    updateUserInfo()
     ElMessage({
       type:'success',
       message:'登录成功',
@@ -269,6 +272,7 @@
         box-sizing: border-box;
         border-radius: 5px;
         margin-right: 25px;
+        color: $colorB;
         .phone,.password,.phoneNum,.VEcode,.mod-password {
           height: 50px;
           line-height: 50px;

@@ -3,30 +3,15 @@
   import { ElMessage, ElMessageBox } from 'element-plus';
   import useUser from '../store/user';
   import { storeToRefs } from 'pinia';
-  import { ref, onMounted} from 'vue';
+  import { ref} from 'vue';
   import { useRouter } from 'vue-router';
-  import {getUserInfoApi} from '@/api/user.js'
+  import { deleteUserInfo } from '@/hooks/handleUserInfo';
 
   /* Router */
   const router = useRouter()
   const userStore = useUser()
-  const {token,username} = storeToRefs(userStore)
+  const {token,username,avatarUrl,fanNumInfo,followerNumInfo,happeningNumInfo,coinNumInfo,meritNumInfo} = storeToRefs(userStore)
   /* Mounted */
-  let userInfo = ref('')
-  onMounted(async () => {
-    userInfo.value = await getUserInfoApi()
-    username.value = userInfo.value.username
-    // userInfo.value = {
-    //   username: "bs_user_1732606984918",
-    //   avatarUrl: "/imgs/default-avatar.png",
-    //   followerInfo: "2",
-    //   fanInfo: "0",
-    //   happeningInfo: "0",
-    //   meritInfo: "0",
-    //   coinInfo: "0"
-    // }
-    // username.value = "bs_user_1732606984918"
-  })
   let showLogin = ref(false)
   function openLogin() {
     showLogin.value = true
@@ -52,6 +37,8 @@
         duration:1000
       })
       token.value = ''
+      deleteUserInfo()
+      router.replace('/index')
     })
   }
   // 防止刷新显示问题
@@ -122,25 +109,25 @@
         </div>
         <div v-else class="avatar-box right-item">
           <div class="avatar" @click="toMainInterface">
-            <img :src="userInfo.avatarUrl" alt="">
+            <img :src="avatarUrl" alt="">
           </div>
           <div class="avatar-children">
-            <div class="nickname"  @click="toMainInterface">{{ userInfo.username }}</div>
+            <div class="nickname"  @click="toMainInterface">{{ username }}</div>
             <div class="coins"  @click="toMainInterface">
-              功德：<span class="coin-num">{{ userInfo.meritNumInfo }}</span>
-              硬币：<span class="coin-num">{{ userInfo.coinNumInfo }}</span>
+              功德：<span class="coin-num">{{ meritNumInfo }}</span>
+              硬币：<span class="coin-num">{{ coinNumInfo }}</span>
             </div>
             <div class="infos">
               <div class="info-item">
-                <span class="count">{{ userInfo.followerNumInfo }}</span>
+                <span class="count">{{ followerNumInfo }}</span>
                 <p class="desc">关注</p>
               </div>
               <div class="info-item">
-                <span class="count">{{ userInfo.fanNumInfo }}</span>
+                <span class="count">{{ fanNumInfo }}</span>
                 <p class="desc">粉丝</p>
               </div>
               <div class="info-item">
-                <span class="count">{{ userInfo.happeningNumInfo }}</span>
+                <span class="count">{{ happeningNumInfo }}</span>
                 <p class="desc">动态</p>
               </div>
             </div>
