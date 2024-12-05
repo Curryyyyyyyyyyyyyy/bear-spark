@@ -30,8 +30,15 @@ export const getVoteDetailApi = (params) => {
     params
   })
 }
-
 /* 投票 */
 export const voteApi = (params) => {
   return request.post('/vote/vote', params)
+}
+/* 点赞/取消点赞 */
+export const likeNewsApi = (params) => {
+  return request.post('/happening/like',params)
+}
+/* 删除动态 */
+export const deleteNewsApi = (params) => {
+  return request.delete('/happening',params)
 }

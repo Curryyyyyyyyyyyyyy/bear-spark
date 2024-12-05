@@ -1,37 +1,28 @@
 <script setup>
   import router from '@/router';
-  import {getUserInfoApi} from '@/api/user.js'
-  import { onMounted, ref } from 'vue';
-
-  const userInfo = ref({})
-  onMounted(async () => {
-    /* 获取用户信息 */
-    userInfo.value = await getUserInfoApi()
-    // userInfo.value = {
-    //   username:'curryyyyyyyyy',
-    //   avatarUrl:'/imgs/default-avatar.png',
-    //   fanNumInfo:0,
-    //   followerNumInfo:0,
-    //   happeningNumInfo:0
-    // }
-  })
+  import {updateUserInfo} from '@/hooks/handleUserInfo';
+  import useUser from '@/store/user';
+  import { storeToRefs } from 'pinia';
+  const userStore = useUser()
+  updateUserInfo()
+  const {avatarUrl,username,followerNumInfo,fanNumInfo,happeningNumInfo} = storeToRefs(userStore)
 </script>
 
 <template>
   <div class="news-user-box">
-    <img @click="router.push('/mainInterface')" :src="userInfo.avatarUrl" alt="头像">
-    <span @click="router.push('/mainInterface')" class="username">{{ userInfo.username }}</span>
+    <img @click="router.push('/mainInterface')" :src="avatarUrl" alt="头像">
+    <span @click="router.push('/mainInterface')" class="username">{{ username }}</span>
     <div class="infos">
       <div @click="router.push('/mainInterface')" class="info-box">
-        <p class="num">{{ userInfo.followerNumInfo }}</p>
+        <p class="num">{{ followerNumInfo }}</p>
         <p class="desc">关注</p>
       </div>
       <div @click="router.push('/mainInterface')" class="info-box">
-        <p class="num">{{ userInfo.fanNumInfo }}</p>
+        <p class="num">{{ fanNumInfo }}</p>
         <p class="desc">粉丝</p>
       </div>
       <div @click="router.push('/mainInterface')" class="info-box">
-        <p class="num">{{ userInfo.happeningNumInfo }}</p>
+        <p class="num">{{ happeningNumInfo }}</p>
         <p class="desc">动态</p>
       </div>
     </div>

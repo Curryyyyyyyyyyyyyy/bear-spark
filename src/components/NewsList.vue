@@ -10,6 +10,7 @@
   import useUser from '@/store/user';
   import {insertEmoji,handleContentNum} from '@/hooks/richTextInput'
   import {getVoteDetailApi,fowardNewsApi,getNewsListApi} from '@/api/news'
+import { likeNewsApi } from '../api/news';
 
   /* Store */
   const userStore = useUser()
@@ -17,7 +18,7 @@
   /* Router */
   const router = useRouter()
   defineProps(['followerList','emojiUrlList'])
-  
+
   //#region 投票
   const showVoteModal = ref(false)
   function closeVoteModal() {
@@ -167,6 +168,7 @@
     mineRefList[index].innerHTML = ''
     forwardTagIdList.value[index] = null
     newsList.value[index].showForward = false
+    newsList.value[index].forwardNumInfo++
   }
   function showForwardInput(index, showForward) {
     !showForward ? newsList.value[index].showForward = true : newsList.value[index].showForward = false
@@ -207,11 +209,12 @@
         "username": "万超",
         "avatarUrl": "http://dummyimage.com/100x100",
         "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
+        "content": "",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 9,
+        "forwardNumInfo":0,
         "commentAble": 0,
         "advanceRelease": 0,
         "voteSimpleInfo": {
@@ -231,11 +234,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 0,
+        "commentNumInfo":95,
+        "forwardNumInfo":0,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":0,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -253,11 +258,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 95,
+        "forwardNumInfo":2,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":1,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -275,11 +282,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 5,
+        "commentNumInfo": 95,
+        "forwardNumInfo":2,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":1,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -297,11 +306,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 95,
+        "forwardNumInfo":2,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":1,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -319,11 +330,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 95,
+        "forwardNumInfo":2,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":0,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -341,11 +354,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 5,
+        "forwardNumInfo":2,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":0,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -363,11 +378,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 95,
+        "forwardNumInfo":2,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":0,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -385,11 +402,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 95,
+        "forwardNumInfo":2,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":0,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -407,11 +426,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 95,
+        "forwardNumInfo":2,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":0,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -429,11 +450,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 9,
+        "forwardNumInfo":2,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":0,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -451,11 +474,13 @@
         "title": "现无称点进其原",
         "content": "mollit reprehenderit in",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": "41",
-        "likeNumInfo": "50",
-        "commentNumInfo": "95",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 9,
+        "forwardNumInfo":2,
         "commentAble": 0,
         "advanceRelease": 0,
+        "liked":0,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",
@@ -467,6 +492,30 @@
         "pubTimeInfo": "1975-04-15 04:31:03"
     },
   ]
+  /* 删除动态 */
+  async function deleteNewsApi(id,index) {
+    await deleteNewsApi({
+      happeningId:id
+    })
+    newsList.value[index].content = ''
+    ElMessage.info('删除成功')
+  }
+  /* 点赞/取消点赞 */
+  async function likeNews(id, liked, index) {
+    await likeNewsApi({
+      happeningId:id,
+      liked:liked ? 0 : 1
+    })
+    if(liked) {
+      ElMessage.info('已取消点赞')
+      newsList.value[index].liked = 0
+      newsList.value[index].likeNumInfo--
+    } else {
+      ElMessage.success('点赞成功')
+      newsList.value[index].liked = 1
+      newsList.value[index].likeNumInfo++
+    }
+  }
   //#endregion
   defineExpose({
     mineRefList,
@@ -478,233 +527,235 @@
 <template>
   <div class="news-list">
     <div v-for="(item,index) in newsList" :key="index" class="news-item">
-      <div class="news-item-avatar">
-        <img :src="item.avatarUrl" alt="头像">
-      </div>
-      <div class="news-item-header">
-        <span class="news-item-author">{{ item.username }}</span>
-        <span v-if="!item.advanceRelease" class="news-item-early-pub">提前发布</span>
-        <p class="news-item-time">{{ item.pubTimeInfo }}</p>
-        <div @mouseenter="newsList[index].isOpen = true" @mouseleave="newsList[index].isOpen = false" class="news-item-more-btn">
-          <i class="iconfont icon-gengduo1"></i>
-          <div v-if="newsList[index].isOpen" class="new-item-cascader">
-            <div v-if="username !== item.username" class="cascader-list">
-              <div class="cascader-item">取消关注</div>
-              <div class="cascader-item">举报</div>
-            </div>
-            <div v-else class="cascader-list">
-              <div class="cascader-item">删除</div>
-            </div>
-          </div>
+      <div v-if="item.content" class="item-warpper">
+        <div class="news-item-avatar">
+          <img :src="item.avatarUrl" alt="头像">
         </div>
-      </div>
-      <div class="news-item-body">
-        <div v-if="item.tag" class="news-tag">
-          <i class="iconfont icon-huati"></i>
-          <span>{{ item.tag }}</span>
-        </div>
-        <div class="news-title">{{ item.title }}</div>
-        <div class="news-text-content" v-html="item.content"></div>
-        <div v-if="item.imgUrlList" class="news-album">
-          <div class="news-album-preview grid">
-            <div v-for="(item, index) in item.imgUrlList" :key="index" class="news-album-preview-picture">
-              <img :src="item" alt="图片">
-            </div>
-          </div>
-        </div>
-        <div v-if="false" class="news-video-card">
-          <a href="javascript:;" class="news-video-box">
-            <div class="video-box-header">
-              <video controls src="/imgs/video.mp4"></video>
-            </div>
-            <div class="video-box-body">
-              <div class="video-title">vhosnvonvosnovl</div>
-              <div class="video-stat">
-                <div class="video-stat-item">
-                  <i class="iconfont icon-shipin"></i>
-                  22
-                </div>
-                <div class="video-stat-item">
-                  <i class="iconfont icon-icon"></i>
-                  11
-                </div>
+        <div class="news-item-header">
+          <span class="news-item-author">{{ item.username }}</span>
+          <span v-if="!item.advanceRelease" class="news-item-early-pub">提前发布</span>
+          <p class="news-item-time">{{ item.pubTimeInfo }}</p>
+          <div @mouseenter="newsList[index].isOpen = true" @mouseleave="newsList[index].isOpen = false" class="news-item-more-btn">
+            <i class="iconfont icon-gengduo1"></i>
+            <div v-if="newsList[index].isOpen" class="new-item-cascader">
+              <div v-if="username !== item.username" class="cascader-list">
+                <div class="cascader-item">取消关注</div>
+                <div class="cascader-item">举报</div>
+              </div>
+              <div v-else class="cascader-list">
+                <div @click="deleteNewsApi(item.id,index)" class="cascader-item">删除</div>
               </div>
             </div>
-          </a>
-        </div>
-        <div v-if="item.bookLiveInfo" class="news-book-lives">
-          <div class="lives-detail">
-            <p class="lives-title">直播预约：{{ item.bookLiveInfo.title }}</p>
-            <p class="lives-stat">
-              <span class="lives-time">{{ item.bookLiveInfo.liveTimeInfo }} 直播</span>
-              <span class="book-num">{{ item.bookLiveInfo.bookNumInfo }}人预约</span>
-            </p>
-          </div>
-          <div class="lives-btn-box">
-            <div v-if="username === item.username" class="revoke-btn-box">
-              <button v-if="!item.bookLiveInfo.canceled" @click="revokeBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn revoke-btn">撤销</button>
-              <button v-else @click="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
-            </div>
-            <div v-else class="book-btn-box">
-              <button  v-if="item.bookLiveInfo.booked" @click="bookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn book-btn">
-                <span><i class="iconfont icon-icon-tixing"></i>预约</span>
-              </button>
-              <button v-else @click="cancelBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn booked-btn">已预约</button>
-            </div>
           </div>
         </div>
-        <div v-if="item.voteSimpleInfo" class="news-vote">
-          <div @click="handleShowVoteModal(item.voteSimpleInfo.voteId)" class="news-vote-card">
-            <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
-            <div class="vote-detail">
-              <p class="vote-title">{{ item.voteSimpleInfo.title }}</p>
-              <p class="vote-stat">{{ item.voteSimpleInfo.voteNumInfo }}人参与&nbsp;&nbsp;{{ item.voteSimpleInfo.deadlineInfo }}</p>
-            </div>
-            <div class="vote-btn-box">
-              <button class="vote-btn">详情</button>
-            </div>
+        <div class="news-item-body">
+          <div v-if="item.tag" class="news-tag">
+            <i class="iconfont icon-huati"></i>
+            <span>{{ item.tag }}</span>
           </div>
-        </div>
-      </div>
-      <div v-if="item.quotedHappening" class="news-item-body" :class="{'news-reference':true}">
-        <div class="refer-author-box">
-          <div class="author-info">
-            <img :src="item.quotedHappening.avatarUrl" alt="头像">
-            <span class="author-username">{{ item.quotedHappening.username }}</span>
-            <span class="refer-text">投稿了文章</span>
-          </div>
-        </div>
-        <div v-if="item.quotedHappening.tag" class="news-tag">
-          <i class="iconfont icon-huati"></i>
-          <span>{{ item.quotedHappening.tag }}</span>
-        </div>
-        <div class="news-title">{{ item.quotedHappening.title }}</div>
-        <div class="news-text-content">{{ item.quotedHappening.content }}</div>
-        <div v-if="item.quotedHappening.imgUrlList" class="news-album">
-          <div class="news-album-preview grid">
-            <div v-for="(item,index) in item.quotedHappening.imgUrlList" :key="index" class="news-album-preview-picture">
-              <img :src="item" alt="图片">
-            </div>
-          </div>
-        </div>
-        <div v-if="false" class="news-video-card">
-          <a href="javascript:;" class="news-video-box">
-            <div class="video-box-header">
-              <video controls src="/imgs/video.mp4"></video>
-            </div>
-            <div class="video-box-body">
-              <div class="video-title">vhosnvonvosnovl</div>
-              <div class="video-stat">
-                <div class="video-stat-item">
-                  <i class="iconfont icon-shipin"></i>
-                  22
-                </div>
-                <div class="video-stat-item">
-                  <i class="iconfont icon-icon"></i>
-                  11
-                </div>
+          <div class="news-title">{{ item.title }}</div>
+          <div class="news-text-content" v-html="item.content"></div>
+          <div v-if="item.imgUrlList" class="news-album">
+            <div class="news-album-preview grid">
+              <div v-for="(item, index) in item.imgUrlList" :key="index" class="news-album-preview-picture">
+                <img :src="item" alt="图片">
               </div>
             </div>
-          </a>
-        </div>
-        <div v-if="item.quotedHappening.bookLiveInfo" class="news-book-lives">
-          <div class="lives-detail">
-            <p class="lives-title">直播预约：{{item.quotedHappening.bookLiveInfo.title}}</p>
-            <p class="lives-stat">
-              <span class="lives-time">{{ item.quotedHappening.bookLiveInfo.liveTimeInfo }} 直播</span>
-              <span class="book-num">{{item.quotedHappening.bookLiveInfo.bookNumInfo}}人预约</span>
-            </p>
           </div>
-          <div class="lives-btn-box">
-            <div v-if="username === item.quotedHappening.bookLiveInfo.anchorName" class="revoke-btn-box">
-              <button v-if="true" @click="revokeBookLive" class="book-lives-btn revoke-btn">撤销</button>
-              <button v-else @click="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
-            </div>
-            <div v-else class="book-btn-box">
-              <button v-if="item.quotedHappening.bookLiveInfo.booked" @click="bookLive" class="book-lives-btn book-btn">
-                <span><i class="iconfont icon-icon-tixing"></i>预约</span>
-              </button>
-              <button v-else @click="cancelBookLive" class="book-lives-btn booked-btn">已预约</button>
-            </div>
-          </div>
-        </div>
-        <div v-if="item.quotedHappening.voteSimpleInfo" class="news-vote">
-          <div @click="handleShowVoteModal(item.quotedHappening.voteSimpleInfo.voteId)" class="news-vote-card">
-            <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
-            <div class="vote-detail">
-              <p class="vote-title">{{item.quotedHappening.voteSimpleInfo.title}}</p>
-              <p class="vote-stat">{{item.quotedHappening.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ item.quotedHappening.voteSimpleInfo.deadlineInfo }}</p>
-            </div>
-            <div class="vote-btn-box">
-              <button class="vote-btn">详情</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="news-item-footer">
-        <div @click="showForwardInput(index,item.showForward)" class="footer-item news-zhuanfa" :class="{'highlight':item.showForward}">
-          <i class="iconfont icon-zhuanfa"></i>
-          {{ !item.likeInfo ? '转发' : item.likeInfo}}
-        </div>
-        <div class="footer-item item-comment">
-          <i class="iconfont icon-pinglun"></i>
-          {{ !item.commentInfo ? '评论' : item.commentInfo }}
-        </div>
-        <div class="footer-item news-like">
-          <i class="iconfont icon-dianzan"></i>
-          {{ !item.likeInfo ? '点赞' : item.likeInfo}}
-        </div>
-      </div>
-      <div v-show="item.showForward" class="item-forward-box">
-        <div class="forward-body">
-          <div class="avatar-box">
-            <img :src="avatarUrl" alt="头像">
-          </div>
-          <div class="forward-input-box">
-            <bs-tag-select @getSelectTagId="changeForwardTagId(index,$event)"></bs-tag-select>
-            <div class="forward-input">
-              <div 
-                :ref="el => getMineRef(el,index)"
-                contenteditable="true"
-                :class="{'empty-input':!contentNumList[index]}"
-                placeholder="有什么想说的呢"
-                @click="handleContentBoxClick"
-                tabindex="0"
-                @input="changePubContent($event,index,showAtSelect,mineRefList,contentNumList)"
-                @blur="handleContentBlur(index,showAtSelect,focusNode,focusOffset,chatInputOffset)"
-              >
+          <div v-if="false" class="news-video-card">
+            <a href="javascript:;" class="news-video-box">
+              <div class="video-box-header">
+                <video controls src="/imgs/video.mp4"></video>
               </div>
-              <bs-at-ul v-if="showAtSelect[index]" contenteditable="false" :atSelectPosition="atSelectPosition">
-                <bs-at-li 
-                  v-for="(item,index) in followerList"
-                  :key="index"
-                  :avatarUrl="item.avatarUrl"
-                  :username="item.username"
-                  :fansNum="item.fanNumInfo"
-                  @selectAtUser="selectAtUser"
+              <div class="video-box-body">
+                <div class="video-title">vhosnvonvosnovl</div>
+                <div class="video-stat">
+                  <div class="video-stat-item">
+                    <i class="iconfont icon-shipin"></i>
+                    22
+                  </div>
+                  <div class="video-stat-item">
+                    <i class="iconfont icon-icon"></i>
+                    11
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+          <div v-if="item.bookLiveInfo" class="news-book-lives">
+            <div class="lives-detail">
+              <p class="lives-title">直播预约：{{ item.bookLiveInfo.title }}</p>
+              <p class="lives-stat">
+                <span class="lives-time">{{ item.bookLiveInfo.liveTimeInfo }} 直播</span>
+                <span class="book-num">{{ item.bookLiveInfo.bookNumInfo }}人预约</span>
+              </p>
+            </div>
+            <div class="lives-btn-box">
+              <div v-if="username === item.username" class="revoke-btn-box">
+                <button v-if="!item.bookLiveInfo.canceled" @click="revokeBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn revoke-btn">撤销</button>
+                <button v-else @click="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
+              </div>
+              <div v-else class="book-btn-box">
+                <button  v-if="item.bookLiveInfo.booked" @click="bookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn book-btn">
+                  <span><i class="iconfont icon-icon-tixing"></i>预约</span>
+                </button>
+                <button v-else @click="cancelBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn booked-btn">已预约</button>
+              </div>
+            </div>
+          </div>
+          <div v-if="item.voteSimpleInfo" class="news-vote">
+            <div @click="handleShowVoteModal(item.voteSimpleInfo.voteId)" class="news-vote-card">
+              <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
+              <div class="vote-detail">
+                <p class="vote-title">{{ item.voteSimpleInfo.title }}</p>
+                <p class="vote-stat">{{ item.voteSimpleInfo.voteNumInfo }}人参与&nbsp;&nbsp;{{ item.voteSimpleInfo.deadlineInfo }}</p>
+              </div>
+              <div class="vote-btn-box">
+                <button class="vote-btn">详情</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-if="item.quotedHappening" class="news-item-body" :class="{'news-reference':true}">
+          <div class="refer-author-box">
+            <div class="author-info">
+              <img :src="item.quotedHappening.avatarUrl" alt="头像">
+              <span class="author-username">{{ item.quotedHappening.username }}</span>
+              <span class="refer-text">投稿了文章</span>
+            </div>
+          </div>
+          <div v-if="item.quotedHappening.tag" class="news-tag">
+            <i class="iconfont icon-huati"></i>
+            <span>{{ item.quotedHappening.tag }}</span>
+          </div>
+          <div class="news-title">{{ item.quotedHappening.title }}</div>
+          <div class="news-text-content">{{ item.quotedHappening.content }}</div>
+          <div v-if="item.quotedHappening.imgUrlList" class="news-album">
+            <div class="news-album-preview grid">
+              <div v-for="(item,index) in item.quotedHappening.imgUrlList" :key="index" class="news-album-preview-picture">
+                <img :src="item" alt="图片">
+              </div>
+            </div>
+          </div>
+          <div v-if="false" class="news-video-card">
+            <a href="javascript:;" class="news-video-box">
+              <div class="video-box-header">
+                <video controls src="/imgs/video.mp4"></video>
+              </div>
+              <div class="video-box-body">
+                <div class="video-title">vhosnvonvosnovl</div>
+                <div class="video-stat">
+                  <div class="video-stat-item">
+                    <i class="iconfont icon-shipin"></i>
+                    22
+                  </div>
+                  <div class="video-stat-item">
+                    <i class="iconfont icon-icon"></i>
+                    11
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+          <div v-if="item.quotedHappening.bookLiveInfo" class="news-book-lives">
+            <div class="lives-detail">
+              <p class="lives-title">直播预约：{{item.quotedHappening.bookLiveInfo.title}}</p>
+              <p class="lives-stat">
+                <span class="lives-time">{{ item.quotedHappening.bookLiveInfo.liveTimeInfo }} 直播</span>
+                <span class="book-num">{{item.quotedHappening.bookLiveInfo.bookNumInfo}}人预约</span>
+              </p>
+            </div>
+            <div class="lives-btn-box">
+              <div v-if="username === item.quotedHappening.bookLiveInfo.anchorName" class="revoke-btn-box">
+                <button v-if="true" @click="revokeBookLive" class="book-lives-btn revoke-btn">撤销</button>
+                <button v-else @click="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
+              </div>
+              <div v-else class="book-btn-box">
+                <button v-if="item.quotedHappening.bookLiveInfo.booked" @click="bookLive" class="book-lives-btn book-btn">
+                  <span><i class="iconfont icon-icon-tixing"></i>预约</span>
+                </button>
+                <button v-else @click="cancelBookLive" class="book-lives-btn booked-btn">已预约</button>
+              </div>
+            </div>
+          </div>
+          <div v-if="item.quotedHappening.voteSimpleInfo" class="news-vote">
+            <div @click="handleShowVoteModal(item.quotedHappening.voteSimpleInfo.voteId)" class="news-vote-card">
+              <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
+              <div class="vote-detail">
+                <p class="vote-title">{{item.quotedHappening.voteSimpleInfo.title}}</p>
+                <p class="vote-stat">{{item.quotedHappening.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ item.quotedHappening.voteSimpleInfo.deadlineInfo }}</p>
+              </div>
+              <div class="vote-btn-box">
+                <button class="vote-btn">详情</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="news-item-footer">
+          <div @click="showForwardInput(index,item.showForward)" class="footer-item news-zhuanfa" :class="{'highlight':item.showForward}">
+            <i class="iconfont icon-zhuanfa"></i>
+            {{ !item.forwardNumInfo ? '转发' : item.forwardNumInfo}}
+          </div>
+          <div class="footer-item item-comment">
+            <i class="iconfont icon-pinglun"></i>
+            {{ !item.commentNumInfo ? '评论' : item.commentNumInfo }}
+          </div>
+          <div @click="likeNews(item.id, item.liked, index)" class="footer-item news-like" :style="{color:item.liked ? '#3280ef' : 'inherit'}">
+            <i class="iconfont icon-dianzan"></i>
+            {{ !item.likeNumInfo ? '点赞' : item.likeNumInfo}}
+          </div>
+        </div>
+        <div v-show="item.showForward" class="item-forward-box">
+          <div class="forward-body">
+            <div class="avatar-box">
+              <img :src="avatarUrl" alt="头像">
+            </div>
+            <div class="forward-input-box">
+              <bs-tag-select @getSelectTagId="changeForwardTagId(index,$event)"></bs-tag-select>
+              <div class="forward-input">
+                <div 
+                  :ref="el => getMineRef(el,index)"
+                  contenteditable="true"
+                  :class="{'empty-input':!contentNumList[index]}"
+                  placeholder="有什么想说的呢"
+                  @click="handleContentBoxClick"
+                  tabindex="0"
+                  @input="changePubContent($event,index,showAtSelect,mineRefList,contentNumList)"
+                  @blur="handleContentBlur(index,showAtSelect,focusNode,focusOffset,chatInputOffset)"
                 >
-                </bs-at-li>
-              </bs-at-ul>
+                </div>
+                <bs-at-ul v-if="showAtSelect[index]" contenteditable="false" :atSelectPosition="atSelectPosition">
+                  <bs-at-li 
+                    v-for="(item,index) in followerList"
+                    :key="index"
+                    :avatarUrl="item.avatarUrl"
+                    :username="item.username"
+                    :fansNum="item.fanNumInfo"
+                    @selectAtUser="selectAtUser"
+                  >
+                  </bs-at-li>
+                </bs-at-ul>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="forward-footer">
-          <div class="emoji-btn" tabindex="1" @blur="handleEmojiBoxBlur(index)">
-            <i @click="showEmojiBoxForward(index,item.showEmojiBox)" :class="{'active':item.showEmojiBox}" class="iconfont icon-biaoqing"></i>
-            <div v-if="item.showEmojiBox" class="emoji-box">
-              <bs-emoji @insertEmoji="insertEmojiForward" :emojiUrlList="emojiUrlList"></bs-emoji>
+          <div class="forward-footer">
+            <div class="emoji-btn" tabindex="1" @blur="handleEmojiBoxBlur(index)">
+              <i @click="showEmojiBoxForward(index,item.showEmojiBox)" :class="{'active':item.showEmojiBox}" class="iconfont icon-biaoqing"></i>
+              <div v-if="item.showEmojiBox" class="emoji-box">
+                <bs-emoji @insertEmoji="insertEmojiForward" :emojiUrlList="emojiUrlList"></bs-emoji>
+              </div>
             </div>
-          </div>
-          <div class="wrapper">
-            <span class="stat">{{ 300-contentNumList[index] }}</span>
-            <button @click="forwardNews(index)" class="forward-btn">转发</button>
+            <div class="wrapper">
+              <span class="stat">{{ 300-contentNumList[index] }}</span>
+              <button @click="forwardNews(index)" class="forward-btn">转发</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
   <div class="load-more-news"
-    :v-infinite-scroll="loadMoreNews" 
+    v-infinite-scroll="loadMoreNews" 
     :infinite-scroll-disabled="busy" 
     infinite-scroll-distance="50"
   >
@@ -1053,11 +1104,12 @@
       .news-item-footer {
         @include flex();
         height: 50px;
-        padding-right: 80px;
+        padding-right: 50px;
         box-sizing: border-box;
         color: $colorD;
         font-size: $fontJ;
         .footer-item {
+          min-width: 100px;
           cursor: pointer;
           &:hover {
             color: $colorM;
@@ -1156,5 +1208,14 @@
         }
       }
     }
+  }
+  .load-more-news {
+    text-align: center;
+  }
+  .prompt {
+    color: $colorD;
+    text-align: center;
+    padding: 8px 0;
+    font-size: $fontJ;
   }
 </style>

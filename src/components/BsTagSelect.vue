@@ -1,88 +1,81 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
+  import { ref } from 'vue';
   import {getTagListApi} from '@/api/news'
+  import { debounce } from '../hooks/performance';
 
   const emit = defineEmits(['getSelectTagId'])
 
   const tagList = ref([])
   const pageNum = ref(1)
   const pageSize = ref(10)
-  onMounted(async () => {
-    const tagRes = await getTagListApi({
-      pageNum:pageNum.value,
-      pageSize:pageSize.value
-    })
-    tagList.value = tagRes.records
-    // tagList.value = [
-    //   {
-    //     "id": 98,
-    //     "viewNumInfo": "21",
-    //     "discussNumInfo": "93",
-    //     "content": "laboris anim pariatur"
-    //   },
-    //   {
-    //     "id": 59,
-    //     "viewNumInfo": "97",
-    //     "discussNumInfo": "65",
-    //     "content": "laboris irure ut dolor nulla"
-    //   },
-    //   {
-    //     "id": 59,
-    //     "viewNumInfo": "97",
-    //     "discussNumInfo": "65",
-    //     "content": "laboris irure ut dolor nulla"
-    //   },
-    //   {
-    //     "id": 59,
-    //     "viewNumInfo": "97",
-    //     "discussNumInfo": "65",
-    //     "content": "laboris irure ut dolor nulla"
-    //   },
-    //   {
-    //     "id": 59,
-    //     "viewNumInfo": "97",
-    //     "discussNumInfo": "65",
-    //     "content": "laboris irure ut dolor nulla"
-    //   },
-    //   {
-    //     "id": 59,
-    //     "viewNumInfo": "97",
-    //     "discussNumInfo": "65",
-    //     "content": "laboris irure ut dolor nulla"
-    //   },
-    //   {
-    //     "id": 59,
-    //     "viewNumInfo": "97",
-    //     "discussNumInfo": "65",
-    //     "content": "laboris irure ut dolor nulla"
-    //   },
-    //   {
-    //     "id": 59,
-    //     "viewNumInfo": "97",
-    //     "discussNumInfo": "65",
-    //     "content": "laboris irure ut dolor nulla"
-    //   },
-    //   {
-    //     "id": 59,
-    //     "viewNumInfo": "97",
-    //     "discussNumInfo": "65",
-    //     "content": "laboris irure ut dolor nulla"
-    //   },
-    //   {
-    //     "id": 59,
-    //     "viewNumInfo": "97",
-    //     "discussNumInfo": "65",
-    //     "content": "laboris irure ut dolor nulla"
-    //   },
-    // ]
-  })
+  // tagList.value = [
+  //   {
+  //     "id": 98,
+  //     "viewNumInfo": "21",
+  //     "discussNumInfo": "93",
+  //     "content": "laboris anim pariatur"
+  //   },
+  //   {
+  //     "id": 59,
+  //     "viewNumInfo": "97",
+  //     "discussNumInfo": "65",
+  //     "content": "laboris irure ut dolor nulla"
+  //   },
+  //   {
+  //     "id": 59,
+  //     "viewNumInfo": "97",
+  //     "discussNumInfo": "65",
+  //     "content": "laboris irure ut dolor nulla"
+  //   },
+  //   {
+  //     "id": 59,
+  //     "viewNumInfo": "97",
+  //     "discussNumInfo": "65",
+  //     "content": "laboris irure ut dolor nulla"
+  //   },
+  //   {
+  //     "id": 59,
+  //     "viewNumInfo": "97",
+  //     "discussNumInfo": "65",
+  //     "content": "laboris irure ut dolor nulla"
+  //   },
+  //   {
+  //     "id": 59,
+  //     "viewNumInfo": "97",
+  //     "discussNumInfo": "65",
+  //     "content": "laboris irure ut dolor nulla"
+  //   },
+  //   {
+  //     "id": 59,
+  //     "viewNumInfo": "97",
+  //     "discussNumInfo": "65",
+  //     "content": "laboris irure ut dolor nulla"
+  //   },
+  //   {
+  //     "id": 59,
+  //     "viewNumInfo": "97",
+  //     "discussNumInfo": "65",
+  //     "content": "laboris irure ut dolor nulla"
+  //   },
+  //   {
+  //     "id": 59,
+  //     "viewNumInfo": "97",
+  //     "discussNumInfo": "65",
+  //     "content": "laboris irure ut dolor nulla"
+  //   },
+  //   {
+  //     "id": 59,
+  //     "viewNumInfo": "97",
+  //     "discussNumInfo": "65",
+  //     "content": "laboris irure ut dolor nulla"
+  //   },
+  // ]
   const showTagCol = ref(false)
   const tagLoading = ref(true)
   const selectTagName = ref('')
   const tagSelected = ref(false)
   async function handleTagCol() {
     showTagCol.value = true
-    emit('getTagList')
     tagLoading.value = false
   }
   function handleTagBlur() {
@@ -103,19 +96,33 @@
   /* 滚动加载 */
   const busy = ref(false)
   const loadingTag = ref(false)
+  const isArriveTotal = ref(false)
   function loadMoreTag() {
+    if(isArriveTotal.value) return
     busy.value = true
     loadingTag.value = true
     setTimeout(async () => {
       const tagRes = await getTagListApi({
-        pageNum:++pageNum.value,
-        pageSize:pageSize.value
+        pageNum:pageNum.value++,
+        pageSize:pageSize.value,
+        keyword:tagKeyWord.value
       })
-      tagList.value = tagList.value.concat(tagRes.records)
+      tagList.value.push(...tagRes.records)
+      if(tagRes.total === tagList.value.length) isArriveTotal.value = true
       busy.value = false
       loadingTag.value = false
-    }, 1000);
+    }, 500);
   }
+  const tagKeyWord = ref('')
+  const searchTag = debounce(async () => {
+    pageNum.value = 1
+    const tagRes = await getTagListApi({
+      pageNum:pageNum.value,
+      pageSize:pageSize.value,
+      keyword:tagKeyWord.value
+    })
+    tagList.value = tagRes.records
+  })
 </script>
 
 <template>
@@ -127,7 +134,7 @@
           <span v-if="!showTagCol" @click="handleTagCol">{{ selectTagName ? selectTagName : '选择标签' }}</span>
           <span v-if="tagSelected && !showTagCol" @click="deleteTag" class="delete-tag-btn"><i class="iconfont icon-cuowu"></i></span>
           <i v-if="showTagCol" class="iconfont icon-sousuo"></i>
-          <input v-if="showTagCol" @blur="handleTagBlur" type="text" placeholder="搜索标签">
+          <input v-if="showTagCol" v-model="tagKeyWord" @input="searchTag" @blur="handleTagBlur" type="text" placeholder="搜索标签">
         </label>
         <div v-if="showTagCol" v-loading="tagLoading" class="tag-search-result">
           <div v-if="!tagLoading" class="tag-search-list">
@@ -141,8 +148,9 @@
               :infinite-scroll-disabled="busy" 
               infinite-scroll-distance="50"
             >
-              <img src="/imgs/loading-svg/loading-spinning-bubbles.svg" v-show="loadingTag">
+              <img src="/imgs/loading-svg/loading-spinning-bubbles.svg" v-show="!isArriveTotal && loadingTag">
             </div>
+            <div v-if="isArriveTotal" class="prompt">已经到最底啦~</div>
           </div>
           <div v-if="false" class="tag-search-empty">还没有相关话题~</div>
         </div>
@@ -242,6 +250,12 @@
                 width: 30px;
                 height: 30px;
               }
+            }
+            .prompt {
+              color: $colorD;
+              text-align: center;
+              padding: 8px 0;
+              font-size: $fontJ;
             }
           }
           .tag-search-empty {
