@@ -14,6 +14,7 @@ export function updateUserInfo() {
   })
 }
 export function deleteUserInfo() {
+  userStore.token = ''
   userStore.username = ''
   userStore.avatarUrl = ''
   userStore.followerNumInfo = ''

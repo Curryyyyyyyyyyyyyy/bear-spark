@@ -9,7 +9,8 @@ const useUser = defineStore('user', {
     fanNumInfo:'',
     happeningNumInfo:'',
     meritNumInfo:'',
-    coinNumInfo:''
+    coinNumInfo:'',
+    expires:0
   }),
   getters:{},
   actions:{},
