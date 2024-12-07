@@ -13,7 +13,7 @@
   //     "id": 98,
   //     "viewNumInfo": "21",
   //     "discussNumInfo": "93",
-  //     "content": "laboris anim pariatur"
+  //     "content": "laboris <em>anim</em> pariatur"
   //   },
   //   {
   //     "id": 59,
@@ -140,7 +140,7 @@
           <div v-if="!tagLoading" class="tag-search-list">
             <div v-for="(item,index) in tagList" :key="index" @click="handleSelectTag(item.content, item.id)" class="tag-search-item">
               <i class="iconfont icon-huati"></i>
-              <span class="tag-search-item-title">{{ item.content }}</span>
+              <span class="tag-search-item-title" v-html="item.content"></span>
               <p class="tag-search-item-desc">{{item.viewNumInfo}}浏览&middot;{{item.discussNumInfo}}讨论</p>
             </div>
             <div class="load-more-tag"
@@ -236,6 +236,10 @@
               }
               .tag-search-item-title {
                 font-size: $fontJ;
+                em {
+                  color: $colorM;
+                  font-style: normal
+                }
               }
               .tag-search-item-desc {
                 margin-left: 20px;

@@ -77,10 +77,11 @@
     if(event.data === '@') {
       setTimeout(() => {
         showAtSelect.value = true
-        // const {left, top} = getCursorPosition()
-        // atSelectPosition.left = left + 'px'
-        // atSelectPosition.top = top + 'px'
-        // console.log(left,top)
+        const {left, top} = getCursorPosition()
+        atSelectPosition.left = left + 'px'
+        atSelectPosition.top = top + 20 + 'px'
+        console.log("left:",left)
+        console.log("top:",top)
       }, 200);
     } else {
       showAtSelect.value = false
@@ -95,7 +96,7 @@
   }
   function handleContentBlur() {
     setTimeout(() => {
-      showAtSelect.value = false
+      // showAtSelect.value = false
     }, 200);
     if (window.getSelection) {
       let sel = window.getSelection();
@@ -116,14 +117,14 @@
     left:"0px",
     top:"0px",
   })
-  // function getCursorPosition() {
-  //   let selection = document.getSelection()
-  //   let range = new Range()
-  //   range.selectNode(selection.focusNode)
-  //   range.setStart(selection.focusNode, selection.focusOffset)
-  //   const {left, top} = range.getBoundingClientRect()
-  //   return {left, top}
-  // }
+  function getCursorPosition() {
+    let selection = document.getSelection()
+    let range = new Range()
+    range.selectNode(selection.focusNode)
+    range.setStart(selection.focusNode, selection.focusOffset)
+    const {left, top} = range.getBoundingClientRect()
+    return {left, top}
+  }
   function handleClickAt() {
     if(contentNum.value + 1 > 300) return ElMessage.error('字数已达上限')
     contentNum.value++
@@ -248,6 +249,7 @@
       position: absolute;
       top: 0px;
       color: $colorD;
+      cursor: text;
     }
   }
 </style>

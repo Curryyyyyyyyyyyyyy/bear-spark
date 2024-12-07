@@ -40,3 +40,7 @@ export const modifyPwdApi = (phone, password) => {
 export const getUserInfoApi = () => {
   return request.get('/info/user')
 }
+/* 获取用户关注列表 */
+export const getFollowerListApi = () => {
+  return request.get('/happening/followerList')
+}

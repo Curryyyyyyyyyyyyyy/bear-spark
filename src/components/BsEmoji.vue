@@ -1,15 +1,20 @@
 <script setup>
-  // import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
+  import {getEmojiListApi} from '@/api/emoji.js'
   const emit = defineEmits(['insertEmoji'])
-  defineProps(['emojiUrlList'])
-  // const emojiUrlList = [
-  //   '/imgs/default-avatar.png',
-  //   '/imgs/default-avatar.png',
-  //   '/imgs/default-avatar.png',
-  //   '/imgs/default-avatar.png',
-  //   '/imgs/default-avatar.png',
-  //   '/imgs/default-avatar.png',
-  // ]
+  const emojiUrlList = ref([])
+  onMounted(async () => {
+    // const emojiListRes = await getEmojiListApi()
+    // emojiUrlList.value = emojiListRes.emojiUrlList
+    emojiUrlList.value = [
+      '/imgs/default-avatar.png',
+      '/imgs/default-avatar.png',
+      '/imgs/default-avatar.png',
+      '/imgs/default-avatar.png',
+      '/imgs/default-avatar.png',
+      '/imgs/default-avatar.png',
+    ]
+  })
   function insertEmoji(event) {
     let emojiUrl
     if(event.target.tagName === 'LI') {

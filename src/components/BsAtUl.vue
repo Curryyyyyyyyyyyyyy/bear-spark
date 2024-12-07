@@ -1,12 +1,9 @@
 <script setup>
-  // import { toRefs } from 'vue';
-
-  // const props = defineProps(['atSelectPosition'])
-  // const { atSelectPosition } = toRefs(props);
+  defineProps(['atSelectPosition'])
 </script>
 
 <template>
-  <div class="bs-at-ul">
+  <div class="bs-at-ul" :style="{left:atSelectPosition.left,top:atSelectPosition.top}">
     <div class="bs-at-header">
       <span>选择或输入你想@的人</span>
     </div>
@@ -21,7 +18,7 @@
   @use '@/assets/sass/config.scss' as *;
   .bs-at-ul {
     z-index: 10;
-    position: absolute;
+    position: fixed;
     // bottom: -180px;
     width: 200px;
     border: 1px solid #e3e5e7;

@@ -6,14 +6,15 @@
   import NewsAsideBox from './NewsAsideBox.vue';
   import NewsList from '@/components/NewsList.vue'
   import {useRouter} from 'vue-router'
-  import {getNewsPrepareApi} from '@/api/news.js'
+  import {getNewsPrepareApi,getNewsBgApi} from '@/api/news.js'
+  import {getFollowerListApi} from '@/api/user.js'
+  import { debounce } from '@/hooks/performance';
 
   /* Router */
   const router = useRouter()
   //#region Mounted
   const recentTagList = ref([])
   const followerList = ref([])
-  const emojiUrlList = ref([])
   const backgroundUrl = ref('')
   const sideBarUrl = ref('')
   // recentTagList.value = [
@@ -68,23 +69,17 @@
     {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:777},
     {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:888},
   ]
-  // emojiUrlList.value = [
-  //   '/imgs/default-avatar.png',
-  //   '/imgs/default-avatar.png',
-  //   '/imgs/default-avatar.png',
-  //   '/imgs/default-avatar.png',
-  //   '/imgs/default-avatar.png',
-  // ]
   // sideBarUrl.value = '/imgs/slide-bar.jpg'
   // backgroundUrl.value = '/imgs/news-background.png'
   onMounted(async () => {
     /* 获取关注的列表、表情包列表、热门标签列表 */
     const res = await getNewsPrepareApi()
     recentTagList.value = res.recentTagList
-    followerList.value = res.followerList
-    emojiUrlList.value = res.emojiUrlList
-    backgroundUrl.value = res.backgroundUrl
     sideBarUrl.value = res.sideBarUrl
+    const followerListRes = await getFollowerListApi() 
+    followerList.value = followerListRes.followerList
+    const backgroundUrlRes = await getNewsBgApi()
+    backgroundUrl.value = backgroundUrlRes.bgUrl
   })
   //#endregion
   //#region up列表
@@ -139,6 +134,14 @@
     }
   })
   //#endregion
+  const showBackToTop = ref(false)
+  window.addEventListener('scroll', debounce(() => {
+    if(document.documentElement.scrollTop > 700) showBackToTop.value = true
+    else showBackToTop.value = false
+  }))
+  function backToTop() {
+    document.documentElement.scrollTop = 0
+  }
 </script>
 
 <template>
@@ -158,7 +161,7 @@
     <div class="container" :class="{'container-small':smallSize}">
       <news-user-box></news-user-box>
       <div class="body">
-        <news-publish-box ref="publishBox" :emojiUrlList="emojiUrlList"></news-publish-box>
+        <news-publish-box ref="publishBox"></news-publish-box>
         <div class="bs-up-list">
           <div class="shim"></div>
           <div @click="changeUpListScroll(-400)" class="left-btn"><i class="iconfont icon-zuojiantou"></i></div>
@@ -186,10 +189,14 @@
           </div>
           <div ref="highlight" class="news-tabs-highlight"></div>
         </div>
-        <NewsList ref="newsListRef" :followerList="followerList" :emojiUrlList="emojiUrlList"></NewsList>
+        <NewsList ref="newsListRef" :followerList="followerList"></NewsList>
       </div>
       <news-aside-box :sideBarUrl="sideBarUrl" :recentTagList="recentTagList"></news-aside-box>
     </div>
+    <button v-if="showBackToTop" @click="backToTop" class="back-to-top">
+      <i class="iconfont icon-huidingbu"></i>
+      <div>顶部</div>
+    </button>
   </div>
 </template>
 
@@ -198,10 +205,8 @@
   @use '@/assets/sass/mixin.scss' as *;
   .header {
     z-index: 100;
-    position: fixed;
-    top: 0px;
-    left: 0;
-    right: 0;
+    position: sticky;
+    top: 0;
     height: 64px;
     padding-bottom: 10px;
     box-sizing: border-box;
@@ -228,7 +233,7 @@
     }
     .container {
       display: flex;
-      padding-top: 74px;
+      margin-top: 10px;
       .body {
         width: 53%;
         margin: 0 10px;
@@ -391,6 +396,26 @@
     }
     .container-small {
       width: 1100px;
+    }
+    .back-to-top {
+      position: fixed;
+      right: 1%;
+      bottom: 15%;
+      width: 40px;
+      height: 40px;
+      padding: 5px;
+      border: none;
+      border-radius: 6px;
+      background-color: $colorG;
+      font-size: $fontK;
+      font-weight: normal;
+      cursor: pointer;
+      &:hover {
+        background-color: $colorN;
+      }
+      .iconfont {
+        font-size: 10px;
+      }
     }
   }
 </style>

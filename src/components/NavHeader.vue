@@ -42,17 +42,17 @@
     })
   }
   // 防止刷新显示问题
-  let showWord = ref(true)
+  let pageSmall = ref(false)
   if(window.innerWidth < 1396) {
-    showWord.value = false
+    pageSmall.value = true
   } else {
-    showWord.value = true
+    pageSmall.value = false
   }
   window.addEventListener('resize', ()=> {
     if(window.innerWidth < 1396) {
-      showWord.value = false
+      pageSmall.value = true
     } else {
-      showWord.value = true
+      pageSmall.value = false
     }
   })
 </script>
@@ -69,9 +69,10 @@
         <a class="jump">漫画</a>
         <a class="jump">赛事</a>
         <a class="jump">KPL</a>
-        <a><i class="iconfont icon-xiazai"></i>下载客户端</a>
+        <a v-if="!pageSmall" class="jump">KPL</a>
+        <a v-if="!pageSmall" class="jump">KPL</a>
       </div>
-      <div class="inp" :class="{'inp-small':!showWord}">
+      <div class="inp" :class="{'inp-small':pageSmall}">
         <input name="keyword" type="text" placeholder="尚硅谷">
         <span class="icon-search">
           <i class="iconfont icon-search-1-copy"></i>
@@ -158,32 +159,32 @@
           </div>
         </div>
         <a class="right-item">
-          <i class="iconfont icon-huiyuan jump" :class="{'onlyIcon':!showWord}"></i>
-          <p v-if="showWord">大会员</p>
+          <i class="iconfont icon-huiyuan jump" :class="{'onlyIcon':pageSmall}"></i>
+          <p v-if="!pageSmall">大会员</p>
         </a>
         <a class="right-item">
-          <i class="iconfont icon-xiaoxi jump" :class="{'onlyIcon':!showWord}"></i>
-          <p v-if="showWord">消息</p>
+          <i class="iconfont icon-xiaoxi jump" :class="{'onlyIcon':pageSmall}"></i>
+          <p v-if="!pageSmall">消息</p>
         </a>
-        <a class="right-item" href="/#/news" target="_blank">
-          <i class="iconfont icon-dongtai jump" :class="{'onlyIcon':!showWord}"></i>
-          <p v-if="showWord">动态</p>
-        </a>
-        <a class="right-item">
-          <i class="iconfont icon-shoucang jump" :class="{'onlyIcon':!showWord}"></i>
-          <p v-if="showWord">收藏</p>
+        <a class="right-item" href="/#/news_index" target="_blank">
+          <i class="iconfont icon-dongtai jump" :class="{'onlyIcon':pageSmall}"></i>
+          <p v-if="!pageSmall">动态</p>
         </a>
         <a class="right-item">
-          <i class="iconfont icon-lishi jump" :class="{'onlyIcon':!showWord}"></i>
-          <p v-if="showWord">历史</p>
+          <i class="iconfont icon-shoucang jump" :class="{'onlyIcon':pageSmall}"></i>
+          <p v-if="!pageSmall">收藏</p>
         </a>
         <a class="right-item">
-          <i class="iconfont icon-chuangzuozhongxin jump" :class="{'onlyIcon':!showWord}"></i>
-          <p v-if="showWord">创作中心</p>
+          <i class="iconfont icon-lishi jump" :class="{'onlyIcon':pageSmall}"></i>
+          <p v-if="!pageSmall">历史</p>
+        </a>
+        <a class="right-item">
+          <i class="iconfont icon-chuangzuozhongxin jump" :class="{'onlyIcon':pageSmall}"></i>
+          <p v-if="!pageSmall">创作中心</p>
         </a>
         <div class="submit right-item">
-          <i class="iconfont icon-shangchuan" :class="{'onlyIcon':!showWord}"></i>
-          <span v-if="showWord">投稿</span>
+          <i class="iconfont icon-shangchuan" :class="{'onlyIcon':pageSmall}"></i>
+          <span v-if="!pageSmall">投稿</span>
         </div>
       </div>
     </div>
@@ -215,7 +216,6 @@
         vertical-align: middle;
       }
       .nav-left {
-        flex: 1.3;
         height: 40px;
         line-height: 40px;
         .logo {
@@ -256,8 +256,7 @@
       }
       .inp {
         position: relative;
-        flex: 1;
-        width: 350px;
+        width: 420px;
         // height:34px;
         padding: 0 5px;
         box-sizing: border-box;
@@ -300,14 +299,14 @@
         }
       }
       .inp-small {
-        flex: 0.7 !important;
+        width: 300px;
       }
       .nav-right {
-        flex: 1;
         display: flex;
         justify-content: right;
         .right-item {
-          margin-left: 2.5%;
+          min-width: 25px;
+          margin: 0 7px;
           text-align: center;
           cursor: pointer;
           .iconfont {
@@ -558,7 +557,7 @@
     }
   }
   .jump:hover {
-    animation: jump .3s .07s;
+    animation: jump .4s;
   }
   @keyframes jump {
     0% {
