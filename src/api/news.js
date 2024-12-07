@@ -8,6 +8,10 @@ export const publishNewsApi = (params) => {
 export const getNewsPrepareApi = () => {
   return request.get('/happening/prepare')
 }
+/* 获取背景图 */
+export const getNewsBgApi = () => {
+  return request.get('/happening/bg')
+}
 /* 获取动态列表 */
 export const getNewsListApi = (params) => {
   return request.get('/happening', {
@@ -17,6 +21,12 @@ export const getNewsListApi = (params) => {
 /* 分页获取标签 */
 export const getTagListApi = (params) => {
   return request.get('/tag', {
+    params
+  })
+}
+/* 获取动态详情 */
+export const getNewsDetailApi = (params) => {
+  return request.get('/happening/detail', {
     params
   })
 }
@@ -41,4 +51,8 @@ export const likeNewsApi = (params) => {
 /* 删除动态 */
 export const deleteNewsApi = (params) => {
   return request.delete('/happening',params)
+}
+/* 修改动态 */
+export const modifyNewsApi = (params) => {
+  return request.put('/happening', params)
 }

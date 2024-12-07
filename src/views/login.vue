@@ -21,8 +21,8 @@
   let registerPhoneNum = ref('')
   let registerVEcode = ref('')
   async function register(){
-    if(!regPhone(registerPhoneNum.value)) return alert('请输入正确的手机号')
-    if(!regVEcode(registerVEcode.value)) return alert('请输入正确的验证码')
+    if(!regPhone(registerPhoneNum.value)) return ElMessage.error('请输入正确的手机号')
+    if(!regVEcode(registerVEcode.value)) return ElMessage.error('请输入正确的验证码')
     await verifyVEcodeApi(registerPhoneNum.value,registerVEcode.value)
     registerPhoneNum.value = ''
     registerVEcode.value = ''
@@ -34,8 +34,8 @@
   let phone = ref('')
   let password = ref('')
   async function login(){
-    if(!regPhone(phone.value)) return alert('请输入正确的手机号')
-    if(!regPwd(password.value)) return alert('密码只能由数字、字母、下划线，6~16位')
+    if(!regPhone(phone.value)) return ElMessage.error('请输入正确的手机号')
+    if(!regPwd(password.value)) return ElMessage.error('密码只能由数字、字母、下划线，6~16位')
     const res = await loginApi(phone.value, password.value)
     userStore.token = res.token
     userStore.expires = Date.now()
@@ -79,8 +79,8 @@
   let findPhoneNum = ref('')
   let findVEcode = ref('')
   async function submit() {
-    if(!regPhone(findPhoneNum.value)) return alert('请输入正确的手机号')
-    if(!regVEcode(findVEcode.value)) return alert('请输入正确的验证码')
+    if(!regPhone(findPhoneNum.value)) return ElMessage.error('请输入正确的手机号')
+    if(!regVEcode(findVEcode.value)) return ElMessage.error('请输入正确的验证码')
     findPhoneNum.value = ''
     findVEcode.value = ''
     await verifyVEcodeApi(findPhoneNum.value,findVEcode.value)
@@ -92,8 +92,8 @@
   let newPassword1 = ref('')
   let newPassword2 = ref('')
   async function confirm(isReg){
-    if(newPassword1.value !== newPassword2.value) return alert('密码不一致！')
-    if(!regPwd(newPassword1.value)) return alert('密码只能由数字、字母、下划线，6~16位')
+    if(newPassword1.value !== newPassword2.value) return ElMessage.error('密码不一致！')
+    if(!regPwd(newPassword1.value)) return ElMessage.error('密码只能由数字、字母、下划线，6~16位')
     if(isReg) {
       await registerPwdApi(registerPhoneNum.value,newPassword2.value)
       ElMessage({
@@ -219,6 +219,7 @@
       transform: translate(-50%,-50%);
       font-size: $fontJ;
       overflow: hidden;
+      animation: appear .5s;
       .box-header {
         height: 40px;
         line-height: 40px;
@@ -356,6 +357,13 @@
           background-color: $colorP;
         }
       }
+    }
+  }
+  @keyframes appear {
+    from{
+      opacity: 0;
+    } to {
+      opacity: 1;
     }
   }
 </style>

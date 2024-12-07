@@ -1,6 +1,5 @@
 import { ElMessage } from "element-plus"
 
-
 /* 表情包 */
 export function insertEmoji(emojiUrl,index,contentNum,rangeOfContentBox,mineRefList) {
   if(contentNum[index] + 3 > 300) return ElMessage.error('字数已达上限')
@@ -48,7 +47,7 @@ export function handleContentNum(mineRef) {
   }, 0)
   return textArr.length + textLtCount*3 + htmlLtCount * 3
 }
-export function changePubContent(event,index,showAtSelect,mineRefList,contentNum) {
+export function changePubContent(event,index,showAtSelect,mineRefList,contentNum,atSelectPosition) {
   if(event.target.innerHTML === '<br>') {
     event.target.innerText = ''
   }
@@ -56,6 +55,9 @@ export function changePubContent(event,index,showAtSelect,mineRefList,contentNum
   if(event.data === '@') {
     setTimeout(() => {
       showAtSelect[index] = true
+      const {left, top} = getCursorPosition()
+      atSelectPosition.left = left + 'px'
+      atSelectPosition.top = top + 20 + 'px'
     }, 200);
   } else {
     showAtSelect[index] = false
@@ -67,4 +69,13 @@ export function changePubContent(event,index,showAtSelect,mineRefList,contentNum
     event.target.blur()
   }
   contentNum[index] = handleContentNum(mineRefList[index])
+}
+/* 获取输入时光标位置 */
+export function getCursorPosition() {
+  let selection = document.getSelection()
+  let range = new Range()
+  range.selectNode(selection.focusNode)
+  range.setStart(selection.focusNode, selection.focusOffset)
+  const {left, top} = range.getBoundingClientRect()
+  return {left, top}
 }

@@ -11,9 +11,8 @@
   import {uploadApi} from '@/api/file'
   import useNews from '@/store/news.js'
   import { storeToRefs } from 'pinia';
-import { throttle } from '../../hooks/performance';
+  import { throttle } from '../../hooks/performance';
 
-  defineProps(['emojiUrlList'])
   /* Store */
   const newsStore = useNews()
   const {pictureList} = storeToRefs(newsStore)
@@ -51,7 +50,6 @@ import { throttle } from '../../hooks/performance';
     ElMessage.success('发布成功')
     //#region 清空表单
       newsTitle.value = ''
-      pubTitleNum.value = 0
       richTextInputPub.value.contentDom.innerHTML = ''
       richTextInputPub.value.contentNum = 0
       imgUrlList.value = []
@@ -64,17 +62,6 @@ import { throttle } from '../../hooks/performance';
       voteInfo.value = ''
       //#endregion
   }, 1000) 
-  //#endregion
-  //#region title
-  /* 监听title输入 */
-  const pubTitleNum = ref(0)
-  function changePubTitle(event) {
-    pubTitleNum.value = event.target.value.length
-  }
-  function clearPubTitle() {
-    newsTitle.value = ''
-    pubTitleNum.value = 0
-  }
   //#endregion
   //#region @艾特功能
   const richTextInputPub = ref()
@@ -889,8 +876,8 @@ import { throttle } from '../../hooks/performance';
     <bs-tag-select @getSelectTagId="changePubTagId"></bs-tag-select>
     <div class="publish-input">
       <input name="newsTitle" v-model="newsTitle" @input="changePubTitle" maxlength="20" type="text" class="title" placeholder="标题 (选填，20字内)" autocomplete="off">
-      <i v-if="pubTitleNum" @click="clearPubTitle" class="iconfont icon-cuowu1"></i>
-      <span v-if="pubTitleNum" class="title-num">{{ pubTitleNum }}</span>
+      <i v-if="newsTitle" @click="newsTitle = ''" class="iconfont icon-cuowu1"></i>
+      <span v-if="newsTitle" class="title-num">{{ newsTitle.length }}</span>
       <bs-rich-text-input ref="richTextInputPub" placeholder="有什么想和大家分享的？"></bs-rich-text-input>
     </div>
     <div v-if="showUploadBox" class="pub-picture-list">
@@ -958,10 +945,6 @@ import { throttle } from '../../hooks/performance';
       <span v-if="newsCommentPermission === 2">开启后，评论都需要经过你的筛选后再向所有用户展示</span>
     </div>
     <div v-if="newsSeePermission === 1" class="only-box">
-      <span class="only-title"><i class="iconfont icon-suo"></i>仅粉丝可见</span>
-      <span class="only-desc">开启后，将不支持分享、商业推广</span>
-    </div>
-    <div v-if="newsSeePermission === 2" class="only-box">
       <span class="only-title"><i class="iconfont icon-suo"></i>仅自己可见</span>
       <span class="only-desc">开启后，将不支持分享、商业推广</span>
     </div>
@@ -970,7 +953,7 @@ import { throttle } from '../../hooks/performance';
         <div class="emoji-btn" ref="emojiBtnDom" tabindex="1" @blur="handleEmojiBoxBlur">
           <i @click="clickEmojiBtn" :class="{'active':showEmojiBoxPub}" class="iconfont icon-biaoqing"></i>
           <div v-if="showEmojiBoxPub" class="emoji-box">
-            <bs-emoji @insertEmoji="insertEmojiPub" :emojiUrlList="emojiUrlList"></bs-emoji>
+            <bs-emoji @insertEmoji="insertEmojiPub"></bs-emoji>
           </div>
         </div>
         <div>
@@ -1014,10 +997,6 @@ import { throttle } from '../../hooks/performance';
               <div @click="newsSeePermission = 1,blurSettingCascader()" :class="{'is-active':newsSeePermission === 1}" class="cascader-options-item">
                 <i class="iconfont icon-suo"></i>
                 <div class="item-label">仅自己可见</div>
-              </div>
-              <div @click="newsSeePermission = 2,blurSettingCascader()" :class="{'is-active':newsSeePermission === 2}" class="cascader-options-item">
-                <i class="iconfont icon-suo"></i>
-                <div class="item-label">仅粉丝可见</div>
               </div>
             </div>
             <div v-if="settingCascader2 === 3" class="cascader-options">

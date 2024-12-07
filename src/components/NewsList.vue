@@ -3,22 +3,63 @@
   import BsTagSelect from '@/components/BsTagSelect.vue';
   import BsVoteModal from '@/components/BsVoteModal.vue'
   import {handleContentBoxClick,changePubContent} from '@/hooks/richTextInput'
-  import { ElMessage } from 'element-plus';
+  import { ElMessage, ElMessageBox } from 'element-plus';
   import { reactive, ref } from 'vue';
   import { useRouter } from 'vue-router';
   import { storeToRefs } from 'pinia';
   import useUser from '@/store/user';
   import {insertEmoji,handleContentNum} from '@/hooks/richTextInput'
-  import {getVoteDetailApi,fowardNewsApi,getNewsListApi} from '@/api/news'
-import { likeNewsApi } from '../api/news';
+  import {getVoteDetailApi,fowardNewsApi,getNewsListApi,deleteNewsApi,likeNewsApi} from '@/api/news'
+  import {revokeBookLiveApi,modBookLiveStateApi} from '@/api/bookLive'
 
   /* Store */
   const userStore = useUser()
   const {username,avatarUrl} = storeToRefs(userStore)
   /* Router */
   const router = useRouter()
-  defineProps(['followerList','emojiUrlList'])
+  defineProps(['followerList'])
 
+  //#region 预约直播
+  function revokeBookLive(bookLiveId,index) {
+    ElMessageBox.confirm(
+      '撤销预约后，将提醒已预约用户',
+      '提示',
+      {
+        confirmButtonText: '撤销预约',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    ).then(async () => {
+      await revokeBookLiveApi({
+        bookLiveId
+      })
+      newsList.value[index].bookLiveInfo.canceled = 1
+      ElMessage({ 
+        type: 'info',
+        message: '已撤销',
+      })
+    })
+  }
+  function cancelRevokeBookLive() {
+    ElMessage.info('该直播预约已撤销')
+  }
+  async function bookLive(bookLiveId,index) {
+    await modBookLiveStateApi({
+      bookLiveId,
+      booked:0
+    })
+    newsList.value[index].bookLiveInfo.booked = 0
+    ElMessage.success('预约成功')
+  }
+  async function cancelBookLive(bookLiveId,index) {
+    await modBookLiveStateApi({
+      bookLiveId,
+      booked:1
+    })
+    newsList.value[index].bookLiveInfo.booked = 1
+    ElMessage.info('已取消预约')
+  }
+  //#endregion
   //#region 投票
   const showVoteModal = ref(false)
   function closeVoteModal() {
@@ -184,7 +225,7 @@ import { likeNewsApi } from '../api/news';
   const busy = ref(false)
   const newsLoading = ref(false)
   const pageNum = ref(1)
-  const pageSize = ref(10)
+  const pageSize = ref(20)
   const isArriveTotal = ref(false)
   function loadMoreNews() {
     if(isArriveTotal.value) return
@@ -209,7 +250,7 @@ import { likeNewsApi } from '../api/news';
         "username": "万超",
         "avatarUrl": "http://dummyimage.com/100x100",
         "title": "现无称点进其原",
-        "content": "",
+        "content": "11",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
         "viewNumInfo": 41,
         "likeNumInfo": 50,
@@ -222,10 +263,33 @@ import { likeNewsApi } from '../api/news';
             "title": "需观反干分取必",
             "voteNumInfo": "43"
         },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
+        "quotedHappening":{
+          "id":1,
+          "username": "万超",
+          "avatarUrl": "http://dummyimage.com/100x100",
+          "title": "现无称点进其原",
+          "content": "",
+          "tag": "pariatur eiusmod aliqua labore reprehenderit",
+          "viewNumInfo": 41,
+          "likeNumInfo": 50,
+          "commentNumInfo": 9,
+          "forwardNumInfo":0,
+          "commentAble": 0,
+          "advanceRelease": 0,
+          "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+          },
+          "imgUrlList": [
+              "http://dummyimage.com/400x400"
+          ],
+          "pubTimeInfo": "1975-04-15 04:31:03"
+          },
+          "imgUrlList": [
+              "http://dummyimage.com/400x400"
+          ],
+          "pubTimeInfo": "1975-04-15 04:31:03"
     },
     {
         "id":2,
@@ -493,12 +557,23 @@ import { likeNewsApi } from '../api/news';
     },
   ]
   /* 删除动态 */
-  async function deleteNewsApi(id,index) {
-    await deleteNewsApi({
-      happeningId:id
+  async function deleteNews(id,index) {
+    ElMessageBox.confirm(
+      '动态删除后将无法恢复，请谨慎操作',
+      '确认删除动态吗？',
+      {
+        confirmButtonText:'确认删除',
+        confirmButtonClass:'confirmButtonClass',
+        cancelButtonText:'取消',
+        type:'error'
+      }
+    ).then(async ()=>{
+      await deleteNewsApi({
+        happeningId:id
+      })
+      newsList.value[index].content = ''
+      ElMessage.info('删除成功')
     })
-    newsList.value[index].content = ''
-    ElMessage.info('删除成功')
   }
   /* 点赞/取消点赞 */
   async function likeNews(id, liked, index) {
@@ -543,7 +618,7 @@ import { likeNewsApi } from '../api/news';
                 <div class="cascader-item">举报</div>
               </div>
               <div v-else class="cascader-list">
-                <div @click="deleteNewsApi(item.id,index)" class="cascader-item">删除</div>
+                <div @click.stop="deleteNews(item.id,index)" class="cascader-item">删除</div>
               </div>
             </div>
           </div>
@@ -553,8 +628,8 @@ import { likeNewsApi } from '../api/news';
             <i class="iconfont icon-huati"></i>
             <span>{{ item.tag }}</span>
           </div>
-          <div class="news-title">{{ item.title }}</div>
-          <div class="news-text-content" v-html="item.content"></div>
+          <div @click="router.push(`/news_detail/${item.id}`)" class="news-title">{{ item.title }}</div>
+          <div @click="router.push(`/news_detail/${item.id}`)" class="news-text-content" v-html="item.content"></div>
           <div v-if="item.imgUrlList" class="news-album">
             <div class="news-album-preview grid">
               <div v-for="(item, index) in item.imgUrlList" :key="index" class="news-album-preview-picture">
@@ -592,19 +667,19 @@ import { likeNewsApi } from '../api/news';
             </div>
             <div class="lives-btn-box">
               <div v-if="username === item.username" class="revoke-btn-box">
-                <button v-if="!item.bookLiveInfo.canceled" @click="revokeBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn revoke-btn">撤销</button>
-                <button v-else @click="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
+                <button v-if="!item.bookLiveInfo.canceled" @click.stop="revokeBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn revoke-btn">撤销</button>
+                <button v-else @click.stop="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
               </div>
               <div v-else class="book-btn-box">
-                <button  v-if="item.bookLiveInfo.booked" @click="bookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn book-btn">
+                <button  v-if="item.bookLiveInfo.booked" @click.stop="bookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn book-btn">
                   <span><i class="iconfont icon-icon-tixing"></i>预约</span>
                 </button>
-                <button v-else @click="cancelBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn booked-btn">已预约</button>
+                <button v-else @click.stop="cancelBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn booked-btn">已预约</button>
               </div>
             </div>
           </div>
           <div v-if="item.voteSimpleInfo" class="news-vote">
-            <div @click="handleShowVoteModal(item.voteSimpleInfo.voteId)" class="news-vote-card">
+            <div @click.stop="handleShowVoteModal(item.voteSimpleInfo.voteId)" class="news-vote-card">
               <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
               <div class="vote-detail">
                 <p class="vote-title">{{ item.voteSimpleInfo.title }}</p>
@@ -617,82 +692,88 @@ import { likeNewsApi } from '../api/news';
           </div>
         </div>
         <div v-if="item.quotedHappening" class="news-item-body" :class="{'news-reference':true}">
-          <div class="refer-author-box">
-            <div class="author-info">
-              <img :src="item.quotedHappening.avatarUrl" alt="头像">
-              <span class="author-username">{{ item.quotedHappening.username }}</span>
-              <span class="refer-text">投稿了文章</span>
-            </div>
-          </div>
-          <div v-if="item.quotedHappening.tag" class="news-tag">
-            <i class="iconfont icon-huati"></i>
-            <span>{{ item.quotedHappening.tag }}</span>
-          </div>
-          <div class="news-title">{{ item.quotedHappening.title }}</div>
-          <div class="news-text-content">{{ item.quotedHappening.content }}</div>
-          <div v-if="item.quotedHappening.imgUrlList" class="news-album">
-            <div class="news-album-preview grid">
-              <div v-for="(item,index) in item.quotedHappening.imgUrlList" :key="index" class="news-album-preview-picture">
-                <img :src="item" alt="图片">
+          <div v-if="item.quotedHappening.content" class="quote-wrapper">
+            <div class="refer-author-box">
+              <div class="author-info">
+                <img :src="item.quotedHappening.avatarUrl" alt="头像">
+                <span class="author-username">{{ item.quotedHappening.username }}</span>
+                <span class="refer-text">投稿了文章</span>
               </div>
             </div>
-          </div>
-          <div v-if="false" class="news-video-card">
-            <a href="javascript:;" class="news-video-box">
-              <div class="video-box-header">
-                <video controls src="/imgs/video.mp4"></video>
-              </div>
-              <div class="video-box-body">
-                <div class="video-title">vhosnvonvosnovl</div>
-                <div class="video-stat">
-                  <div class="video-stat-item">
-                    <i class="iconfont icon-shipin"></i>
-                    22
-                  </div>
-                  <div class="video-stat-item">
-                    <i class="iconfont icon-icon"></i>
-                    11
-                  </div>
+            <div v-if="item.quotedHappening.tag" class="news-tag">
+              <i class="iconfont icon-huati"></i>
+              <span>{{ item.quotedHappening.tag }}</span>
+            </div>
+            <div class="news-title">{{ item.quotedHappening.title }}</div>
+            <div class="news-text-content">{{ item.quotedHappening.content }}</div>
+            <div v-if="item.quotedHappening.imgUrlList" class="news-album">
+              <div class="news-album-preview grid">
+                <div v-for="(item,index) in item.quotedHappening.imgUrlList" :key="index" class="news-album-preview-picture">
+                  <img :src="item" alt="图片">
                 </div>
               </div>
-            </a>
+            </div>
+            <div v-if="false" class="news-video-card">
+              <a href="javascript:;" class="news-video-box">
+                <div class="video-box-header">
+                  <video controls src="/imgs/video.mp4"></video>
+                </div>
+                <div class="video-box-body">
+                  <div class="video-title">vhosnvonvosnovl</div>
+                  <div class="video-stat">
+                    <div class="video-stat-item">
+                      <i class="iconfont icon-shipin"></i>
+                      22
+                    </div>
+                    <div class="video-stat-item">
+                      <i class="iconfont icon-icon"></i>
+                      11
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div v-if="item.quotedHappening.bookLiveInfo" class="news-book-lives">
+              <div class="lives-detail">
+                <p class="lives-title">直播预约：{{item.quotedHappening.bookLiveInfo.title}}</p>
+                <p class="lives-stat">
+                  <span class="lives-time">{{ item.quotedHappening.bookLiveInfo.liveTimeInfo }} 直播</span>
+                  <span class="book-num">{{item.quotedHappening.bookLiveInfo.bookNumInfo}}人预约</span>
+                </p>
+              </div>
+              <div class="lives-btn-box">
+                <div v-if="username === item.quotedHappening.bookLiveInfo.anchorName" class="revoke-btn-box">
+                  <button v-if="true" @click.stop="revokeBookLive(newsInfo.quotedHappening.bookLiveInfo.id)" class="book-lives-btn revoke-btn">撤销</button>
+                  <button v-else @click.stop="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
+                </div>
+                <div v-else class="book-btn-box">
+                  <button v-if="item.quotedHappening.bookLiveInfo.booked" @click.stop="bookLive(newsInfo.quotedHappening.bookLiveInfo.id)" class="book-lives-btn book-btn">
+                    <span><i class="iconfont icon-icon-tixing"></i>预约</span>
+                  </button>
+                  <button v-else @click.stop="cancelBookLive(newsInfo.quotedHappening.bookLiveInfo.id)" class="book-lives-btn booked-btn">已预约</button>
+                </div>
+              </div>
+            </div>
+            <div v-if="item.quotedHappening.voteSimpleInfo" class="news-vote">
+              <div @click.stop="handleShowVoteModal(item.quotedHappening.voteSimpleInfo.voteId)" class="news-vote-card">
+                <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
+                <div class="vote-detail">
+                  <p class="vote-title">{{item.quotedHappening.voteSimpleInfo.title}}</p>
+                  <p class="vote-stat">{{item.quotedHappening.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ item.quotedHappening.voteSimpleInfo.deadlineInfo }}</p>
+                </div>
+                <div class="vote-btn-box">
+                  <button class="vote-btn">详情</button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div v-if="item.quotedHappening.bookLiveInfo" class="news-book-lives">
-            <div class="lives-detail">
-              <p class="lives-title">直播预约：{{item.quotedHappening.bookLiveInfo.title}}</p>
-              <p class="lives-stat">
-                <span class="lives-time">{{ item.quotedHappening.bookLiveInfo.liveTimeInfo }} 直播</span>
-                <span class="book-num">{{item.quotedHappening.bookLiveInfo.bookNumInfo}}人预约</span>
-              </p>
-            </div>
-            <div class="lives-btn-box">
-              <div v-if="username === item.quotedHappening.bookLiveInfo.anchorName" class="revoke-btn-box">
-                <button v-if="true" @click="revokeBookLive" class="book-lives-btn revoke-btn">撤销</button>
-                <button v-else @click="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
-              </div>
-              <div v-else class="book-btn-box">
-                <button v-if="item.quotedHappening.bookLiveInfo.booked" @click="bookLive" class="book-lives-btn book-btn">
-                  <span><i class="iconfont icon-icon-tixing"></i>预约</span>
-                </button>
-                <button v-else @click="cancelBookLive" class="book-lives-btn booked-btn">已预约</button>
-              </div>
-            </div>
-          </div>
-          <div v-if="item.quotedHappening.voteSimpleInfo" class="news-vote">
-            <div @click="handleShowVoteModal(item.quotedHappening.voteSimpleInfo.voteId)" class="news-vote-card">
-              <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
-              <div class="vote-detail">
-                <p class="vote-title">{{item.quotedHappening.voteSimpleInfo.title}}</p>
-                <p class="vote-stat">{{item.quotedHappening.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ item.quotedHappening.voteSimpleInfo.deadlineInfo }}</p>
-              </div>
-              <div class="vote-btn-box">
-                <button class="vote-btn">详情</button>
-              </div>
-            </div>
+          <div v-else class="quoted-isdelete">
+            <i class="iconfont icon-jinggao"></i>
+            <span>源动态已被作者删除</span>
           </div>
         </div>
         <div class="news-item-footer">
-          <div @click="showForwardInput(index,item.showForward)" class="footer-item news-zhuanfa" :class="{'highlight':item.showForward}">
+          <div @click.stop="showForwardInput(index,item.showForward)" class="footer-item news-zhuanfa" :class="{'highlight':item.showForward}">
             <i class="iconfont icon-zhuanfa"></i>
             {{ !item.forwardNumInfo ? '转发' : item.forwardNumInfo}}
           </div>
@@ -700,7 +781,7 @@ import { likeNewsApi } from '../api/news';
             <i class="iconfont icon-pinglun"></i>
             {{ !item.commentNumInfo ? '评论' : item.commentNumInfo }}
           </div>
-          <div @click="likeNews(item.id, item.liked, index)" class="footer-item news-like" :style="{color:item.liked ? '#3280ef' : 'inherit'}">
+          <div @click.stop="likeNews(item.id, item.liked, index)" class="footer-item news-like" :style="{color:item.liked ? '#3280ef' : 'inherit'}">
             <i class="iconfont icon-dianzan"></i>
             {{ !item.likeNumInfo ? '点赞' : item.likeNumInfo}}
           </div>
@@ -718,9 +799,9 @@ import { likeNewsApi } from '../api/news';
                   contenteditable="true"
                   :class="{'empty-input':!contentNumList[index]}"
                   placeholder="有什么想说的呢"
-                  @click="handleContentBoxClick"
+                  @click.stop="handleContentBoxClick"
                   tabindex="0"
-                  @input="changePubContent($event,index,showAtSelect,mineRefList,contentNumList)"
+                  @input="changePubContent($event,index,showAtSelect,mineRefList,contentNumList,atSelectPosition)"
                   @blur="handleContentBlur(index,showAtSelect,focusNode,focusOffset,chatInputOffset)"
                 >
                 </div>
@@ -740,14 +821,14 @@ import { likeNewsApi } from '../api/news';
           </div>
           <div class="forward-footer">
             <div class="emoji-btn" tabindex="1" @blur="handleEmojiBoxBlur(index)">
-              <i @click="showEmojiBoxForward(index,item.showEmojiBox)" :class="{'active':item.showEmojiBox}" class="iconfont icon-biaoqing"></i>
+              <i @click.stop="showEmojiBoxForward(index,item.showEmojiBox)" :class="{'active':item.showEmojiBox}" class="iconfont icon-biaoqing"></i>
               <div v-if="item.showEmojiBox" class="emoji-box">
-                <bs-emoji @insertEmoji="insertEmojiForward" :emojiUrlList="emojiUrlList"></bs-emoji>
+                <bs-emoji @insertEmoji="insertEmojiForward"></bs-emoji>
               </div>
             </div>
             <div class="wrapper">
               <span class="stat">{{ 300-contentNumList[index] }}</span>
-              <button @click="forwardNews(index)" class="forward-btn">转发</button>
+              <button @click.stop="forwardNews(index)" class="forward-btn">转发</button>
             </div>
           </div>
         </div>
@@ -860,34 +941,46 @@ import { likeNewsApi } from '../api/news';
       }
       .news-item-body {
         &.news-reference {
-          padding: 20px;
-          border-radius: 6px;
           margin-top: 10px;
+          border-radius: 6px;
           background-color: $colorR;
-          cursor: pointer;
-          .refer-author-box {
-            .author-info {
-              @include flex(left);
-              img {
-                width: 36px;
-                height: 36px;
-                border-radius: 18px;
+          .quote-wrapper {
+            padding: 20px;
+            cursor: pointer;
+            .refer-author-box {
+              .author-info {
+                @include flex(left);
+                img {
+                  width: 36px;
+                  height: 36px;
+                  border-radius: 18px;
+                }
+                .author-username {
+                  font-size: $fontJ;
+                  margin: 0 5px;
+                }
+                .refer-text {
+                  color: $colorD;
+                }
               }
-              .author-username {
-                font-size: $fontJ;
-                margin: 0 5px;
-              }
-              .refer-text {
-                color: $colorD;
+            }
+            .news-vote {
+              .news-vote-card {
+                background-color: $colorG;
+                .vote-icon-box {
+                  background-color: $colorR;
+                }
               }
             }
           }
-          .news-vote {
-            .news-vote-card {
-              background-color: $colorG;
-              .vote-icon-box {
-                background-color: $colorR;
-              }
+          .quoted-isdelete {
+            @include flex(left);
+            padding: 8px 15px;
+            font-weight: bold;
+            color: $colorD;
+            .icon-jinggao {
+              font-size: $fontK;
+              margin-right: 5px;
             }
           }
         }
@@ -908,10 +1001,12 @@ import { likeNewsApi } from '../api/news';
           font-size: $fontJ;
           font-weight: bold;
           margin-top: 15px;
+          cursor: pointer;
         }
         .news-text-content {
           margin-top: 10px;
           font-size: $fontJ;
+          cursor: pointer;
           img{
             height: 20px;
             width: 20px;
@@ -1217,5 +1312,12 @@ import { likeNewsApi } from '../api/news';
     text-align: center;
     padding: 8px 0;
     font-size: $fontJ;
+  }
+  .confirmButtonClass {
+    background-color: #f85a54;
+    border: none;
+    &:hover {
+      background-color: #f85a54;
+    }
   }
 </style>

@@ -16,9 +16,13 @@ const routes = [
     component:()=>import('@/views/mainInterface.vue')
   },
   {
-    path:'/news',
-    name:'news',
-    component:()=>import('@/views/news/news.vue')
+    path:'/news_index',
+    name:'news_index',
+    component:()=>import('@/views/news/index.vue')
+  },{
+    path:'/news_detail/:id',
+    name:'news_detail',
+    component:()=>import('@/views/news/NewsDetail.vue')
   }
 ]
 
