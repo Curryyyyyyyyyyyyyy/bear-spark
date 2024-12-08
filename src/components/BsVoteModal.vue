@@ -73,7 +73,7 @@
               <ul class="option-list">
                 <div v-for="(item,index) in voteDetailInfo.optionList" :key="index" class="option-item" :class="{'image-vote':voteDetailInfo.voteType===2}" @click="handleClickOption(item.optionId,voteDetailInfo.voteLim)">
                   <div class="option-photo">
-                    <img :src="item.optionPhotoUrl" alt="">
+                    <img v-lazy="item.optionPhotoUrl" alt="">
                   </div>
                   <div class="option-content-wrap">
                     <div v-if="!voteDetailInfo.voted || username === voteDetailInfo.username" class="percentage-bar" :class="{'full':item.optionPercent==='100'}" :style="{width:`${item.optionPercent}%`,backgroundColor: item.selected?'#e3e5e7':'#8dd0ff'}"></div>

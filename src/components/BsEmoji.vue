@@ -4,16 +4,16 @@
   const emit = defineEmits(['insertEmoji'])
   const emojiUrlList = ref([])
   onMounted(async () => {
-    // const emojiListRes = await getEmojiListApi()
-    // emojiUrlList.value = emojiListRes.emojiUrlList
-    emojiUrlList.value = [
-      '/imgs/default-avatar.png',
-      '/imgs/default-avatar.png',
-      '/imgs/default-avatar.png',
-      '/imgs/default-avatar.png',
-      '/imgs/default-avatar.png',
-      '/imgs/default-avatar.png',
-    ]
+    const emojiListRes = await getEmojiListApi()
+    emojiUrlList.value = emojiListRes.emojiUrlList
+    // emojiUrlList.value = [
+    //   '/imgs/default-avatar.png',
+    //   '/imgs/default-avatar.png',
+    //   '/imgs/default-avatar.png',
+    //   '/imgs/default-avatar.png',
+    //   '/imgs/default-avatar.png',
+    //   '/imgs/default-avatar.png',
+    // ]
   })
   function insertEmoji(event) {
     let emojiUrl

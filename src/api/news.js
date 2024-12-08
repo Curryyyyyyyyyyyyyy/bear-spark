@@ -8,10 +8,6 @@ export const publishNewsApi = (params) => {
 export const getNewsPrepareApi = () => {
   return request.get('/happening/prepare')
 }
-/* 获取背景图 */
-export const getNewsBgApi = () => {
-  return request.get('/happening/bg')
-}
 /* 获取动态列表 */
 export const getNewsListApi = (params) => {
   return request.get('/happening', {
@@ -50,7 +46,9 @@ export const likeNewsApi = (params) => {
 }
 /* 删除动态 */
 export const deleteNewsApi = (params) => {
-  return request.delete('/happening',params)
+  return request.delete('/happening',{
+    params
+  })
 }
 /* 修改动态 */
 export const modifyNewsApi = (params) => {
