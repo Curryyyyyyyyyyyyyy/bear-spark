@@ -18,17 +18,43 @@ const routes = [
   {
     path:'/news_index',
     name:'news_index',
-    component:()=>import('@/views/news/index.vue')
+    component:()=>import('@/views/news/news.vue'),
+    children:[
+      {
+        path:'/',
+        name:'tab_all',
+      }
+    ]
   },{
     path:'/news_detail/:id',
     name:'news_detail',
-    component:()=>import('@/views/news/NewsDetail.vue')
+    component:()=>import('@/views/news-detail/NewsDetail.vue'),
+    children:[
+      {
+        path:'/',
+        name:'comment',
+      }
+    ]
   }
 ]
 
 const router = createRouter({
   history:createWebHashHistory(),
   routes
+})
+
+router.afterEach((to) => {
+  switch(to.name) {
+    case 'index':
+      document.title = '首页_bear-spark'
+      break
+    case 'news_index':
+      document.title = '动态首页_bear-spark'
+      break
+    case 'news_detail':
+      document.title = '动态详情_bear-spark'
+      break
+  }
 })
 
 export default router

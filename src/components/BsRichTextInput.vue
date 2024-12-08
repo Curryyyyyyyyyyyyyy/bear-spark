@@ -1,7 +1,6 @@
 <script setup>
   import { ElMessage } from 'element-plus';
   import BsAtUl from './BsAtUl.vue';
-  import BsAtLi from './BsAtLi.vue'
   import { ref,reactive } from 'vue';
 
   defineProps(['placeholder'])
@@ -168,28 +167,28 @@
     selection.addRange(chatInputOffset)
     contentNum.value = handleContentNum()
   }
-  const followerList = [
-    {
-      avatarUrl:'/imgs/default-avatar.png',
-      username:'周权',
-      fanNumInfo:111
-    },
-    {
-      avatarUrl:'/imgs/default-avatar.png',
-      username:'周权',
-      fanNumInfo:111
-    },
-    {
-      avatarUrl:'/imgs/default-avatar.png',
-      username:'周权',
-      fanNumInfo:111
-    },
-    {
-      avatarUrl:'/imgs/default-avatar.png',
-      username:'周权',
-      fanNumInfo:111
-    },
-  ]
+  // const followerList = [
+  //   {
+  //     avatarUrl:'/imgs/default-avatar.png',
+  //     username:'周权',
+  //     fanNumInfo:111
+  //   },
+  //   {
+  //     avatarUrl:'/imgs/default-avatar.png',
+  //     username:'周权',
+  //     fanNumInfo:111
+  //   },
+  //   {
+  //     avatarUrl:'/imgs/default-avatar.png',
+  //     username:'周权',
+  //     fanNumInfo:111
+  //   },
+  //   {
+  //     avatarUrl:'/imgs/default-avatar.png',
+  //     username:'周权',
+  //     fanNumInfo:111
+  //   },
+  // ]
   //#endregion
   /* 暴露方法 */
   defineExpose({
@@ -216,15 +215,11 @@
     tabindex="0"
   >
   </div>
-  <bs-at-ul v-if="showAtSelect" :atSelectPosition="atSelectPosition">
-    <bs-at-li 
-      v-for="(item,index) in followerList" :key="index"
-      :avatarUrl="item.avatarUrl"
-      :username="item.username"
-      :fansNum="item.fanNumInfo"
-      @selectAtUser="selectAtUser"
-    >
-    </bs-at-li>
+  <bs-at-ul 
+    v-if="showAtSelect" 
+    @selectAtUser="selectAtUser" 
+    :atSelectPosition="atSelectPosition"
+  >
   </bs-at-ul>
 </template>
 

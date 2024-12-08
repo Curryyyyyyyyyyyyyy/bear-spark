@@ -1,5 +1,17 @@
 <script setup>
+  import {getFollowerListApi} from '@/api/user.js'
+  import BsAtLi from '@/components/BsAtLi.vue'
+  import { onMounted,ref } from 'vue';
   defineProps(['atSelectPosition'])
+  const emit = defineEmits(['selectAtUser'])
+  const followerList = ref([])
+  onMounted(async () => {
+    const followerListRes = await getFollowerListApi()
+    followerList.value = followerListRes.followerList
+  })
+  function selectAtUser(username) {
+    emit('selectAtUser', username)
+  }
 </script>
 
 <template>
@@ -10,6 +22,15 @@
     <ul class="bs-at-list">
       <p class="bs-at-ul-desc">我的关注</p>
       <slot></slot>
+      <bs-at-li 
+        v-for="(item,index) in followerList"
+        :key="index"
+        :avatarUrl="item.avatarUrl"
+        :username="item.username"
+        :fansNum="item.fanNumInfo"
+        @selectAtUser="selectAtUser"
+      >
+      </bs-at-li>
     </ul>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onBeforeUnmount, ref } from 'vue';
   import {loginApi,sendVEcodeApi,verifyVEcodeApi,registerPwdApi,modifyPwdApi} from '@/api/user.js'
   import {regPhone,regPwd,regVEcode} from '@/util/reg.js'
   import { ElMessage } from 'element-plus';
@@ -17,26 +17,38 @@
   function closeLogin(){
     emit('closeLogin')
   }
-
+  /* 注册 */
   let registerPhoneNum = ref('')
   let registerVEcode = ref('')
   async function register(){
     if(!regPhone(registerPhoneNum.value)) return ElMessage.error('请输入正确的手机号')
     if(!regVEcode(registerVEcode.value)) return ElMessage.error('请输入正确的验证码')
-    await verifyVEcodeApi(registerPhoneNum.value,registerVEcode.value)
-    registerPhoneNum.value = ''
-    registerVEcode.value = ''
+    await verifyVEcodeApi({
+      phone:registerPhoneNum.value,
+      code:registerVEcode.value
+    })
     inputBigBox.value.style.transform = `translateX(${(-3)*375}px)`
     curWay.value = 3
     isReg.value = true
+    timer = setInterval(() => {
+      regDeadline.value--
+      if(regDeadline.value <= 0) {
+        changeWay(1)
+        regVEcode.value = ''
+      }
+    }, 1000);
   }
-
+  /* 登录 */
   let phone = ref('')
   let password = ref('')
   async function login(){
     if(!regPhone(phone.value)) return ElMessage.error('请输入正确的手机号')
     if(!regPwd(password.value)) return ElMessage.error('密码只能由数字、字母、下划线，6~16位')
-    const res = await loginApi(phone.value, password.value)
+    const res = await loginApi({
+      phone:phone.value,
+      password:password.value
+    })
+    if(!res) return ElMessage.error('手机号或密码错误')
     userStore.token = res.token
     userStore.expires = Date.now()
     updateUserInfo()
@@ -47,13 +59,16 @@
     })
     closeLogin()
   }
-
+  /* 发送验证码 */
   let registerCountDown = ref(60)
   let findCountDown = ref(60)
   let timer
   async function sendVEcode(phoneNum,way) {
     if(!regPhone(phoneNum)) return
-    await sendVEcodeApi(phoneNum)
+    await sendVEcodeApi({
+      phone:phoneNum
+    })
+    ElMessage.success('发送成功')
     if(way === 'register') {
       timer = setInterval(() => {
         if(registerCountDown.value === 0) {
@@ -61,7 +76,6 @@
           clearInterval(timer)
           return
         }
-        console.log(11)
         registerCountDown.value = registerCountDown.value-1
       }, 1000);
     } else {
@@ -75,39 +89,59 @@
       }, 1000);
     }
   }
-
+  /* 注册倒计时 */
+  const regDeadline = ref(120)
+  /* 修改 */
   let findPhoneNum = ref('')
   let findVEcode = ref('')
   async function submit() {
     if(!regPhone(findPhoneNum.value)) return ElMessage.error('请输入正确的手机号')
     if(!regVEcode(findVEcode.value)) return ElMessage.error('请输入正确的验证码')
-    findPhoneNum.value = ''
-    findVEcode.value = ''
-    await verifyVEcodeApi(findPhoneNum.value,findVEcode.value)
+    await verifyVEcodeApi({
+      phone:findPhoneNum.value,
+      code:findVEcode.value
+    })
     inputBigBox.value.style.transform = `translateX(${(-3)*375}px)`
     curWay.value = 3
     isReg.value = false
+    timer = setInterval(() => {
+      regDeadline.value--
+      if(regDeadline.value <= 0) {
+        changeWay(1)
+        findVEcode.value = ''
+      }
+    }, 1000);
   }
-
+  /* 提交 */
   let newPassword1 = ref('')
   let newPassword2 = ref('')
   async function confirm(isReg){
     if(newPassword1.value !== newPassword2.value) return ElMessage.error('密码不一致！')
     if(!regPwd(newPassword1.value)) return ElMessage.error('密码只能由数字、字母、下划线，6~16位')
     if(isReg) {
-      await registerPwdApi(registerPhoneNum.value,newPassword2.value)
+      await registerPwdApi({
+        phone:registerPhoneNum.value,
+        password:newPassword2.value,
+        code:registerVEcode.value
+      })
       ElMessage({
         type:'success',
         message:'注册成功，请登录',
         duration:1000
       })
+      registerPhoneNum.value = ''
     } else {
-      await modifyPwdApi(findPhoneNum.value,newPassword2.value)
+      await modifyPwdApi({
+        phone:findPhoneNum.value,
+        password:newPassword2.value,
+        code:findVEcode.value
+      })
       ElMessage({
         type:'success',
         message:'修改成功，请重新登录',
         duration:1000
       })
+      findPhoneNum.value = ''
     }
     newPassword1.value = ''
     newPassword2.value = ''
@@ -122,6 +156,10 @@
     inputBigBox.value.style.transform = `translateX(${(-pos)*375}px)`
     curWay.value = pos
   }
+
+  onBeforeUnmount(() => {
+    clearInterval(timer)
+  })
 </script>
 
 <template>
@@ -172,9 +210,10 @@
             <input type="text" placeholder="请输入验证码" v-model="findVEcode">
           </div>
         </div>
-        <div class="input-box">
+        <div class="input-box input-passward">
           <div class="mod-password mod-password1">
             <input :type="showPwd ? 'text' : 'password'" placeholder="请输入密码" v-model="newPassword1">
+            <div v-if="regDeadline > 0" class="register-deadline">{{ regDeadline }}</div>
           </div>
           <div class="mod-password mod-password2">
             <input :type="showPwd ? 'text' : 'password'" placeholder="请再次输入密码" v-model="newPassword2">
@@ -334,9 +373,16 @@
           }
         }
         .mod-password1 {
+          position: relative;
           border-bottom: 1px solid $colorF;
           input {
             width: 320px;
+          }
+          .register-deadline {
+            position: absolute;
+            top: 0;
+            right: 26px;
+            color: $colorD;
           }
         }
         .eyeBtn {

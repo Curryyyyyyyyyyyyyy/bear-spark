@@ -33,6 +33,8 @@
     let pubTime = ''
     if(publishDate.value && publishHour.value && publishHour.value) {
       pubTime = timeFormat(publishDate.value,publishHour.value,publishHour.value)
+    } else {
+      pubTime = timeFormat(dayjs().format('YYYY-MM-DD'), dayjs().$H, dayjs().$m)
     }
     await publishNewsApi({
       title:newsTitle.value,
@@ -60,6 +62,7 @@
       bookLiveInfo.value = ''
       showVoteBox.value = false
       voteInfo.value = ''
+      pictureList.value = []
       //#endregion
   }, 1000) 
   //#endregion
@@ -1006,9 +1009,9 @@
               <div class="cascader-options-item"  @click="newsCommentPermission = 1,blurSettingCascader()" :class="{'is-active':newsCommentPermission === 1}">
                 <span class="item-label">关闭评论</span>
               </div>
-              <div class="cascader-options-item" @click="newsCommentPermission = 2,blurSettingCascader()" :class="{'is-active':newsCommentPermission === 2}">
+              <!-- <div class="cascader-options-item" @click="newsCommentPermission = 2,blurSettingCascader()" :class="{'is-active':newsCommentPermission === 2}">
                 <span class="item-label">精选评论</span>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -1074,7 +1077,7 @@
               <div class="picture-box">
                 <label :for="'picture'+index">
                   <div class="upload-box">
-                    <img v-if="item.optionPhotoUrl" :src="item.optionPhotoUrl" alt="">
+                    <img v-if="item.optionPhotoUrl" v-lazy="item.optionPhotoUrl" alt="">
                     <i v-else class="iconfont icon-jiahao"></i>
                   </div>
                 </label>

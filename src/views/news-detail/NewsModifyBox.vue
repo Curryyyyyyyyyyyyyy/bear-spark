@@ -5,6 +5,7 @@
   import { onMounted, ref } from 'vue';
   import {modifyNewsApi} from '@/api/news.js'
   import { ElMessage, ElMessageBox } from 'element-plus';
+  import router from '@/router';
 
   const emit = defineEmits(['closeModifyBox'])
   const props = defineProps(['newsInfo'])
@@ -41,15 +42,15 @@
   function insertEmoji(emojiUrl) {
     modifyInputRef.value.insertEmoji(emojiUrl)
   }
-  document.onselectionchange = () => {
-    let selection = document.getSelection()
-    if(selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0)
-      if(modifyInputRef.value.contentDom.contains(range.commonAncestorContainer)) {
-        modifyInputRef.value.rangeOfContentBox = range
-      }
-    }
-  }
+  // document.onselectionchange = () => {
+  //   let selection = document.getSelection()
+  //   if(selection.rangeCount > 0) {
+  //     const range = selection.getRangeAt(0)
+  //     if(modifyInputRef.value.contentDom.contains(range.commonAncestorContainer)) {
+  //       modifyInputRef.value.rangeOfContentBox = range
+  //     }
+  //   }
+  // }
   /* setting */
   const showCascader = ref(false)
   const showCascader2 = ref(false)
@@ -63,15 +64,23 @@
   }
   /* 发布 */
   async function publishNews() {
+    const content = modifyInputRef.value.contentDom.innerHTML
+    if(!content) return ElMessage.error('内容不能为空')
     await modifyNewsApi({
-      happeningId:props.id,
+      happeningId:props.newsInfo.id,
       tagId:tagId.value,
       title:title.value,
-      content:modifyInputRef.value.contentDom.innerHTML,
+      content:content,
       visibility:visibility.value
     })
     ElMessage.success('发布成功')
+    emit('closeModifyBox')
+    router.replace('/news_index')
   }
+
+  defineExpose({
+    modifyInputRef
+  })
 </script>
 
 <template>
@@ -97,6 +106,10 @@
         <div v-if="visibility === 1" class="only-box">
           <span class="only-title"><i class="iconfont icon-suo"></i>仅自己可见</span>
           <span class="only-desc">开启后，将不支持分享、商业推广</span>
+        </div>
+        <div class="quote-news">
+          <i class="iconfont icon-jinggao"></i>
+          <span>源动态不支持修改</span>
         </div>
       </div>
       <div class="news-modify-footer">
@@ -224,6 +237,18 @@
           }
           .only-desc {
             color: $colorD
+          }
+        }
+        .quote-news {
+          @include flex(left);
+          padding: 10px 15px;
+          border-radius: 6px;
+          background-color: $colorN;
+          color: $colorD;
+          margin-top: 10px;
+          .icon-jinggao {
+            font-size: $fontK;
+            margin-right: 5px;
           }
         }
       }

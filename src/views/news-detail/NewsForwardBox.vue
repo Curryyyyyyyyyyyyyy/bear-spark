@@ -4,7 +4,8 @@
   import BsTagSelect from '@/components/BsTagSelect.vue'
   import BsRichTextInput from '@/components/BsRichTextInput.vue'
   import {fowardNewsApi} from '@/api/news.js'
-import { ElMessage } from 'element-plus';
+  import { ElMessage } from 'element-plus';
+  import router from '@/router';
 
   const emit = defineEmits(['closeForwardBox'])
   const props = defineProps(['newsInfo'])
@@ -22,26 +23,31 @@ import { ElMessage } from 'element-plus';
   function insertEmoji(emojiUrl) {
     forwardInputRef.value.insertEmoji(emojiUrl)
   }
-  document.onselectionchange = () => {
-    let selection = document.getSelection()
-    if(selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0)
-      if(forwardInputRef.value.contentDom.contains(range.commonAncestorContainer)) {
-        forwardInputRef.value.rangeOfContentBox = range
-      }
-    }
-  }
+  // document.onselectionchange = () => {
+  //   let selection = document.getSelection()
+  //   if(selection.rangeCount > 0) {
+  //     const range = selection.getRangeAt(0)
+  //     if(forwardInputRef.value&&forwardInputRef.value.contentDom.contains(range.commonAncestorContainer)) {
+  //       forwardInputRef.value.rangeOfContentBox = range
+  //     }
+  //   }
+  // }
   /* 发布 */
   async function publishNews() {
     const content = forwardInputRef.value.contentDom.innerHTML ? forwardInputRef.value.contentDom.innerHTML : '转发动态'
     await fowardNewsApi({
-      happeningId:props.newsInfo.id,
+      quotedHappeningId:props.newsInfo.quotedHappening ? props.newsInfo.quotedHappening.id : props.newsInfo.id,
       content: content,
       tagId:tagId.value
     })
     ElMessage.success('发布成功')
     closeForwardBox()
+    router.replace('/news_index')
   }
+
+  defineExpose({
+    forwardInputRef
+  })
 </script>
 
 <template>

@@ -6,8 +6,7 @@
   import NewsAsideBox from './NewsAsideBox.vue';
   import NewsList from '@/components/NewsList.vue'
   import {useRouter} from 'vue-router'
-  import {getNewsPrepareApi,getNewsBgApi} from '@/api/news.js'
-  import {getFollowerListApi} from '@/api/user.js'
+  import {getNewsPrepareApi} from '@/api/news.js'
   import { debounce } from '@/hooks/performance';
 
   /* Router */
@@ -15,7 +14,6 @@
   //#region Mounted
   const recentTagList = ref([])
   const followerList = ref([])
-  const backgroundUrl = ref('')
   const sideBarUrl = ref('')
   // recentTagList.value = [
   //     {
@@ -59,16 +57,16 @@
   //       discussNum:8,
   //     },
   // ]
-  followerList.value = [
-    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:111},
-    {avatarUrl:'/imgs/default-avatar.png',username:'谢家辉',fansNumInfo:222},
-    {avatarUrl:'/imgs/default-avatar.png',username:'何昕',fansNumInfo:333},
-    {avatarUrl:'/imgs/default-avatar.png',username:'叶凯乐',fansNumInfo:444},
-    {avatarUrl:'/imgs/default-avatar.png',username:'王思杰',fansNumInfo:555},
-    {avatarUrl:'/imgs/default-avatar.png',username:'卢家秦',fansNumInfo:666},
-    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:777},
-    {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:888},
-  ]
+  // followerList.value = [
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:111},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'谢家辉',fansNumInfo:222},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'何昕',fansNumInfo:333},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'叶凯乐',fansNumInfo:444},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'王思杰',fansNumInfo:555},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'卢家秦',fansNumInfo:666},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:777},
+  //   {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:888},
+  // ]
   // sideBarUrl.value = '/imgs/slide-bar.jpg'
   // backgroundUrl.value = '/imgs/news-background.png'
   onMounted(async () => {
@@ -76,10 +74,7 @@
     const res = await getNewsPrepareApi()
     recentTagList.value = res.recentTagList
     sideBarUrl.value = res.sideBarUrl
-    const followerListRes = await getFollowerListApi() 
-    followerList.value = followerListRes.followerList
-    const backgroundUrlRes = await getNewsBgApi()
-    backgroundUrl.value = backgroundUrlRes.bgUrl
+    followerList.value = res.followerList
   })
   //#endregion
   //#region up列表

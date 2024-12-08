@@ -18,57 +18,57 @@
   /* onMounted */
   const newsInfo = ref({})
   onMounted(async () => {
-    // newsInfo.value = await getNewsDetailApi({
-    //   happeningId:route.params.id
-    // })
-    newsInfo.value = {
-        "id":1,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "11",
-        "tagId":1,
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 9,
-        "forwardNumInfo":0,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "visibility":1,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "quotedHappening":{
-          "id":1,
-          "username": "万超",
-          "avatarUrl": "http://dummyimage.com/100x100",
-          "title": "现无称点进其原",
-          "content": "",
-          "tag": "pariatur eiusmod aliqua labore reprehenderit",
-          "viewNumInfo": 41,
-          "likeNumInfo": 50,
-          "commentNumInfo": 9,
-          "forwardNumInfo":0,
-          "commentAble": 0,
-          "advanceRelease": 0,
-          "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-          },
-          "imgUrlList": [
-              "http://dummyimage.com/400x400"
-          ],
-          "pubTimeInfo": "1975-04-15 04:31:03"
-          },
-          "imgUrlList": [
-              "http://dummyimage.com/400x400"
-          ],
-          "pubTimeInfo": "1975-04-15 04:31:03"
-    }
+    newsInfo.value = await getNewsDetailApi({
+      happeningId:route.params.id
+    })
+    // newsInfo.value = {
+    //     "id":1,
+    //     "username": "万超",
+    //     "avatarUrl": "http://dummyimage.com/100x100",
+    //     "title": "现无称点进其原",
+    //     "content": "11",
+    //     "tagId":1,
+    //     "tag": "pariatur eiusmod aliqua labore reprehenderit",
+    //     "viewNumInfo": 41,
+    //     "likeNumInfo": 50,
+    //     "commentNumInfo": 9,
+    //     "forwardNumInfo":0,
+    //     "commentAble": 0,
+    //     "advanceRelease": 0,
+    //     "visibility":1,
+    //     "voteSimpleInfo": {
+    //         "voteId": 8,
+    //         "title": "需观反干分取必",
+    //         "voteNumInfo": "43"
+    //     },
+    //     "quotedHappening":{
+    //       "id":1,
+    //       "username": "万超",
+    //       "avatarUrl": "http://dummyimage.com/100x100",
+    //       "title": "现无称点进其原",
+    //       "content": "",
+    //       "tag": "pariatur eiusmod aliqua labore reprehenderit",
+    //       "viewNumInfo": 41,
+    //       "likeNumInfo": 50,
+    //       "commentNumInfo": 9,
+    //       "forwardNumInfo":0,
+    //       "commentAble": 0,
+    //       "advanceRelease": 0,
+    //       "voteSimpleInfo": {
+    //         "voteId": 8,
+    //         "title": "需观反干分取必",
+    //         "voteNumInfo": "43"
+    //       },
+    //       "imgUrlList": [
+    //           "http://dummyimage.com/400x400"
+    //       ],
+    //       "pubTimeInfo": "1975-04-15 04:31:03"
+    //       },
+    //       "imgUrlList": [
+    //           "http://dummyimage.com/400x400"
+    //       ],
+    //       "pubTimeInfo": "1975-04-15 04:31:03"
+    // }
   })
   //#region 投票
   const showVoteModal = ref(false)
@@ -149,6 +149,22 @@
   //#region 转发
   const showForwardBox = ref(false)
   //#endregion
+  //#region onselectionchange
+  const newsModifyRef = ref()
+  const newsForwardRef = ref()
+  document.onselectionchange = () => {
+    let selection = document.getSelection()
+    if(selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0)
+      if(showForwardBox.value && newsForwardRef.value.forwardInputRef.contentDom.contains(range.commonAncestorContainer)) {
+        newsForwardRef.value.forwardInputRef.rangeOfContentBox = range
+      }
+      if(showModifyBox.value && newsModifyRef.value.modifyInputRef.contentDom.contains(range.commonAncestorContainer)) {
+        newsModifyRef.value.modifyInputRef.rangeOfContentBox = range
+      }
+    }
+  }
+  //#endregion
 </script>
 
 <template>
@@ -189,15 +205,13 @@
           <div @mouseenter="showCascader = true"  @mouseleave="showCascader = false,showCascaderSecond=false" class="news-item-more-btn">
             <i class="iconfont icon-gengduo1"></i>
             <div v-if="showCascader" class="new-item-cascader">
-              <div v-if="username === newsInfo.username" class="cascader-list">
+              <div v-if="username !== newsInfo.username" class="cascader-list">
                 <div class="cascader-item">取消关注</div>
                 <div class="cascader-item">举报</div>
               </div>
               <div v-else class="cascader-list">
-                <div class="cascader-first">
-                  <div @click="showModifyBox = true" class="cascader-item">编辑</div>
-                  <div @click.stop="deleteNews(newsInfo.id)" class="cascader-item">删除</div>
-                </div>
+                <div @click="showModifyBox = true" class="cascader-item">编辑</div>
+                <div @click.stop="deleteNews(newsInfo.id)" class="cascader-item">删除</div>
               </div>
             </div>
           </div>
@@ -284,7 +298,7 @@
             <span>{{ newsInfo.quotedHappening.tag }}</span>
           </div>
           <div class="news-title">{{ newsInfo.quotedHappening.title }}</div>
-          <div class="news-text-content">{{ newsInfo.quotedHappening.content }}</div>
+          <div class="news-text-content" v-html="newsInfo.quotedHappening.content"></div>
           <div v-if="newsInfo.quotedHappening.imgUrlList" class="news-album">
             <div class="news-album-preview grid">
               <div v-for="(item,index) in newsInfo.quotedHappening.imgUrlList" :key="index" class="news-album-preview-picture">
@@ -355,15 +369,21 @@
       <div class="side-toolbar">
         <div class="side-toolbar-item like-info">
           <i class="iconfont icon-dianzan"></i>
-          <div class="side-toolbar-item-text">1</div>
+          <div class="side-toolbar-item-text">
+            {{ newsInfo.likeNumInfo }}
+          </div>
         </div>
         <div @click="showForwardBox = true" class="side-toolbar-item forward-info">
           <i class="iconfont icon-zhuanfa"></i>
-          <div class="side-toolbar-item-text">1</div>
+          <div class="side-toolbar-item-text">
+            {{ newsInfo.forwardNumInfo }}
+          </div>
         </div>
         <div class="side-toolbar-item comment-info">
           <i class="iconfont icon-pinglun"></i>
-          <div class="side-toolbar-item-text">1</div>
+          <div class="side-toolbar-item-text">
+            {{ newsInfo.commentNumInfo }}
+          </div>
         </div>
       </div>
     </div>
@@ -379,12 +399,14 @@
     v-if="showModifyBox"
     @closeModifyBox="showModifyBox = false"
     :newsInfo="newsInfo"
+    ref="newsModifyRef"
   >
   </news-modify-box>
   <news-forward-box
     v-if="showForwardBox"
     @closeForwardBox="showForwardBox = false"
     :newsInfo="newsInfo"
+    ref="newsForwardRef"
   >
   </news-forward-box>
 </template>
@@ -497,19 +519,16 @@
               top: 24px;
               padding-top: 10px;
               .cascader-list {
-                display: flex;
-                .cascader-first {
-                  background-color: $colorG;
-                  border: 1px solid $colorN;
-                  border-radius: 6px;
-                  text-align: left;
-                  padding: 12px 0;
-                  .cascader-item {
-                    padding: 8px 27px;
-                    min-width: 82px;
-                    &:hover {
-                      background-color: $colorN;
-                    }
+                background-color: $colorG;
+                border: 1px solid $colorN;
+                border-radius: 6px;
+                text-align: left;
+                padding: 12px 0;
+                .cascader-item {
+                  padding: 8px 27px;
+                  min-width: 82px;
+                  &:hover {
+                    background-color: $colorN;
                   }
                 }
               }
