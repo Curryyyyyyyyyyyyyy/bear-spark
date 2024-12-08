@@ -27,6 +27,7 @@
     if(!rangeOfContentBox.value) {
       rangeOfContentBox.value = new Range()
       rangeOfContentBox.value.selectNodeContents(contentDom.value)
+      rangeOfContentBox.value.collapse(false)
     }
     if(rangeOfContentBox.value.collapsed) {
       rangeOfContentBox.value.insertNode(emojiImg)
@@ -80,8 +81,6 @@
         const {left, top} = getCursorPosition()
         atSelectPosition.left = left + 'px'
         atSelectPosition.top = top + 20 + 'px'
-        console.log("left:",left)
-        console.log("top:",top)
       }, 200);
     } else {
       showAtSelect.value = false
@@ -96,7 +95,7 @@
   }
   function handleContentBlur() {
     setTimeout(() => {
-      // showAtSelect.value = false
+      showAtSelect.value = false
     }, 200);
     if (window.getSelection) {
       let sel = window.getSelection();
@@ -119,6 +118,7 @@
   })
   function getCursorPosition() {
     let selection = document.getSelection()
+    console.log(selection.focusNode)
     let range = new Range()
     range.selectNode(selection.focusNode)
     range.setStart(selection.focusNode, selection.focusOffset)
@@ -132,6 +132,7 @@
     if(!rangeOfContentBox.value) {
       rangeOfContentBox.value = new Range()
       rangeOfContentBox.value.selectNodeContents(contentDom.value)
+      rangeOfContentBox.value.collapse(false)
     }
     const atNode = rangeOfContentBox.value.createContextualFragment(atElement)
     if(rangeOfContentBox.value.collapsed) {
@@ -140,14 +141,13 @@
       rangeOfContentBox.value.deleteContents()
       rangeOfContentBox.value.insertNode(atNode)
     }
+    const {left, top} = rangeOfContentBox.value.getBoundingClientRect()
+    atSelectPosition.left = left + 'px'
+    atSelectPosition.top = top + 20 + 'px'
     rangeOfContentBox.value.collapse(false)
     document.getSelection().removeAllRanges()
-    document.getSelection().addRange(rangeOfContentBox)
+    document.getSelection().addRange(rangeOfContentBox.value)
     setTimeout(() => {
-      // const {left, top} = rangeOfContentBox.getBoundingClientRect()
-      // console.log(left,top)
-      // atSelectPosition.left = left + 'px'
-      // atSelectPosition.top = top + 'px'
       showAtSelect.value = true
     }, 200);
   }
@@ -197,6 +197,7 @@
     insertEmoji,
     handleClickAt,
     selectAtUser,
+    handleContentNum,
     contentNum,
     contentDom,
     rangeOfContentBox
@@ -232,6 +233,7 @@
   @use '../assets/sass/config.scss' as *;
   .bs-rich-text-input {
     position: relative;
+    padding-top: 5px;
     width: 100%;
     font-size: $fontJ;
     img {
@@ -247,7 +249,7 @@
     &::after {
       content: attr(placeholder);
       position: absolute;
-      top: 0px;
+      top: 5px;
       color: $colorD;
       cursor: text;
     }
