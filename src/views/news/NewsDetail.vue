@@ -142,6 +142,9 @@
     })
   }
   //#endregion
+  //#region 编辑
+  const showModifyBox = ref(false)
+  //#endregion
 </script>
 
 <template>
@@ -188,7 +191,7 @@
               </div>
               <div v-else class="cascader-list">
                 <div class="cascader-first">
-                  <div class="cascader-item">编辑</div>
+                  <div @click="showModifyBox = true" class="cascader-item">编辑</div>
                   <div @click.stop="deleteNews(newsInfo.id)" class="cascader-item">删除</div>
                 </div>
               </div>
@@ -368,7 +371,12 @@
     :voteId="voteId"
   >
   </bs-vote-modal>
-  <news-modify-box></news-modify-box>
+  <news-modify-box 
+    v-if="showModifyBox"
+    @closeModifyBox="showModifyBox = false"
+    :newsInfo="newsInfo"
+  >
+  </news-modify-box>
 </template>
 
 <style lang="scss"> 

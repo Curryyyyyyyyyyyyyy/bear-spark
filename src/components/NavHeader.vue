@@ -81,31 +81,32 @@
       <div class="nav-right">
         <div v-if="!token" class="login right-item">
           <span class="nav-login" @click="openLogin">登录</span>
-          <div class="mask"></div>
           <div class="children">
-            <p>登录后你可以：</p>
-            <div class="benefits clearfix">
-              <div class="item fl">
-                <i class="iconfont icon-HD"></i>
-                <span>免费看高清视频</span>
+            <div class="login-info">
+              <p>登录后你可以：</p>
+              <div class="benefits clearfix">
+                <div class="item fl">
+                  <i class="iconfont icon-HD"></i>
+                  <span>免费看高清视频</span>
+                </div>
+                <div class="item fr">
+                  <i class="iconfont icon-lishi"></i>
+                  <span>多端同步播放记录</span>
+                </div>
               </div>
-              <div class="item fr">
-                <i class="iconfont icon-lishi"></i>
-                <span>多端同步播放记录</span>
+              <div class="benefits clearfix">
+                <div class="item fl">
+                  <i class="iconfont icon-fuwenben"></i>
+                  <span>发起弹幕/评论</span>
+                </div>
+                <div class="item fr">
+                  <i class="iconfont icon-shipin"></i>
+                  <span>热门番剧影视看不停</span>
+                </div>
               </div>
+              <button class="login-btn" @click="openLogin">立即登录</button>
+              <p>首次使用？<span class="register" @click="openLogin">点我注册</span></p>
             </div>
-            <div class="benefits clearfix">
-              <div class="item fl">
-                <i class="iconfont icon-fuwenben"></i>
-                <span>发起弹幕/评论</span>
-              </div>
-              <div class="item fr">
-                <i class="iconfont icon-shipin"></i>
-                <span>热门番剧影视看不停</span>
-              </div>
-            </div>
-            <button class="login-btn" @click="openLogin">立即登录</button>
-            <p>首次使用？<span class="register" @click="openLogin">点我注册</span></p>
           </div>
         </div>
         <div v-else class="avatar-box right-item">
@@ -327,10 +328,6 @@
         }
         .login {
           position: relative;
-          .mask {
-            height: 20px;
-            width: 36px;
-          }
           .nav-login {
             display: inline-block;
             height: 40px;
@@ -352,57 +349,60 @@
             width: 280px;
             position: absolute;
             left: -125px;
-            top: 50px;
-            padding: 10px;
-            box-sizing: border-box;
-            border-radius: 5px;
-            background-color: $colorG;
-            box-shadow: 0 0 5px $colorF;
-            color: $colorI;
-            font-size: $fontK;
-            p:first-child {
-              text-align: left;
-              margin-bottom: 10px;
-            }
-            .benefits {
-              margin-bottom: 10px;
-              .item {
-                width: 130px;
-                text-align: left;
-                .iconfont {
-                  color: $colorM;
-                  font-size: 12px;
-                  vertical-align: middle;
-                  margin-right: 3px;
-                }
-                .icon-HD {
-                  font-size: 20px;
-                }
-                .icon-lishi {
-                  font-size: 16px;
-                }
-                .icon-fuwenben {
-                  font-size: 16px;
-                  margin-left: 2px;
-                }
-              }
-            }
-            .login-btn {
-              width: 250px;
-              height: 30px;
-              background-color: $colorM;
-              color: $colorG;
-              border: none;
+            top: 40px;
+            padding-top: 12px;
+            .login-info {
+              padding: 10px;
+              box-sizing: border-box;
               border-radius: 5px;
-              margin-bottom: 10px;
-              cursor: pointer;
-              &:hover {
-                background-color: $colorP;
+              background-color: $colorG;
+              box-shadow: 0 0 5px $colorF;
+              color: $colorI;
+              font-size: $fontK;
+              p:first-child {
+                text-align: left;
+                margin-bottom: 10px;
               }
-            }
-            .register {
-              color: $colorM;
-              cursor: pointer;
+              .benefits {
+                margin-bottom: 10px;
+                .item {
+                  width: 130px;
+                  text-align: left;
+                  .iconfont {
+                    color: $colorM;
+                    font-size: 12px;
+                    vertical-align: middle;
+                    margin-right: 3px;
+                  }
+                  .icon-HD {
+                    font-size: 20px;
+                  }
+                  .icon-lishi {
+                    font-size: 16px;
+                  }
+                  .icon-fuwenben {
+                    font-size: 16px;
+                    margin-left: 2px;
+                  }
+                }
+              }
+              .login-btn {
+                width: 250px;
+                height: 30px;
+                background-color: $colorM;
+                color: $colorG;
+                border: none;
+                border-radius: 5px;
+                margin-bottom: 10px;
+                cursor: pointer;
+                &:hover {
+                  background-color: $colorP;
+                }
+              }
+              .register {
+                color: $colorM;
+                cursor: pointer;
+              }
             }
           }
         }
