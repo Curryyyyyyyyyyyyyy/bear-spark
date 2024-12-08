@@ -1,6 +1,7 @@
 <script setup>
   import NavHeader from '@/components/NavHeader.vue'
   import NewsModifyBox from './NewsModifyBox.vue';
+  import NewsForwardBox from './NewsForwardBox.vue';
   import { useRoute, useRouter } from 'vue-router';
   import {getNewsDetailApi,deleteNewsApi,getVoteDetailApi} from '@/api/news.js'
   import {revokeBookLiveApi, modBookLiveStateApi} from '@/api/bookLive'
@@ -144,6 +145,9 @@
   //#endregion
   //#region 编辑
   const showModifyBox = ref(false)
+  //#endregion
+  //#region 转发
+  const showForwardBox = ref(false)
   //#endregion
 </script>
 
@@ -353,7 +357,7 @@
           <i class="iconfont icon-dianzan"></i>
           <div class="side-toolbar-item-text">1</div>
         </div>
-        <div class="side-toolbar-item forward-info">
+        <div @click="showForwardBox = true" class="side-toolbar-item forward-info">
           <i class="iconfont icon-zhuanfa"></i>
           <div class="side-toolbar-item-text">1</div>
         </div>
@@ -377,6 +381,12 @@
     :newsInfo="newsInfo"
   >
   </news-modify-box>
+  <news-forward-box
+    v-if="showForwardBox"
+    @closeForwardBox="showForwardBox = false"
+    :newsInfo="newsInfo"
+  >
+  </news-forward-box>
 </template>
 
 <style lang="scss"> 

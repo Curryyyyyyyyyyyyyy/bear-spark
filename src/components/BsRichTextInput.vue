@@ -118,7 +118,6 @@
   })
   function getCursorPosition() {
     let selection = document.getSelection()
-    console.log(selection.focusNode)
     let range = new Range()
     range.selectNode(selection.focusNode)
     range.setStart(selection.focusNode, selection.focusOffset)

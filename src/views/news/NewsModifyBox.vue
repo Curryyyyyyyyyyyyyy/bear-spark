@@ -4,7 +4,7 @@
   import BsEmoji from '@/components/BsEmoji.vue'
   import { onMounted, ref } from 'vue';
   import {modifyNewsApi} from '@/api/news.js'
-  import { ElMessageBox } from 'element-plus';
+  import { ElMessage, ElMessageBox } from 'element-plus';
 
   const emit = defineEmits(['closeModifyBox'])
   const props = defineProps(['newsInfo'])
@@ -70,6 +70,7 @@
       content:modifyInputRef.value.contentDom.innerHTML,
       visibility:visibility.value
     })
+    ElMessage.success('发布成功')
   }
 </script>
 
