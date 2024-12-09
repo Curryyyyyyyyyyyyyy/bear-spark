@@ -1,10 +1,10 @@
 <script setup>
   import { onMounted, ref } from 'vue';
-  import NavHeader from '@/components/NavHeader.vue'
+  import NavHeader from '@/components/common/NavHeader.vue'
   import NewsUserBox from './NewsUserBox.vue';
   import NewsPublishBox from './NewsPublishBox.vue';
   import NewsAsideBox from './NewsAsideBox.vue';
-  import NewsList from '@/components/NewsList.vue'
+  import NewsList from '@/components/news/NewsList.vue'
   import {useRouter} from 'vue-router'
   import {getNewsPrepareApi} from '@/api/news.js'
   import { debounce } from '@/hooks/performance';
@@ -68,7 +68,6 @@
   //   {avatarUrl:'/imgs/default-avatar.png',username:'周权',fansNumInfo:888},
   // ]
   // sideBarUrl.value = '/imgs/slide-bar.jpg'
-  // backgroundUrl.value = '/imgs/news-background.png'
   onMounted(async () => {
     /* 获取关注的列表、表情包列表、热门标签列表 */
     const res = await getNewsPrepareApi()
@@ -78,29 +77,23 @@
   })
   //#endregion
   //#region up列表
-  const activeUpIndex = ref(-1)
+  const activeUp = ref(null)
   const upListDom = ref()
   function changeUpListScroll(n) {
     upListDom.value.scrollLeft += n
   }
-  //#endregion
-  //#region tab栏
-  const activeNum = ref(0)
-  const highlight = ref()
-  function addActive(num) {
-    activeNum.value = num
-    if(num === 0) {
-      highlight.value.style.transform = 'translateX(37px)'
-    } else if(num === 1) {
-      highlight.value.style.transform = 'translateX(111px)'
-    } else if(num === 2) {
-      highlight.value.style.transform = 'translateX(199px)'
-    } else if(num === 3) {
-      highlight.value.style.transform = 'translateX(273px)'
-    }
+  function getUserNewsList(username) {
+    activeUp.value = username
+    newsListRef.value.getUserNewsList(username)
   }
   //#endregion
-  /* 处理光标 */
+  //#region tab栏
+  const tab = ref('all')
+  function changeTab(tabName) {
+    tab.value = tabName
+  }
+  //#endregion
+  //#region 处理光标
   const publishBox = ref()
   const newsListRef = ref()
   document.onselectionchange = () => {
@@ -110,7 +103,7 @@
       newsListRef.value.mineRefList.forEach((item,index) => {
         if(item.contains(range.commonAncestorContainer)) {
           newsListRef.value.rangeOfContentBoxList[index] = range
-          newsListRef.value.curRangeIndex.value = index
+          newsListRef.value.curRangeIndex = index
         }
       })
       /* 处理publish输入框光标 */
@@ -119,6 +112,7 @@
       }
     }
   }
+  //#endregion
   //#region 页面尺寸缩放调整
   let smallSize = ref(false)
   window.addEventListener('resize', ()=> {
@@ -129,6 +123,7 @@
     }
   })
   //#endregion
+  //#region 回顶部
   const showBackToTop = ref(false)
   window.addEventListener('scroll', debounce(() => {
     if(document.documentElement.scrollTop > 700) showBackToTop.value = true
@@ -137,6 +132,7 @@
   function backToTop() {
     document.documentElement.scrollTop = 0
   }
+  //#endregion
 </script>
 
 <template>
@@ -162,11 +158,11 @@
           <div @click="changeUpListScroll(-400)" class="left-btn"><i class="iconfont icon-zuojiantou"></i></div>
           <div ref="upListDom" @click="showArrow = true" class="up-list">
             <div class="up-box-list" @hover="showArrow = true">
-              <div @click="activeUpIndex = -1" class="all-news" :class="{'active':activeUpIndex === -1}">
+              <div @click="getUserNewsList('')" class="all-news" :class="{'active':!activeUp}">
                 <span><i class="iconfont icon-dongtai"></i></span>
                 <p>全部动态</p>
               </div>
-              <div v-for="(item,index) in followerList" :key="index" @click="activeUpIndex = index" class="up-box" :class="{'active':activeUpIndex === index}">
+              <div v-for="(item,index) in followerList" :key="index" @click="getUserNewsList(item.username)" class="up-box" :class="{'active':activeUp === item.username}">
                 <img :src="item.avatarUrl" alt="头像">
                 <p>{{ item.username }}</p>
               </div>
@@ -175,16 +171,15 @@
           <div @click="changeUpListScroll(400)" class="right-btn"><i class="iconfont icon-youjiantou"></i></div>
           <div class="shim"></div>
         </div>
-        <div v-if="activeUpIndex === -1" class="news-tabs">
+        <div v-if="!activeUp" class="news-tabs">
           <div class="news-tabs-list">
-            <div @click="addActive(0)" :class="{'active':activeNum === 0}" class="news-tabs-item">全部</div>
-            <div @click="addActive(1)" :class="{'active':activeNum === 1}" class="news-tabs-item">视频投稿</div>
-            <div @click="addActive(2)" :class="{'active':activeNum === 2}" class="news-tabs-item">追番追剧</div>
-            <div @click="addActive(3)" :class="{'active':activeNum === 3}" class="news-tabs-item">专栏</div>
+            <div @click="changeTab('all')" :class="{'active':tab === 'all'}" class="news-tabs-item">全部</div>
+            <div @click="changeTab('video')" :class="{'active':tab === 'video'}" class="news-tabs-item">视频</div>
+            <div @click="changeTab('article')" :class="{'active':tab === 'article'}" class="news-tabs-item">专栏</div>
           </div>
-          <div ref="highlight" class="news-tabs-highlight"></div>
+          <div class="news-tabs-highlight" :style="{transform:tab==='all'?`translateX(37px)`:(tab==='video'?`translateX(98px)`:`translateX(158px)`)}"></div>
         </div>
-        <NewsList ref="newsListRef" :followerList="followerList"></NewsList>
+        <NewsList ref="newsListRef" :tab="tab" :activeUp="activeUp"></NewsList>
       </div>
       <news-aside-box :sideBarUrl="sideBarUrl" :recentTagList="recentTagList"></news-aside-box>
     </div>

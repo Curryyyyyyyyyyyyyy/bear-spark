@@ -1,7 +1,7 @@
 <script setup>
-  import BsTagSelect from '@/components/BsTagSelect.vue';
-  import BsRichTextInput from '@/components/BsRichTextInput.vue';
-  import BsModal from '@/components/BsModal.vue'
+  import BsTagSelect from '@/components/news/BsTagSelect.vue';
+  import BsRichTextInput from '@/components/input/BsRichTextInput.vue';
+  import BsModal from '@/components/common/BsModal.vue'
   import { nextTick, onBeforeUnmount, ref } from 'vue';
   import dayjs from 'dayjs';
   import {timeFormat} from '@/hooks/timeFormat.js'
@@ -57,12 +57,13 @@
       imgUrlList.value = []
       newsSeePermission.value = 0
       newsCommentPermission.value = 0
-      pubTime = ''
       showLivesBox.value = false
       bookLiveInfo.value = ''
       showVoteBox.value = false
       voteInfo.value = ''
       pictureList.value = []
+      pubTime = ''
+      pubTimeBox.value = false
       //#endregion
   }, 1000) 
   //#endregion
@@ -91,7 +92,6 @@
     }
     const fd = new FormData()
     fd.append('file',pictureFile)
-    console.log(event)
     const imgUrl = await uploadApi(fd)
     pictureList.value.push({src:imgUrl.data,remainTime:1800})
     imgUrlList.value = pictureList.value.map(item => item.src)

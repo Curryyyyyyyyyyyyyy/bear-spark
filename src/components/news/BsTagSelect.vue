@@ -1,7 +1,7 @@
 <script setup>
   import { onMounted, ref } from 'vue';
   import {getTagListApi} from '@/api/news'
-  import { debounce } from '../hooks/performance';
+  import { debounce } from '../../hooks/performance';
 
   const emit = defineEmits(['getSelectTagId'])
   const props = defineProps(['defaultTag','defaultTagId'])
@@ -167,7 +167,7 @@
 </template>
 
 <style lang="scss">
-  @use '../assets/sass/config.scss' as *;
+  @use '@/assets/sass/config.scss' as *;
   .tag-desk {
     .tag-search {
       height: 24px;

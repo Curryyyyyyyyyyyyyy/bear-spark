@@ -1,6 +1,6 @@
 <script setup>
   import { ref } from 'vue';
-  import useUser from '../store/user';
+  import useUser from '../../store/user';
   import { ElMessage } from 'element-plus';
   import {voteApi,getVoteDetailApi} from '@/api/news.js'
 
@@ -165,8 +165,8 @@
 </template>
 
 <style lang="scss">
-  @use '../assets/sass/config.scss' as *;
-  @use '../assets/sass/mixin.scss' as *;
+  @use '@/assets/sass/config.scss' as *;
+  @use '@/assets/sass/mixin.scss' as *;
   .bs-vote-modal-wrapper {
     .mask {
       z-index: 200;

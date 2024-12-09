@@ -32,7 +32,7 @@
 </template>
 
 <style lang="scss">
-  @use '../assets/sass/config.scss' as *;
+  @use '@/assets/sass/config.scss' as *;
   .bs-modal {
     .mask {
       z-index: 200;

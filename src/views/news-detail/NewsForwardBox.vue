@@ -1,8 +1,8 @@
 <script setup>
   import { ref } from 'vue';
-  import BsEmoji from '@/components/BsEmoji.vue'
-  import BsTagSelect from '@/components/BsTagSelect.vue'
-  import BsRichTextInput from '@/components/BsRichTextInput.vue'
+  import BsEmoji from '@/components/input/BsEmoji.vue'
+  import BsTagSelect from '@/components/news/BsTagSelect.vue'
+  import BsRichTextInput from '@/components/input/BsRichTextInput.vue'
   import {fowardNewsApi} from '@/api/news.js'
   import { ElMessage } from 'element-plus';
   import router from '@/router';

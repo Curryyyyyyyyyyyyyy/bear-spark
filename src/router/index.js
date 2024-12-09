@@ -18,23 +18,12 @@ const routes = [
   {
     path:'/news_index',
     name:'news_index',
-    component:()=>import('@/views/news/news.vue'),
-    children:[
-      {
-        path:'/',
-        name:'tab_all',
-      }
-    ]
-  },{
+    component:()=>import('@/views/news/news.vue')
+  },
+  {
     path:'/news_detail/:id',
     name:'news_detail',
-    component:()=>import('@/views/news-detail/NewsDetail.vue'),
-    children:[
-      {
-        path:'/',
-        name:'comment',
-      }
-    ]
+    component:()=>import('@/views/news-detail/NewsDetail.vue')
   }
 ]
 

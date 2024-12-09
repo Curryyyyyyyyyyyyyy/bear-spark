@@ -1,7 +1,7 @@
 <script setup>
   import login from '@/views/login.vue'
   import { ElMessage, ElMessageBox } from 'element-plus';
-  import useUser from '../store/user';
+  import useUser from '@/store/user';
   import { storeToRefs } from 'pinia';
   import { ref} from 'vue';
   import { useRouter } from 'vue-router';
@@ -194,9 +194,9 @@
 </template>
 
 <style lang="scss">
-  @use '../assets/sass/mixin.scss' as *;
-  @use '../assets/sass/config.scss' as *;
-  @use '../assets/sass/animation.scss' as *;
+  @use '@/assets/sass/mixin.scss' as *;
+  @use '@/assets/sass/config.scss' as *;
+  @use '@/assets/sass/animation.scss' as *;
   .nav-header {
     min-width: $min-width;
     max-width: $max-width;
