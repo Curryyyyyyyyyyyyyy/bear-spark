@@ -1,7 +1,7 @@
 <script setup>
-  import BsEmoji from '@/components/BsEmoji.vue';
-  import BsTagSelect from '@/components/BsTagSelect.vue';
-  import BsVoteModal from '@/components/BsVoteModal.vue'
+  import BsEmoji from '@/components/input/BsEmoji.vue';
+  import BsTagSelect from '@/components/news/BsTagSelect.vue';
+  import BsVoteModal from '@/components/news/BsVoteModal.vue'
   import {handleContentBoxClick,changePubContent} from '@/hooks/richTextInput'
   import { ElMessage, ElMessageBox } from 'element-plus';
   import { reactive, ref } from 'vue';
@@ -17,8 +17,8 @@
   const {username,avatarUrl} = storeToRefs(userStore)
   /* Router */
   const router = useRouter()
-  defineProps(['followerList'])
-
+  /* Props */
+  const props = defineProps(['tab','activeUp'])
   //#region 预约直播
   function revokeBookLive(bookLiveId,index) {
     ElMessageBox.confirm(
@@ -234,10 +234,11 @@
     setTimeout(async () => {
       const newsRes = await getNewsListApi({
         pageNum:pageNum.value++,
-        pageSize:pageSize.value
+        pageSize:pageSize.value,
+        username:props.activeUp
       })
       newsList.value.push(...newsRes.records)
-      if(newsRes.total === newsList.value.length) isArriveTotal.value = true
+      if(newsRes.total <= newsList.value.length) isArriveTotal.value = true
       contentNumList.push(...new Array(newsRes.records.length).fill(0))
       showAtSelect.push(...new Array(newsRes.records.length).fill(false))
       busy.value = false;
@@ -592,10 +593,33 @@
     }
   }
   //#endregion
+  //#region 查看指定用户动态
+  function getUserNewsList(username) {
+    pageNum.value = 1
+    newsList.value.splice(0, newsList.value.length)
+    contentNumList.splice(0, contentNumList.length)
+    showAtSelect.splice(0, showAtSelect.length)
+    isArriveTotal.value = false
+    newsLoading.value = true
+    setTimeout(async () => {
+      const newsRes = await getNewsListApi({
+        pageNum:pageNum.value++,
+        pageSize:pageSize.value,
+        username:username
+      })
+      newsList.value.push(...newsRes.records)
+      if(newsRes.total <= newsList.value.length) isArriveTotal.value = true
+      contentNumList.push(...new Array(newsRes.records.length).fill(0))
+      showAtSelect.push(...new Array(newsRes.records.length).fill(false))
+      newsLoading.value = false
+    }, 500);
+  }
+  //#endregion 
   defineExpose({
     mineRefList,
     rangeOfContentBoxList,
-    curRangeIndex
+    curRangeIndex,
+    getUserNewsList
   })
 </script>
 
@@ -697,7 +721,7 @@
               <div class="author-info">
                 <img :src="item.quotedHappening.avatarUrl" alt="头像">
                 <span class="author-username">{{ item.quotedHappening.username }}</span>
-                <span class="refer-text">投稿了文章</span>
+                <span v-if="false" class="refer-text">投稿了文章</span>
               </div>
             </div>
             <div v-if="item.quotedHappening.tag" class="news-tag">
@@ -967,6 +991,9 @@
                   background-color: $colorR;
                 }
               }
+            }
+            .news-book-lives {
+              background-color: $colorG
             }
           }
           .quoted-isdelete {

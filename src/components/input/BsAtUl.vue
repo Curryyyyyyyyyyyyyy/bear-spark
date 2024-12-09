@@ -1,6 +1,6 @@
 <script setup>
   import {getFollowerListApi} from '@/api/user.js'
-  import BsAtLi from '@/components/BsAtLi.vue'
+  import BsAtLi from '@/components/input/BsAtLi.vue'
   import { onMounted,ref } from 'vue';
   defineProps(['atSelectPosition'])
   const emit = defineEmits(['selectAtUser'])

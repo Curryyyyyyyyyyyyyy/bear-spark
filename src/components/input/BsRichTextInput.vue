@@ -1,6 +1,6 @@
 <script setup>
   import { ElMessage } from 'element-plus';
-  import BsAtUl from './BsAtUl.vue';
+  import BsAtUl from '@/components/input/BsAtUl.vue';
   import { ref,reactive } from 'vue';
 
   defineProps(['placeholder'])
@@ -224,7 +224,7 @@
 </template>
 
 <style lang="scss">
-  @use '../assets/sass/config.scss' as *;
+  @use '@/assets/sass/config.scss' as *;
   .bs-rich-text-input {
     position: relative;
     padding-top: 5px;

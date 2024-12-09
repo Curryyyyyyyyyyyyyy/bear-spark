@@ -11,7 +11,7 @@ const app = createApp(App)
 app.use(pinia)
 app.use(router)
 app.use(VueLazyLoad, {
-  loading:'/imgs/loading-svg/loading-cylon-red.svg'
+  loading:'/imgs/loading-svg/loading-balls.svg'
 })
 app.use(infiniteScroll)
 app.mount('#app')
