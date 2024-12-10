@@ -44,7 +44,6 @@
       visibility:newsSeePermission.value,
       advanceRelease:earlyPublish.value,
       commentAble:newsCommentPermission.value,
-      submissionId:'',
       pubTime:pubTime,
       bookLiveInfo:bookLiveInfo.value,
       voteInfo:voteInfo.value

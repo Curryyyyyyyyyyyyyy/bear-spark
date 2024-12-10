@@ -20,93 +20,93 @@
   /* onMounted */
   const newsInfo = ref({})
   onMounted(async () => {
-    newsInfo.value = await getNewsDetailApi({
-      happeningId:route.params.id
-    })
-    // newsInfo.value = {
-    //     "id":1,
-    //     "username": "万超",
-    //     "avatarUrl": "http://dummyimage.com/100x100",
-    //     "title": "现无称点进其原",
-    //     "content": "11",
-    //     "tagId":1,
-    //     "tag": "pariatur eiusmod aliqua labore reprehenderit",
-    //     "viewNumInfo": 41,
-    //     "likeNumInfo": 50,
-    //     "commentNumInfo": 9,
-    //     "forwardNumInfo":0,
-    //     "commentAble": 0,
-    //     "advanceRelease": 0,
-    //     "visibility":1,
-    //     "voteSimpleInfo": {
-    //         "voteId": 8,
-    //         "title": "需观反干分取必",
-    //         "voteNumInfo": "43"
-    //     },
-    //     "quotedHappening":{
-    //       "id":1,
-    //       "username": "万超",
-    //       "avatarUrl": "http://dummyimage.com/100x100",
-    //       "title": "现无称点进其原",
-    //       "content": "",
-    //       "tag": "pariatur eiusmod aliqua labore reprehenderit",
-    //       "viewNumInfo": 41,
-    //       "likeNumInfo": 50,
-    //       "commentNumInfo": 9,
-    //       "forwardNumInfo":0,
-    //       "commentAble": 0,
-    //       "advanceRelease": 0,
-    //       "voteSimpleInfo": {
-    //         "voteId": 8,
-    //         "title": "需观反干分取必",
-    //         "voteNumInfo": "43"
-    //       },
-    //       "imgUrlList": [
-    //           "http://dummyimage.com/400x400"
-    //       ],
-    //       "pubTimeInfo": "1975-04-15 04:31:03"
-    //     },
-    //     "imgUrlList": [
-    //         "http://dummyimage.com/400x400"
-    //     ],
-    //     "pubTimeInfo": "1975-04-15 04:31:03",
-    //     'likeInfoList':[
-    //       {
-    //         'avatarUrl':'/imgs/default-avatar.png',
-    //         'username':'周权'
-    //       },
-    //       {
-    //         'avatarUrl':'/imgs/default-avatar.png',
-    //         'username':'周权'
-    //       },
-    //       {
-    //         'avatarUrl':'/imgs/default-avatar.png',
-    //         'username':'周权'
-    //       },
-    //       {
-    //         'avatarUrl':'/imgs/default-avatar.png',
-    //         'username':'周权'
-    //       },
-    //     ],
-    //     'forwardInfoList':[
-    //       {
-    //         'avatarUrl':'/imgs/default-avatar.png',
-    //         'username':'周权'
-    //       },
-    //       {
-    //         'avatarUrl':'/imgs/default-avatar.png',
-    //         'username':'周权'
-    //       },
-    //       {
-    //         'avatarUrl':'/imgs/default-avatar.png',
-    //         'username':'周权'
-    //       },
-    //       {
-    //         'avatarUrl':'/imgs/default-avatar.png',
-    //         'username':'周权'
-    //       },
-    //     ]
-    // }
+    // newsInfo.value = await getNewsDetailApi({
+    //   happeningId:route.params.id
+    // })
+    newsInfo.value = {
+        "id":1,
+        "username": "万超",
+        "avatarUrl": "http://dummyimage.com/100x100",
+        "title": "现无称点进其原",
+        "content": "11",
+        "tagId":1,
+        "tag": "pariatur eiusmod aliqua labore reprehenderit",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 9,
+        "forwardNumInfo":0,
+        "commentAble": 0,
+        "advanceRelease": 0,
+        "visibility":1,
+        "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+        },
+        "quotedHappening":{
+          "id":1,
+          "username": "万超",
+          "avatarUrl": "http://dummyimage.com/100x100",
+          "title": "现无称点进其原",
+          "content": "",
+          "tag": "pariatur eiusmod aliqua labore reprehenderit",
+          "viewNumInfo": 41,
+          "likeNumInfo": 50,
+          "commentNumInfo": 9,
+          "forwardNumInfo":0,
+          "commentAble": 0,
+          "advanceRelease": 0,
+          "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+          },
+          "imgUrlList": [
+              "http://dummyimage.com/400x400"
+          ],
+          "pubTimeInfo": "1975-04-15 04:31:03"
+        },
+        "imgUrlList": [
+            "http://dummyimage.com/400x400"
+        ],
+        "pubTimeInfo": "1975-04-15 04:31:03",
+        'likeInfoList':[
+          {
+            'avatarUrl':'/imgs/default-avatar.png',
+            'username':'周权'
+          },
+          {
+            'avatarUrl':'/imgs/default-avatar.png',
+            'username':'周权'
+          },
+          {
+            'avatarUrl':'/imgs/default-avatar.png',
+            'username':'周权'
+          },
+          {
+            'avatarUrl':'/imgs/default-avatar.png',
+            'username':'周权'
+          },
+        ],
+        'forwardInfoList':[
+          {
+            'avatarUrl':'/imgs/default-avatar.png',
+            'username':'周权'
+          },
+          {
+            'avatarUrl':'/imgs/default-avatar.png',
+            'username':'周权'
+          },
+          {
+            'avatarUrl':'/imgs/default-avatar.png',
+            'username':'周权'
+          },
+          {
+            'avatarUrl':'/imgs/default-avatar.png',
+            'username':'周权'
+          },
+        ]
+    }
   })
   //#region 投票
   const showVoteModal = ref(false)

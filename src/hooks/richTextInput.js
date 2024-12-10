@@ -1,8 +1,6 @@
-import { ElMessage } from "element-plus"
-
 /* 表情包 */
 export function insertEmoji(emojiUrl,index,contentNum,rangeOfContentBox,mineRefList) {
-  if(contentNum[index] + 3 > 300) return ElMessage.error('字数已达上限')
+  // if(contentNum[index] + 3 > 300) return ElMessage.error('字数已达上限')
   const emojiImg = document.createElement('img')
   emojiImg.src = emojiUrl
   if(!rangeOfContentBox[index]) {
@@ -55,27 +53,29 @@ export function changePubContent(event,index,showAtSelect,mineRefList,contentNum
   if(event.data === '@') {
     setTimeout(() => {
       showAtSelect[index] = true
-      const {left, top} = getCursorPosition()
+      const {left, top} = getCursorPosition(event)
       atSelectPosition.left = left + 'px'
-      atSelectPosition.top = top + 20 + 'px'
+      atSelectPosition.top = top + 'px'
     }, 200);
   } else {
     showAtSelect[index] = false
   }
-  if(handleContentNum(mineRefList[index]) > 300) {
-    const overTextNum = handleContentNum(mineRefList[index]) - 300
-    event.target.innerHTML = event.target.innerHTML.slice(0, event.target.innerHTML.length - overTextNum)
-    ElMessage.error('字数已达上限！')
-    event.target.blur()
-  }
+  // if(handleContentNum(mineRefList[index]) > 300) {
+  //   const overTextNum = handleContentNum(mineRefList[index]) - 300
+  //   event.target.innerHTML = event.target.innerHTML.slice(0, event.target.innerHTML.length - overTextNum)
+  //   ElMessage.error('字数已达上限！')
+  //   event.target.blur()
+  // }
   contentNum[index] = handleContentNum(mineRefList[index])
 }
 /* 获取输入时光标位置 */
-export function getCursorPosition() {
+export function getCursorPosition(event) {
   let selection = document.getSelection()
   let range = new Range()
   range.selectNode(selection.focusNode)
   range.setStart(selection.focusNode, selection.focusOffset)
-  const {left, top} = range.getBoundingClientRect()
+  let {left, top} = range.getBoundingClientRect()
+  left -= event.target.getBoundingClientRect().left
+  top -= event.target.getBoundingClientRect().top - 20
   return {left, top}
 }
