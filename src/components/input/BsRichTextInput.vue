@@ -1,5 +1,4 @@
 <script setup>
-  import { ElMessage } from 'element-plus';
   import BsAtUl from '@/components/input/BsAtUl.vue';
   import { ref,reactive } from 'vue';
 
@@ -20,7 +19,7 @@
   // }
   /* 插入表情包 */
   function insertEmoji(emojiUrl) {
-    if(contentNum.value + 3 > 300) return ElMessage.error('字数已达上限')
+    // if(contentNum.value + 3 > 300) return ElMessage.error('字数已达上限')
     const emojiImg = document.createElement('img')
     emojiImg.src = emojiUrl
     if(!rangeOfContentBox.value) {
@@ -84,12 +83,12 @@
     } else {
       showAtSelect.value = false
     }
-    if(handleContentNum() > 300) {
-      const overTextNum = handleContentNum() - 300
-      event.target.innerHTML = event.target.innerHTML.slice(0, event.target.innerHTML.length - overTextNum)
-      ElMessage.error('字数已达上限！')
-      event.target.blur()
-    }
+    // if(handleContentNum() > 300) {
+    //   const overTextNum = handleContentNum() - 300
+    //   event.target.innerHTML = event.target.innerHTML.slice(0, event.target.innerHTML.length - overTextNum)
+    //   ElMessage.error('字数已达上限！')
+    //   event.target.blur()
+    // }
     contentNum.value = handleContentNum()
   }
   function handleContentBlur() {
@@ -120,11 +119,13 @@
     let range = new Range()
     range.selectNode(selection.focusNode)
     range.setStart(selection.focusNode, selection.focusOffset)
-    const {left, top} = range.getBoundingClientRect()
+    let {left, top} = range.getBoundingClientRect()
+    left -= contentDom.value.getBoundingClientRect().left
+    top -= contentDom.value.getBoundingClientRect().top
     return {left, top}
   }
   function handleClickAt() {
-    if(contentNum.value + 1 > 300) return ElMessage.error('字数已达上限')
+    // if(contentNum.value + 1 > 300) return ElMessage.error('字数已达上限')
     contentNum.value++
     const atElement = '@'
     if(!rangeOfContentBox.value) {
@@ -139,9 +140,11 @@
       rangeOfContentBox.value.deleteContents()
       rangeOfContentBox.value.insertNode(atNode)
     }
-    const {left, top} = rangeOfContentBox.value.getBoundingClientRect()
+    let {left, top} = rangeOfContentBox.value.getBoundingClientRect()
+    left -= contentDom.value.getBoundingClientRect().left-14
+    top -= contentDom.value.getBoundingClientRect().top-20
     atSelectPosition.left = left + 'px'
-    atSelectPosition.top = top + 20 + 'px'
+    atSelectPosition.top = top + 'px'
     rangeOfContentBox.value.collapse(false)
     document.getSelection().removeAllRanges()
     document.getSelection().addRange(rangeOfContentBox.value)
@@ -150,7 +153,7 @@
     }, 200);
   }
   function selectAtUser(username) {
-    if(handleContentNum() + username.length + 1 > 300) return ElMessage.error('字数已达上限')
+    // if(handleContentNum() + username.length + 1 > 300) return ElMessage.error('字数已达上限')
     showAtSelect.value = false
     chatInputOffset.setStart(focusNode,focusOffset.value-1)
     chatInputOffset.setEnd(focusNode,focusOffset.value)
@@ -203,49 +206,54 @@
 </script>
 
 <template>
-  <div 
-    ref="contentDom"
-    contenteditable="true"
-    @blur="handleContentBlur"
-    @click="handleContentBoxClick"
-    @input="changePubContent"
-    :class="{'input-empty':!contentNum}"
-    class="bs-rich-text-input"
-    :placeholder="placeholder"
-    tabindex="0"
-  >
+  <div class="bs-input-box">
+    <div 
+      ref="contentDom"
+      contenteditable="true"
+      @blur="handleContentBlur"
+      @click="handleContentBoxClick"
+      @input="changePubContent"
+      :class="{'input-empty':!contentNum}"
+      class="bs-rich-text-input"
+      :placeholder="placeholder"
+      tabindex="0"
+    >
+    </div>
+    <bs-at-ul 
+      v-if="showAtSelect" 
+      @selectAtUser="selectAtUser" 
+      :atSelectPosition="atSelectPosition"
+    >
+    </bs-at-ul>
   </div>
-  <bs-at-ul 
-    v-if="showAtSelect" 
-    @selectAtUser="selectAtUser" 
-    :atSelectPosition="atSelectPosition"
-  >
-  </bs-at-ul>
 </template>
 
 <style lang="scss">
   @use '@/assets/sass/config.scss' as *;
-  .bs-rich-text-input {
+  .bs-input-box {
     position: relative;
-    padding-top: 5px;
-    width: 100%;
-    font-size: $fontJ;
-    img {
-      width: 20px;
-      height: 20px;
-      vertical-align: middle;
+    .bs-rich-text-input {
+      position: relative;
+      padding-top: 5px;
+      width: 100%;
+      font-size: $fontJ;
+      img {
+        width: 20px;
+        height: 20px;
+        vertical-align: middle;
+      }
+      .username {
+        color: $colorM;
+      }
     }
-    .username {
-      color: $colorM;
-    }
-  }
-  .input-empty {
-    &::after {
-      content: attr(placeholder);
-      position: absolute;
-      top: 5px;
-      color: $colorD;
-      cursor: text;
+    .input-empty {
+      &::after {
+        content: attr(placeholder);
+        position: absolute;
+        top: 5px;
+        color: $colorD;
+        cursor: text;
+      }
     }
   }
 </style>

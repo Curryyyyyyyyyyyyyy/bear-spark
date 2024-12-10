@@ -28,7 +28,7 @@ export const getNewsDetailApi = (params) => {
 }
 /* 转发动态 */
 export const fowardNewsApi = (params) => {
-  return request.post('/happening/forward', params)
+  return request.post('/forward/happening', params)
 }
 /* 获取投票详细信息 */
 export const getVoteDetailApi = (params) => {
@@ -42,7 +42,7 @@ export const voteApi = (params) => {
 }
 /* 点赞/取消点赞 */
 export const likeNewsApi = (params) => {
-  return request.post('/happening/like',params)
+  return request.post('/like/happening',params)
 }
 /* 删除动态 */
 export const deleteNewsApi = (params) => {

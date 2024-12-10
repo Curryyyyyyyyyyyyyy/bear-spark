@@ -39,7 +39,7 @@
   @use '@/assets/sass/config.scss' as *;
   .bs-at-ul {
     z-index: 10;
-    position: fixed;
+    position: absolute;
     // bottom: -180px;
     width: 200px;
     border: 1px solid #e3e5e7;
