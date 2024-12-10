@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import useUser from '../../store/user';
   import { ElMessage } from 'element-plus';
   import {voteApi,getVoteDetailApi} from '@/api/news.js'
@@ -7,9 +7,68 @@
   const userStore = useUser()
   const {username} = userStore
   const emit = defineEmits(['closeVoteModal'])
-  const props = defineProps(['voteId','voteDetail'])
+  const props = defineProps(['voteId'])
 
-  const voteDetailInfo = ref(props.voteDetail)
+  const voteDetailInfo = ref({})
+  // voteDetailInfo.value = {
+  //       "publisherInfo":{
+  //         "userId":1111,
+  //         "username":"李四",
+  //         "avatarUrl":'/imgs/default-avatar.png'
+  //       },
+  //       "title": "非住矿八",
+  //       "desc":'无',
+  //       "voteNumInfo": "37",
+  //       "voteType": 2,
+  //       "optionList": [
+  //           {
+  //               "optionId": 56,
+  //               "optionContent": "Duis ea aliqua",
+  //               "optionPhotoUrl": "http://dummyimage.com/400x400",
+  //               "optionPercent": "officia ullamco minim dolore",
+  //               "selected": 1
+  //           },
+  //           {
+  //               "optionId": 29,
+  //               "optionContent": "ullamco",
+  //               "optionPhotoUrl": "http://dummyimage.com/400x400",
+  //               "optionPercent": "nisi deserunt",
+  //               "selected": 0
+  //           },
+  //           {
+  //               "optionId": 38,
+  //               "optionContent": "fugiat officia dolore ut irure",
+  //               "optionPhotoUrl": "http://dummyimage.com/400x400",
+  //               "optionPercent": "labore mollit deserunt amet",
+  //               "selected": 1
+  //           }
+  //       ],
+  //       "voteLim": 74,
+  //       "voted": 1,
+  //       "dead": 0,
+  //       "voterInfoList": [
+  //           {
+  //               "username": "丁敏",
+  //               "avatarUrl": "http://dummyimage.com/100x100",
+  //               "optionsInfo": "tempor ut"
+  //           },
+  //           {
+  //               "username": "武刚",
+  //               "avatarUrl": "http://dummyimage.com/100x100",
+  //               "optionsInfo": "sint nisi est"
+  //           },
+  //           {
+  //               "username": "顾强",
+  //               "avatarUrl": "http://dummyimage.com/100x100",
+  //               "optionsInfo": "Lorem consectetur quis exercitation deserunt"
+  //           }
+  //       ]
+  //   }
+  onMounted(async ()=>{
+    voteDetailInfo.value = await getVoteDetailApi({
+      voteId:props.voteId
+    })
+  })
 
   function closeVoteModal() {
     emit('closeVoteModal')
@@ -58,8 +117,8 @@
             <div class="vote-title">{{voteDetailInfo.title}}</div>
             <div class="vote-info">
               <div class="author-info">
-                <img :src="voteDetailInfo.avatarUrl" alt="头像">
-                <span class="author-username">{{ voteDetailInfo.username }}</span>
+                <img :src="voteDetailInfo.publisherInfo.avatarUrl" alt="头像">
+                <span class="author-username">{{ voteDetailInfo.publisherInfo.username }}</span>
               </div>
               <div class="vote-text">发起</div>
               <div class="vote-stat"><span class="involveNum">{{voteDetailInfo.voteNumInfo}}人</span>参与</div>

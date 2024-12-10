@@ -145,7 +145,7 @@
         </label>
         <div v-if="showTagCol" v-loading="tagLoading" class="tag-search-result">
           <div v-if="!tagLoading" class="tag-search-list">
-            <div v-for="(item,index) in tagList" :key="index" @click="handleSelectTag(item.content, item.id)" class="tag-search-item">
+            <div v-for="(item,index) in tagList" :key="index" @click="handleSelectTag(item.content, item.tagId)" class="tag-search-item">
               <i class="iconfont icon-huati"></i>
               <span class="tag-search-item-title" v-html="item.content"></span>
               <p class="tag-search-item-desc">{{item.viewNumInfo}}浏览&middot;{{item.discussNumInfo}}讨论</p>
