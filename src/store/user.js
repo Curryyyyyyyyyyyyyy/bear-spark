@@ -3,13 +3,16 @@ import {defineStore} from 'pinia'
 const useUser = defineStore('user', {
   state: () => ({
     token:'',
+    userId:'',
     username:'',
     avatarUrl:'',
     followerNumInfo:'',
     fanNumInfo:'',
     happeningNumInfo:'',
-    meritNumInfo:'',
-    coinNumInfo:'',
+    currencyInfo:{
+      meritNumInfo:'',
+      coinNumInfo:'',
+    },
     expires:0
   }),
   getters:{},

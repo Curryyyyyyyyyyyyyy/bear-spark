@@ -9,8 +9,8 @@ export function updateUserInfo() {
     userStore.followerNumInfo = userInfo.followerNumInfo
     userStore.fanNumInfo = userInfo.fanNumInfo
     userStore.happeningNumInfo = userInfo.happeningNumInfo
-    userStore.meritNumInfo = userInfo.meritNumInfo
-    userStore.coinNumInfo = userInfo.coinNumInfo
+    userStore.currencyInfo.meritNumInfo = userInfo.currencyInfo.meritNumInfo
+    userStore.currencyInfo.coinNumInfo = userInfo.currencyInfo.coinNumInfo
   })
 }
 export function deleteUserInfo() {
@@ -20,6 +20,6 @@ export function deleteUserInfo() {
   userStore.followerNumInfo = ''
   userStore.fanNumInfo = ''
   userStore.happeningNumInfo = ''
-  userStore.meritNumInfo = ''
-  userStore.coinNumInfo = ''
+  userStore.currencyInfo.meritNumInfo = ''
+  userStore.currencyInfo.coinNumInfo = ''
 }

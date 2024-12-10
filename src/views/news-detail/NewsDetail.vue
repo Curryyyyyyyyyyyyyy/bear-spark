@@ -19,17 +19,30 @@
   const route = useRoute()
   /* onMounted */
   const newsInfo = ref({})
-  onMounted(async () => {
-    // newsInfo.value = await getNewsDetailApi({
-    //   happeningId:route.params.id
-    // })
-    newsInfo.value = {
-        "id":1,
+  newsInfo.value = {
+    "happeningInfo":{
+      "happeningId":1,
+      "title": "现无称点进其原",
+      "content": "11",
+      "tag": "pariatur eiusmod aliqua labore reprehenderit",
+      "viewNumInfo": 41,
+      "likeNumInfo": 50,
+      "commentNumInfo": 9,
+      "forwardNumInfo":0,
+      "commentAble": 0,
+      "advanceRelease": 0,
+      "voteSimpleInfo": {
+          "voteId": 8,
+          "title": "需观反干分取必",
+          "voteNumInfo": "43"
+      },
+      "quotedHappening":{
+        "happeningInfo":{
+        "happeningId":1,
         "username": "万超",
         "avatarUrl": "http://dummyimage.com/100x100",
         "title": "现无称点进其原",
-        "content": "11",
-        "tagId":1,
+        "content": "",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
         "viewNumInfo": 41,
         "likeNumInfo": 50,
@@ -37,76 +50,32 @@
         "forwardNumInfo":0,
         "commentAble": 0,
         "advanceRelease": 0,
-        "visibility":1,
         "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "quotedHappening":{
-          "id":1,
-          "username": "万超",
-          "avatarUrl": "http://dummyimage.com/100x100",
-          "title": "现无称点进其原",
-          "content": "",
-          "tag": "pariatur eiusmod aliqua labore reprehenderit",
-          "viewNumInfo": 41,
-          "likeNumInfo": 50,
-          "commentNumInfo": 9,
-          "forwardNumInfo":0,
-          "commentAble": 0,
-          "advanceRelease": 0,
-          "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-          },
-          "imgUrlList": [
-              "http://dummyimage.com/400x400"
-          ],
-          "pubTimeInfo": "1975-04-15 04:31:03"
+          "voteId": 8,
+          "title": "需观反干分取必",
+          "voteNumInfo": "43"
         },
         "imgUrlList": [
             "http://dummyimage.com/400x400"
         ],
-        "pubTimeInfo": "1975-04-15 04:31:03",
-        'likeInfoList':[
-          {
-            'avatarUrl':'/imgs/default-avatar.png',
-            'username':'周权'
-          },
-          {
-            'avatarUrl':'/imgs/default-avatar.png',
-            'username':'周权'
-          },
-          {
-            'avatarUrl':'/imgs/default-avatar.png',
-            'username':'周权'
-          },
-          {
-            'avatarUrl':'/imgs/default-avatar.png',
-            'username':'周权'
-          },
-        ],
-        'forwardInfoList':[
-          {
-            'avatarUrl':'/imgs/default-avatar.png',
-            'username':'周权'
-          },
-          {
-            'avatarUrl':'/imgs/default-avatar.png',
-            'username':'周权'
-          },
-          {
-            'avatarUrl':'/imgs/default-avatar.png',
-            'username':'周权'
-          },
-          {
-            'avatarUrl':'/imgs/default-avatar.png',
-            'username':'周权'
-          },
-        ]
-    }
+        "pubTimeInfo": "1975-04-15 04:31:03"
+        },
+      },
+      "imgUrlList": [
+          "http://dummyimage.com/400x400"
+      ],
+      "pubTimeInfo": "1975-04-15 04:31:03"
+    },
+    "publisherInfo":{
+      "userId":1001,
+      "username": "万超",
+      "avatarUrl": "/imgs/default-avatar.png",
+    },
+  }
+  onMounted(async () => {
+  // newsInfo.value = await getNewsDetailApi({
+  //   happeningId:route.params.id
+  // })
   })
   //#region 投票
   const showVoteModal = ref(false)
@@ -134,7 +103,7 @@
       await revokeBookLiveApi({
         bookLiveId
       })
-      newsInfo.value.bookLiveInfo.canceled = 1
+      newsInfo.value.happeningInfo.bookLiveInfo.canceled = 1
       ElMessage({ 
         type: 'info',
         message: '已撤销',
@@ -149,7 +118,7 @@
       bookLiveId,
       booked:0
     })
-    newsInfo.value.bookLiveInfo.booked = 0
+    newsInfo.value.happeningInfo.bookLiveInfo.booked = 0
     ElMessage.success('预约成功')
   }
   async function cancelBookLive(bookLiveId) {
@@ -157,7 +126,7 @@
       bookLiveId,
       booked:1
     })
-    newsInfo.value.bookLiveInfo.booked = 1
+    newsInfo.value.happeningInfo.bookLiveInfo.booked = 1
     ElMessage.info('已取消预约')
   }
   //#endregion
@@ -188,12 +157,12 @@
       liked:liked ? 0 : 1
     })
     if(liked) {
-      newsInfo.value.liked = 0
-      newsInfo.value.likeNumInfo--
+      newsInfo.value.happeningInfo.liked = 0
+      newsInfo.value.happeningInfo.likeNumInfo--
       ElMessage.info('取消点赞')
     } else {
-      newsInfo.value.liked = 1
-      newsInfo.value.likeNumInfo++
+      newsInfo.value.happeningInfo.liked = 1
+      newsInfo.value.happeningInfo.likeNumInfo++
       ElMessage.success('点赞成功')
     }
   }
@@ -241,9 +210,9 @@
     <div class="bg"></div>
     <div class="news-detail-card">
       <div class="news-item">
-        <div v-if="newsInfo.content" class="item-warpper">
+        <div v-if="newsInfo.happeningInfo.content" class="item-warpper">
           <div class="news-item-avatar">
-            <img :src="newsInfo.avatarUrl" alt="头像">
+            <img :src="newsInfo.publisherInfo.avatarUrl" alt="头像">
           </div>
           <div class="news-item-header">
             <span class="news-item-author">{{ newsInfo.username }}</span>
@@ -276,15 +245,15 @@
             </div>
           </div>
           <div class="news-item-body">
-            <div v-if="newsInfo.tag" class="news-tag">
+            <div v-if="newsInfo.happeningInfo.tag" class="news-tag">
               <i class="iconfont icon-huati"></i>
-              <span>{{ newsInfo.tag }}</span>
+              <span>{{ newsInfo.happeningInfo.tag }}</span>
             </div>
-            <div class="news-title">{{ newsInfo.title }}</div>
-            <div class="news-text-content" v-html="newsInfo.content"></div>
-            <div v-if="newsInfo.imgUrlList" class="news-album">
+            <div class="news-title">{{ newsInfo.happeningInfo.title }}</div>
+            <div class="news-text-content" v-html="newsInfo.happeningInfo.content"></div>
+            <div v-if="newsInfo.happeningInfo.imgUrlList" class="news-album">
               <div class="news-album-preview grid">
-                <div v-for="(item, index) in newsInfo.imgUrlList" :key="index" class="news-album-preview-picture">
+                <div v-for="(item, index) in newsInfo.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
                   <img :src="item" alt="图片">
                 </div>
               </div>
@@ -309,33 +278,33 @@
                 </div>
               </a>
             </div>
-            <div v-if="newsInfo.bookLiveInfo" class="news-book-lives">
+            <div v-if="newsInfo.happeningInfo.bookLiveInfo" class="news-book-lives">
               <div class="lives-detail">
-                <p class="lives-title">直播预约：{{ newsInfo.bookLiveInfo.title }}</p>
+                <p class="lives-title">直播预约：{{ newsInfo.happeningInfo.bookLiveInfo.title }}</p>
                 <p class="lives-stat">
-                  <span class="lives-time">{{ newsInfo.bookLiveInfo.liveTimeInfo }} 直播</span>
-                  <span class="book-num">{{ newsInfo.bookLiveInfo.bookNumInfo }}人预约</span>
+                  <span class="lives-time">{{ newsInfo.happeningInfo.bookLiveInfo.liveTimeInfo }} 直播</span>
+                  <span class="book-num">{{ newsInfo.happeningInfo.bookLiveInfo.bookNumInfo }}人预约</span>
                 </p>
               </div>
               <div class="lives-btn-box">
-                <div v-if="username === newsInfo.username" class="revoke-btn-box">
-                  <button v-if="!newsInfo.bookLiveInfo.canceled" @click.stop="revokeBookLive(newsInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn revoke-btn">撤销</button>
+                <div v-if="username === newsInfo.publisherInfo.username" class="revoke-btn-box">
+                  <button v-if="!newsInfo.happeningInfo.bookLiveInfo.canceled" @click.stop="revokeBookLive(newsInfo.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn revoke-btn">撤销</button>
                   <button v-else @click.stop="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
                 </div>
                 <div v-else class="book-btn-box">
-                  <button  v-if="newsInfo.bookLiveInfo.booked" @click.stop="bookLive(newsInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn book-btn">
+                  <button  v-if="newsInfo.happeningInfo.bookLiveInfo.booked" @click.stop="bookLive(newsInfo.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn book-btn">
                     <span><i class="iconfont icon-icon-tixing"></i>预约</span>
                   </button>
-                  <button v-else @click.stop="cancelBookLive(newsInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn booked-btn">已预约</button>
+                  <button v-else @click.stop="cancelBookLive(newsInfo.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn booked-btn">已预约</button>
                 </div>
               </div>
             </div>
-            <div v-if="newsInfo.voteSimpleInfo" class="news-vote">
-              <div @click.stop="handleShowVoteModal(newsInfo.voteSimpleInfo.voteId)" class="news-vote-card">
+            <div v-if="newsInfo.happeningInfo.voteSimpleInfo" class="news-vote">
+              <div @click.stop="handleShowVoteModal(newsInfo.happeningInfo.voteSimpleInfo.voteId)" class="news-vote-card">
                 <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
                 <div class="vote-detail">
-                  <p class="vote-title">{{ newsInfo.voteSimpleInfo.title }}</p>
-                  <p class="vote-stat">{{ newsInfo.voteSimpleInfo.voteNumInfo }}人参与&nbsp;&nbsp;{{ newsInfo.voteSimpleInfo.deadlineInfo }}</p>
+                  <p class="vote-title">{{ newsInfo.happeningInfo.voteSimpleInfo.title }}</p>
+                  <p class="vote-stat">{{ newsInfo.happeningInfo.voteSimpleInfo.voteNumInfo }}人参与&nbsp;&nbsp;{{ newsInfo.happeningInfo.voteSimpleInfo.deadlineInfo }}</p>
                 </div>
                 <div class="vote-btn-box">
                   <button class="vote-btn">详情</button>
@@ -343,24 +312,24 @@
               </div>
             </div>
           </div>
-          <div v-if="newsInfo.quotedHappening" class="news-item-body" :class="{'news-reference':true}">
-            <div v-if="newsInfo.quotedHappening.content" class="quote-wrapper">
+          <div v-if="newsInfo.happeningInfo.quotedHappening" class="news-item-body" :class="{'news-reference':true}">
+            <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.content" class="quote-wrapper">
             <div class="refer-author-box">
               <div class="author-info">
-                <img :src="newsInfo.quotedHappening.avatarUrl" alt="头像">
-                <span class="author-username">{{ newsInfo.quotedHappening.username }}</span>
+                <img :src="newsInfo.happeningInfo.quotedHappening.publisherInfo.avatarUrl" alt="头像">
+                <span class="author-username">{{ newsInfo.happeningInfo.quotedHappening.publisherInfo.username }}</span>
                 <span class="refer-text">投稿了文章</span>
               </div>
             </div>
-            <div v-if="newsInfo.quotedHappening.tag" class="news-tag">
+            <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.tag" class="news-tag">
               <i class="iconfont icon-huati"></i>
-              <span>{{ newsInfo.quotedHappening.tag }}</span>
+              <span>{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.tag }}</span>
             </div>
-            <div class="news-title">{{ newsInfo.quotedHappening.title }}</div>
-            <div class="news-text-content" v-html="newsInfo.quotedHappening.content"></div>
-            <div v-if="newsInfo.quotedHappening.imgUrlList" class="news-album">
+            <div class="news-title">{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.title }}</div>
+            <div class="news-text-content" v-html="newsInfo.happeningInfo.quotedHappening.happeningInfo.content"></div>
+            <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.imgUrlList" class="news-album">
               <div class="news-album-preview grid">
-                <div v-for="(item,index) in newsInfo.quotedHappening.imgUrlList" :key="index" class="news-album-preview-picture">
+                <div v-for="(item,index) in newsInfo.happeningInfo.quotedHappening.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
                   <img :src="item" alt="图片">
                 </div>
               </div>
@@ -385,33 +354,33 @@
                 </div>
               </a>
             </div>
-            <div v-if="newsInfo.quotedHappening.bookLiveInfo" class="news-book-lives">
+            <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo" class="news-book-lives">
               <div class="lives-detail">
-                <p class="lives-title">直播预约：{{newsInfo.quotedHappening.bookLiveInfo.title}}</p>
+                <p class="lives-title">直播预约：{{newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.title}}</p>
                 <p class="lives-stat">
-                  <span class="lives-time">{{ newsInfo.quotedHappening.bookLiveInfo.liveTimeInfo }} 直播</span>
-                  <span class="book-num">{{newsInfo.quotedHappening.bookLiveInfo.bookNumInfo}}人预约</span>
+                  <span class="lives-time">{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.liveTimeInfo }} 直播</span>
+                  <span class="book-num">{{newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookNumInfo}}人预约</span>
                 </p>
               </div>
               <div class="lives-btn-box">
-                <div v-if="username === newsInfo.quotedHappening.bookLiveInfo.anchorName" class="revoke-btn-box">
-                  <button v-if="true" @click.stop="revokeBookLive(newsInfo.quotedHappening.bookLiveInfo.id)" class="book-lives-btn revoke-btn">撤销</button>
+                <div v-if="username === newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.anchorName" class="revoke-btn-box">
+                  <button v-if="true" @click.stop="revokeBookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn revoke-btn">撤销</button>
                   <button v-else @click.stop="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
                 </div>
                 <div v-else class="book-btn-box">
-                  <button v-if="newsInfo.quotedHappening.bookLiveInfo.booked" @click.stop="bookLive(newsInfo.quotedHappening.bookLiveInfo.id)" class="book-lives-btn book-btn">
+                  <button v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.booked" @click.stop="bookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn book-btn">
                     <span><i class="iconfont icon-icon-tixing"></i>预约</span>
                   </button>
-                  <button v-else @click.stop="cancelBookLive(newsInfo.quotedHappening.bookLiveInfo.id)" class="book-lives-btn booked-btn">已预约</button>
+                  <button v-else @click.stop="cancelBookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn booked-btn">已预约</button>
                 </div>
               </div>
             </div>
-            <div v-if="newsInfo.quotedHappening.voteSimpleInfo" class="news-vote">
-              <div @click.stop="handleShowVoteModal(newsInfo.quotedHappening.voteSimpleInfo.voteId)" class="news-vote-card">
+            <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo" class="news-vote">
+              <div @click.stop="handleShowVoteModal(newsInfo.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.voteId)" class="news-vote-card">
                 <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
                 <div class="vote-detail">
-                  <p class="vote-title">{{newsInfo.quotedHappening.voteSimpleInfo.title}}</p>
-                  <p class="vote-stat">{{newsInfo.quotedHappening.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ newsInfo.quotedHappening.voteSimpleInfo.deadlineInfo }}</p>
+                  <p class="vote-title">{{newsInfo.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.title}}</p>
+                  <p class="vote-stat">{{newsInfo.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.deadlineInfo }}</p>
                 </div>
                 <div class="vote-btn-box">
                   <button class="vote-btn">详情</button>
@@ -427,22 +396,22 @@
         </div>
       </div>
       <div class="side-toolbar">
-        <div @click="likeNews(newsInfo.id, newsInfo.liked)" class="side-toolbar-item like-info" :class="{'active':newsInfo.liked}">
+        <div @click="likeNews(newsInfo.happeningInfo.happeningId, newsInfo.happeningInfo.liked)" class="side-toolbar-item like-info" :class="{'active':newsInfo.happeningInfo.liked}">
           <i class="iconfont icon-dianzan"></i>
           <div class="side-toolbar-item-text">
-            {{ newsInfo.likeNumInfo }}
+            {{ newsInfo.happeningInfo.likeNumInfo }}
           </div>
         </div>
         <div @click="showForwardBox = true" class="side-toolbar-item forward-info">
           <i class="iconfont icon-zhuanfa"></i>
           <div class="side-toolbar-item-text">
-            {{ newsInfo.forwardNumInfo }}
+            {{ newsInfo.happeningInfo.forwardNumInfo }}
           </div>
         </div>
         <div class="side-toolbar-item comment-info">
           <i class="iconfont icon-pinglun"></i>
           <div class="side-toolbar-item-text">
-            {{ newsInfo.commentNumInfo }}
+            {{ newsInfo.happeningInfo.commentNumInfo }}
           </div>
         </div>
       </div>
@@ -455,8 +424,8 @@
         </div>
       </div>
       <div class="item-tabs-content">
-        <like-list v-if="tab === 'like'" :likeInfoList="newsInfo.likeInfoList"></like-list>
-        <forward-list v-if="tab === 'forward'" :forwardInfoList="newsInfo.forwardInfoList"></forward-list>
+        <like-list v-if="tab === 'like'" :likeInfoList="newsInfo.happeningInfo.likeInfoList"></like-list>
+        <forward-list v-if="tab === 'forward'" :forwardInfoList="newsInfo.happeningInfo.forwardInfoList"></forward-list>
       </div>
     </div>
   </div>

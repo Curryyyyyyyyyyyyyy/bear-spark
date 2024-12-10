@@ -10,7 +10,7 @@
   /* Router */
   const router = useRouter()
   const userStore = useUser()
-  const {token,username,avatarUrl,fanNumInfo,followerNumInfo,happeningNumInfo,coinNumInfo,meritNumInfo} = storeToRefs(userStore)
+  const {token,username,avatarUrl,fanNumInfo,followerNumInfo,happeningNumInfo,currencyInfo} = storeToRefs(userStore)
   /* Mounted */
   let showLogin = ref(false)
   function openLogin() {
@@ -116,8 +116,8 @@
           <div class="avatar-children">
             <div class="nickname"  @click="toMainInterface">{{ username }}</div>
             <div class="coins"  @click="toMainInterface">
-              功德：<span class="coin-num">{{ meritNumInfo }}</span>
-              硬币：<span class="coin-num">{{ coinNumInfo }}</span>
+              功德：<span class="coin-num">{{ currencyInfo.meritNumInfo }}</span>
+              硬币：<span class="coin-num">{{ currencyInfo.coinNumInfo }}</span>
             </div>
             <div class="infos">
               <div class="info-item">

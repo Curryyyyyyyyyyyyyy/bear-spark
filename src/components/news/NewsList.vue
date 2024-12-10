@@ -9,7 +9,7 @@
   import { storeToRefs } from 'pinia';
   import useUser from '@/store/user';
   import {insertEmoji,handleContentNum} from '@/hooks/richTextInput'
-  import {getVoteDetailApi,fowardNewsApi,getNewsListApi,deleteNewsApi,likeNewsApi} from '@/api/news'
+  import {fowardNewsApi,getNewsListApi,deleteNewsApi,likeNewsApi} from '@/api/news'
   import {revokeBookLiveApi,modBookLiveStateApi} from '@/api/bookLive'
 
   /* Store */
@@ -18,7 +18,7 @@
   /* Router */
   const router = useRouter()
   /* Props */
-  const props = defineProps(['tab','activeUp'])
+  defineProps(['tab','activeUp'])
   //#region 预约直播
   function revokeBookLive(bookLiveId,index) {
     ElMessageBox.confirm(
@@ -69,57 +69,6 @@
   const voteId = ref(null)
   async function handleShowVoteModal(id) {
     voteId.value = id
-    voteDetailInfo.value = await getVoteDetailApi({
-      voteId:id
-    })
-    // voteDetailInfo.value = {
-    //     "title": "非住矿八",
-    //     "voteNumInfo": "37",
-    //     "voteType": 2,
-    //     "optionList": [
-    //         {
-    //             "optionId": 56,
-    //             "optionContent": "Duis ea aliqua",
-    //             "optionPhotoUrl": "http://dummyimage.com/400x400",
-    //             "optionPercent": "officia ullamco minim dolore",
-    //             "selected": 1
-    //         },
-    //         {
-    //             "optionId": 29,
-    //             "optionContent": "ullamco",
-    //             "optionPhotoUrl": "http://dummyimage.com/400x400",
-    //             "optionPercent": "nisi deserunt",
-    //             "selected": 0
-    //         },
-    //         {
-    //             "optionId": 38,
-    //             "optionContent": "fugiat officia dolore ut irure",
-    //             "optionPhotoUrl": "http://dummyimage.com/400x400",
-    //             "optionPercent": "labore mollit deserunt amet",
-    //             "selected": 1
-    //         }
-    //     ],
-    //     "voteLim": 74,
-    //     "voted": 1,
-    //     "dead": 0,
-    //     "voterInfoList": [
-    //         {
-    //             "username": "丁敏",
-    //             "avatarUrl": "http://dummyimage.com/100x100",
-    //             "optionsInfo": "tempor ut"
-    //         },
-    //         {
-    //             "username": "武刚",
-    //             "avatarUrl": "http://dummyimage.com/100x100",
-    //             "optionsInfo": "sint nisi est"
-    //         },
-    //         {
-    //             "username": "顾强",
-    //             "avatarUrl": "http://dummyimage.com/100x100",
-    //             "optionsInfo": "Lorem consectetur quis exercitation deserunt"
-    //         }
-    //     ]
-    // }
     showVoteModal.value = true
   }
   //#endregion
@@ -199,7 +148,7 @@
   async function forwardNews(index) {
     let content = mineRefList[index].innerHTML ? mineRefList[index].innerHTML : '转发动态'
     let tagId = forwardTagIdList.value[index]
-    let quotedHappeningId = newsList.value[index].quotedHappening ? newsList.value[index].quotedHappening.id : newsList.value[index].id
+    let quotedHappeningId = newsList.value[index].happeningInfo.quotedHappening ? newsList.value[index].happeningInfo.quotedHappening.happeningId : newsList.value[index].happeningId
     await fowardNewsApi({
       quotedHappeningId,
       content,
@@ -247,9 +196,8 @@
   }
   newsList.value = [
     {
-        "id":1,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
+      "happeningInfo":{
+        "happeningId":1,
         "title": "现无称点进其原",
         "content": "11",
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
@@ -265,7 +213,8 @@
             "voteNumInfo": "43"
         },
         "quotedHappening":{
-          "id":1,
+          "happeningInfo":{
+          "happeningId":1,
           "username": "万超",
           "avatarUrl": "http://dummyimage.com/100x100",
           "title": "现无称点进其原",
@@ -287,275 +236,18 @@
           ],
           "pubTimeInfo": "1975-04-15 04:31:03"
           },
-          "imgUrlList": [
-              "http://dummyimage.com/400x400"
-          ],
-          "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 0,
-        "commentNumInfo":95,
-        "forwardNumInfo":0,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":0,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
         },
         "imgUrlList": [
             "http://dummyimage.com/400x400"
         ],
         "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
+      },
+      "publisherInfo":{
+        "userId":1001,
         "username": "万超",
         "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 95,
-        "forwardNumInfo":2,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":1,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 5,
-        "commentNumInfo": 95,
-        "forwardNumInfo":2,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":1,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 95,
-        "forwardNumInfo":2,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":1,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 95,
-        "forwardNumInfo":2,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":0,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 5,
-        "forwardNumInfo":2,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":0,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 95,
-        "forwardNumInfo":2,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":0,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 95,
-        "forwardNumInfo":2,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":0,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 95,
-        "forwardNumInfo":2,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":0,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 9,
-        "forwardNumInfo":2,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":0,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    {
-        "id":2,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "mollit reprehenderit in",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 9,
-        "forwardNumInfo":2,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "liked":0,
-        "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-    },
+      },
+    }
   ]
   /* 删除动态 */
   async function deleteNews(id,index) {
@@ -626,37 +318,37 @@
 <template>
   <div class="news-list">
     <div v-for="(item,index) in newsList" :key="index" class="news-item">
-      <div v-if="item.content" class="item-warpper">
+      <div v-if="item.happeningInfo.content" class="item-warpper">
         <div class="news-item-avatar">
-          <img :src="item.avatarUrl" alt="头像">
+          <img :src="item.publisherInfo.avatarUrl" alt="头像">
         </div>
         <div class="news-item-header">
-          <span class="news-item-author">{{ item.username }}</span>
-          <span v-if="!item.advanceRelease" class="news-item-early-pub">提前发布</span>
-          <p class="news-item-time">{{ item.pubTimeInfo }}</p>
+          <span class="news-item-author">{{ item.publisherInfo.username }}</span>
+          <span v-if="!item.happeningInfo.advanceRelease" class="news-item-early-pub">提前发布</span>
+          <p class="news-item-time">{{ item.happeningInfo.pubTimeInfo }}</p>
           <div @mouseenter="newsList[index].isOpen = true" @mouseleave="newsList[index].isOpen = false" class="news-item-more-btn">
             <i class="iconfont icon-gengduo1"></i>
             <div v-if="newsList[index].isOpen" class="new-item-cascader">
-              <div v-if="username !== item.username" class="cascader-list">
+              <div v-if="username !== item.publisherInfo.username" class="cascader-list">
                 <div class="cascader-item">取消关注</div>
                 <div class="cascader-item">举报</div>
               </div>
               <div v-else class="cascader-list">
-                <div @click.stop="deleteNews(item.id,index)" class="cascader-item">删除</div>
+                <div @click.stop="deleteNews(item.happeningInfo.happeningId,index)" class="cascader-item">删除</div>
               </div>
             </div>
           </div>
         </div>
         <div class="news-item-body">
-          <div v-if="item.tag" class="news-tag">
+          <div v-if="item.happeningInfo.tag" class="news-tag">
             <i class="iconfont icon-huati"></i>
-            <span>{{ item.tag }}</span>
+            <span>{{ item.happeningInfo.tag }}</span>
           </div>
-          <div @click="router.push(`/news_detail/${item.id}`)" class="news-title">{{ item.title }}</div>
-          <div @click="router.push(`/news_detail/${item.id}`)" class="news-text-content" v-html="item.content"></div>
-          <div v-if="item.imgUrlList" class="news-album">
+          <div @click="router.push(`/news_detail/${item.happeningInfo.happeningId}`)" class="news-title">{{ item.happeningInfo.title }}</div>
+          <div @click="router.push(`/news_detail/${item.happeningInfo.happeningId}`)" class="news-text-content" v-html="item.happeningInfo.content"></div>
+          <div v-if="item.happeningInfo.imgUrlList" class="news-album">
             <div class="news-album-preview grid">
-              <div v-for="(item, index) in item.imgUrlList" :key="index" class="news-album-preview-picture">
+              <div v-for="(item, index) in item.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
                 <img v-lazy="item" alt="图片">
               </div>
             </div>
@@ -681,33 +373,33 @@
               </div>
             </a>
           </div>
-          <div v-if="item.bookLiveInfo" class="news-book-lives">
+          <div v-if="item.happeningInfo.bookLiveInfo" class="news-book-lives">
             <div class="lives-detail">
-              <p class="lives-title">直播预约：{{ item.bookLiveInfo.title }}</p>
+              <p class="lives-title">直播预约：{{ item.happeningInfo.bookLiveInfo.title }}</p>
               <p class="lives-stat">
-                <span class="lives-time">{{ item.bookLiveInfo.liveTimeInfo }} 直播</span>
-                <span class="book-num">{{ item.bookLiveInfo.bookNumInfo }}人预约</span>
+                <span class="lives-time">{{ item.happeningInfo.bookLiveInfo.liveTimeInfo }} 直播</span>
+                <span class="book-num">{{ item.happeningInfo.bookLiveInfo.bookNumInfo }}人预约</span>
               </p>
             </div>
             <div class="lives-btn-box">
-              <div v-if="username === item.username" class="revoke-btn-box">
-                <button v-if="!item.bookLiveInfo.canceled" @click.stop="revokeBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn revoke-btn">撤销</button>
+              <div v-if="username === item.publisherInfo.username" class="revoke-btn-box">
+                <button v-if="!item.happeningInfo.bookLiveInfo.canceled" @click.stop="revokeBookLive(item.happeningInfo.bookLiveInfo.bookLiveId,index)" class="book-lives-btn revoke-btn">撤销</button>
                 <button v-else @click.stop="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
               </div>
               <div v-else class="book-btn-box">
-                <button  v-if="item.bookLiveInfo.booked" @click.stop="bookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn book-btn">
+                <button  v-if="item.happeningInfo.bookLiveInfo.booked" @click.stop="bookLive(item.happeningInfo.bookLiveInfo.bookLiveId,index)" class="book-lives-btn book-btn">
                   <span><i class="iconfont icon-icon-tixing"></i>预约</span>
                 </button>
-                <button v-else @click.stop="cancelBookLive(item.bookLiveInfo.bookLiveId,index)" class="book-lives-btn booked-btn">已预约</button>
+                <button v-else @click.stop="cancelBookLive(item.happeningInfo.bookLiveInfo.bookLiveId,index)" class="book-lives-btn booked-btn">已预约</button>
               </div>
             </div>
           </div>
-          <div v-if="item.voteSimpleInfo" class="news-vote">
-            <div @click.stop="handleShowVoteModal(item.voteSimpleInfo.voteId)" class="news-vote-card">
+          <div v-if="item.happeningInfo.voteSimpleInfo" class="news-vote">
+            <div @click.stop="handleShowVoteModal(item.happeningInfo.voteSimpleInfo.voteId)" class="news-vote-card">
               <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
               <div class="vote-detail">
-                <p class="vote-title">{{ item.voteSimpleInfo.title }}</p>
-                <p class="vote-stat">{{ item.voteSimpleInfo.voteNumInfo }}人参与&nbsp;&nbsp;{{ item.voteSimpleInfo.deadlineInfo }}</p>
+                <p class="vote-title">{{ item.happeningInfo.voteSimpleInfo.title }}</p>
+                <p class="vote-stat">{{ item.happeningInfo.voteSimpleInfo.voteNumInfo }}人参与&nbsp;&nbsp;{{ item.happeningInfo.voteSimpleInfo.deadlineInfo }}</p>
               </div>
               <div class="vote-btn-box">
                 <button class="vote-btn">详情</button>
@@ -715,24 +407,24 @@
             </div>
           </div>
         </div>
-        <div v-if="item.quotedHappening" class="news-item-body" :class="{'news-reference':true}">
-          <div v-if="item.quotedHappening.content" class="quote-wrapper">
+        <div v-if="item.happeningInfo.quotedHappening" class="news-item-body" :class="{'news-reference':true}">
+          <div v-if="item.happeningInfo.quotedHappening.happeningInfo.content" class="quote-wrapper">
             <div class="refer-author-box">
               <div class="author-info">
-                <img :src="item.quotedHappening.avatarUrl" alt="头像">
-                <span class="author-username">{{ item.quotedHappening.username }}</span>
+                <img :src="item.happeningInfo.quotedHappening.publisherInfo.avatarUrl" alt="头像">
+                <span class="author-username">{{ item.happeningInfo.quotedHappening.publisherInfo.username }}</span>
                 <span v-if="false" class="refer-text">投稿了文章</span>
               </div>
             </div>
-            <div v-if="item.quotedHappening.tag" class="news-tag">
+            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.tag" class="news-tag">
               <i class="iconfont icon-huati"></i>
               <span>{{ item.quotedHappening.tag }}</span>
             </div>
-            <div @click="router.push(`/news_detail/${item.quotedHappening.id}`)" class="news-title">{{ item.quotedHappening.title }}</div>
-            <div @click="router.push(`/news_detail/${item.quotedHappening.id}`)" class="news-text-content" v-html="item.quotedHappening.content"></div>
-            <div v-if="item.quotedHappening.imgUrlList" class="news-album">
+            <div @click="router.push(`/news_detail/${item.happeningInfo.quotedHappening.happeningInfo.happeningId}`)" class="news-title">{{ item.happeningInfo.quotedHappening.happeningInfo.title }}</div>
+            <div @click="router.push(`/news_detail/${item.happeningInfo.quotedHappening.happeningInfo.happeningId}`)" class="news-text-content" v-html="item.happeningInfo.quotedHappening.happeningInfo.content"></div>
+            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.imgUrlList" class="news-album">
               <div class="news-album-preview grid">
-                <div v-for="(item,index) in item.quotedHappening.imgUrlList" :key="index" class="news-album-preview-picture">
+                <div v-for="(item,index) in item.happeningInfo.quotedHappening.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
                   <img :src="item" alt="图片">
                 </div>
               </div>
@@ -757,33 +449,33 @@
                 </div>
               </a>
             </div>
-            <div v-if="item.quotedHappening.bookLiveInfo" class="news-book-lives">
+            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo" class="news-book-lives">
               <div class="lives-detail">
-                <p class="lives-title">直播预约：{{item.quotedHappening.bookLiveInfo.title}}</p>
+                <p class="lives-title">直播预约：{{item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.title}}</p>
                 <p class="lives-stat">
-                  <span class="lives-time">{{ item.quotedHappening.bookLiveInfo.liveTimeInfo }} 直播</span>
-                  <span class="book-num">{{item.quotedHappening.bookLiveInfo.bookNumInfo}}人预约</span>
+                  <span class="lives-time">{{ item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.liveTimeInfo }} 直播</span>
+                  <span class="book-num">{{item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookNumInfo}}人预约</span>
                 </p>
               </div>
               <div class="lives-btn-box">
-                <div v-if="username === item.quotedHappening.bookLiveInfo.anchorName" class="revoke-btn-box">
-                  <button v-if="true" @click.stop="revokeBookLive(newsInfo.quotedHappening.bookLiveInfo.id)" class="book-lives-btn revoke-btn">撤销</button>
+                <div v-if="username === item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.anchorName" class="revoke-btn-box">
+                  <button v-if="true" @click.stop="revokeBookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn revoke-btn">撤销</button>
                   <button v-else @click.stop="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
                 </div>
                 <div v-else class="book-btn-box">
-                  <button v-if="item.quotedHappening.bookLiveInfo.booked" @click.stop="bookLive(newsInfo.quotedHappening.bookLiveInfo.id)" class="book-lives-btn book-btn">
+                  <button v-if="item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.booked" @click.stop="bookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn book-btn">
                     <span><i class="iconfont icon-icon-tixing"></i>预约</span>
                   </button>
-                  <button v-else @click.stop="cancelBookLive(newsInfo.quotedHappening.bookLiveInfo.id)" class="book-lives-btn booked-btn">已预约</button>
+                  <button v-else @click.stop="cancelBookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn booked-btn">已预约</button>
                 </div>
               </div>
             </div>
-            <div v-if="item.quotedHappening.voteSimpleInfo" class="news-vote">
-              <div @click.stop="handleShowVoteModal(item.quotedHappening.voteSimpleInfo.voteId)" class="news-vote-card">
+            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo" class="news-vote">
+              <div @click.stop="handleShowVoteModal(item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.voteId)" class="news-vote-card">
                 <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
                 <div class="vote-detail">
-                  <p class="vote-title">{{item.quotedHappening.voteSimpleInfo.title}}</p>
-                  <p class="vote-stat">{{item.quotedHappening.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ item.quotedHappening.voteSimpleInfo.deadlineInfo }}</p>
+                  <p class="vote-title">{{item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.title}}</p>
+                  <p class="vote-stat">{{item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.deadlineInfo }}</p>
                 </div>
                 <div class="vote-btn-box">
                   <button class="vote-btn">详情</button>
@@ -799,15 +491,15 @@
         <div class="news-item-footer">
           <div @click.stop="showForwardInput(index,item.showForward)" class="footer-item news-zhuanfa" :class="{'highlight':item.showForward}">
             <i class="iconfont icon-zhuanfa"></i>
-            {{ item.forwardNumInfo === '0' ? '转发' : item.forwardNumInfo}}
+            {{ item.happeningInfo.forwardNumInfo === '0' ? '转发' : item.happeningInfo.forwardNumInfo}}
           </div>
-          <div @click.stop="router.push(`/news_detail/${item.id}`)" class="footer-item item-comment">
+          <div @click.stop="router.push(`/news_detail/${item.happeningInfo.happeningId}`)" class="footer-item item-comment">
             <i class="iconfont icon-pinglun"></i>
-            {{ item.commentNumInfo === '0' ? '评论' : item.commentNumInfo }}
+            {{ item.happeningInfo.commentNumInfo === '0' ? '评论' : item.happeningInfo.commentNumInfo }}
           </div>
-          <div @click.stop="likeNews(item.id, item.liked, index)" class="footer-item news-like" :class="{'highlight':item.liked}">
+          <div @click.stop="likeNews(item.happeningInfo.happeningId, item.happeningInfo.liked, index)" class="footer-item news-like" :class="{'highlight':item.happeningInfo.liked}">
             <i class="iconfont icon-dianzan"></i>
-            {{ item.likeNumInfo === '0' ? '点赞' : item.likeNumInfo}}
+            {{ item.happeningInfo.likeNumInfo === '0' ? '点赞' : item.happeningInfo.likeNumInfo}}
           </div>
         </div>
         <div v-show="item.showForward" class="item-forward-box">
