@@ -177,6 +177,13 @@
   //#region tab栏
   const tab = ref('comment')
   //#endregion
+  const tabRef = ref()
+  function handleClickComment() {
+    window.scrollTo({
+      top:tabRef.value.offsetTop,
+      behavior:'smooth'
+    })
+  }
 </script>
 
 <template>
@@ -393,14 +400,14 @@
             {{ newsInfo.happeningInfo.forwardNumInfo }}
           </div>
         </div>
-        <div class="side-toolbar-item comment-info">
+        <div @click="handleClickComment" class="side-toolbar-item comment-info">
           <i class="iconfont icon-pinglun"></i>
           <div class="side-toolbar-item-text">
             {{ newsInfo.happeningInfo.commentNumInfo }}
           </div>
         </div>
       </div>
-      <div class="item-tabs">
+      <div ref="tabRef" class="item-tabs">
         <div class="tabs-nav-items">
           <div @click="tab = 'comment'" class="tabs-nav-item" :class="{'active':tab === 'comment'}">评论</div>
           <div @click="tab = 'like'" class="tabs-nav-item" :class="{'active':tab === 'like'}">点赞</div>
@@ -409,9 +416,9 @@
         </div>
       </div>
       <div class="item-tabs-content">
-        <like-list v-if="tab === 'like'" :likeInfoList="newsInfo.happeningInfo.likeInfoList"></like-list>
-        <forward-list v-if="tab === 'forward'" :forwardInfoList="newsInfo.happeningInfo.forwardInfoList"></forward-list>
-        <comment-list v-if="tab === 'comment'"></comment-list>
+        <like-list v-if="tab === 'like'"></like-list>
+        <forward-list v-if="tab === 'forward'" :happeningId="newsInfo.happeningInfo.happeningId"></forward-list>
+        <comment-list v-if="tab === 'comment'" :happeningId="newsInfo.happeningInfo.happeningId"></comment-list>
       </div>
     </div>
   </div>

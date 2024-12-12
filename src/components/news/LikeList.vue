@@ -1,10 +1,71 @@
 <script setup>
-  defineProps(['likeInfoList'])
+  import {getLikeListApi} from '@/api/news'
+  import { onMounted, ref } from 'vue';
+
+  const props = defineProps(['happeningId'])
+  onMounted(()=>{
+    loadMore()
+  })
+  const likeList = ref([])
+  const busy = ref(false)
+  const loading = ref(false)
+  const isArriveTotal = ref(false)
+  const pageNum = ref(1)
+  const pageSize = ref(20)
+  function loadMore() {
+    if(isArriveTotal.value) return
+    busy.value = true
+    loading.value = true
+    setTimeout(async () => {
+      const res = await getLikeListApi({
+        pageNum:pageNum.value,
+        pageSize:pageSize.value,
+        happeningId:props.happeningId
+      })
+      // const res = {
+      //   "total": 6,
+      //   "records": [
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //   ]
+      // }
+      likeList.value.push(...res.records)
+      if(likeList.value.length >= res.total) isArriveTotal.value = true
+    }, 500);
+  }
 </script>
 
 <template>
   <ul class="news-like-list">
-    <li v-for="(item,index) in likeInfoList" :key="index" class="like-item">
+    <li v-for="(item,index) in likeList" :key="index" class="like-item">
       <div class="user-avatar">
         <img v-lazy="item.avatarUrl" alt="">
       </div>
@@ -13,8 +74,15 @@
         <span class="text">点赞了</span>
       </div>
     </li>
-    <div class="like-list-empty">人家是有底线的呢 ~</div>
   </ul>
+  <div class="load-more"
+    v-infinite-scroll="loadMore" 
+    :infinite-scroll-disabled="busy" 
+    infinite-scroll-distance="50"
+  >
+    <img src="/imgs/loading-svg/loading-spinning-bubbles.svg" v-show="!isArriveTotal && loading">
+  </div>
+  <div v-if="isArriveTotal" class="like-list-full">人家是有底线的呢 ~</div>
 </template>
 
 <style lang="scss">
@@ -48,5 +116,13 @@
       font-size: $fontJ;
       color: $colorD;
     }
+  }
+  .load-more {
+    text-align: center;
+  }
+  .like-list-full {
+    text-align: center;
+    color: $colorD;
+    padding: 30px 0 60px 0;
   }
 </style>

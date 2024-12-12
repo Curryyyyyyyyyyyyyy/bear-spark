@@ -54,3 +54,15 @@ export const deleteNewsApi = (params) => {
 export const modifyNewsApi = (params) => {
   return request.put('/happening', params)
 }
+/* 分页查询点赞用户列表 */
+export const getLikeListApi = (params) => {
+  return request.get('/happening/list/liked', {
+    params
+  })
+}
+/* 分页查询转发用户列表 */
+export const getForwardListApi = (params) => {
+  return request.get('/happening/list/forwarded', {
+    params
+  })
+}

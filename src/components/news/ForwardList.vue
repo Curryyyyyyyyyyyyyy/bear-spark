@@ -1,10 +1,70 @@
 <script setup>
-  defineProps(['forwardInfoList'])
+  import { onMounted, ref } from 'vue';
+  import {getForwardListApi} from '@/api/news'
+  const props = defineProps(['happeningId'])
+  onMounted(()=>{
+    loadMore()
+  })
+  const forwardList = ref([])
+  const busy = ref(false)
+  const loading = ref(false)
+  const isArriveTotal = ref(false)
+  const pageNum = ref(1)
+  const pageSize = ref(20)
+  function loadMore() {
+    if(isArriveTotal.value) return
+    busy.value = true
+    loading.value = true
+    setTimeout(async () => {
+      const res = await getForwardListApi({
+        pageNum:pageNum.value,
+        pageSize:pageSize.value,
+        happeningId:props.happeningId
+      })
+      // const res = {
+      //   "total": 6,
+      //   "records": [
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //     {
+      //       "userId": 1,
+      //       "username": "curyyyy",
+      //       "avatarUrl": "/imgs/default-avatar.png"
+      //     },
+      //   ]
+      // }
+      forwardList.value.push(...res.records)
+      if(forwardList.value.length >= res.total) isArriveTotal.value = true
+    }, 500);
+  }
 </script>
 
 <template>
   <ul class="news-forward-list">
-    <li v-for="(item,index) in forwardInfoList" :key="index" class="forward-item">
+    <li v-for="(item,index) in forwardList" :key="index" class="forward-item">
       <div class="user-avatar">
         <img v-lazy="item.avatarUrl" alt="">
       </div>
@@ -13,8 +73,15 @@
         <span class="text">转发了</span>
       </div>
     </li>
-    <div class="forward-list-empty">人家是有底线的呢 ~</div>
   </ul>
+  <div class="load-more"
+    v-infinite-scroll="loadMore" 
+    :infinite-scroll-disabled="busy" 
+    infinite-scroll-distance="50"
+  >
+    <img src="/imgs/loading-svg/loading-spinning-bubbles.svg" v-show="!isArriveTotal && loading">
+  </div>
+  <div v-if="isArriveTotal" class="forward-list-full">人家是有底线的呢 ~</div>
 </template>
 
 <style lang="scss">
@@ -48,5 +115,13 @@
       font-size: $fontJ;
       color: $colorD;
     }
+  }
+  .load-more {
+    text-align: center;
+  }
+  .forward-list-full {
+    text-align: center;
+    color: $colorD;
+    padding: 30px 0 60px 0;
   }
 </style>
