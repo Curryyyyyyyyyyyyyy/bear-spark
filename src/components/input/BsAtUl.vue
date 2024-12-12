@@ -2,12 +2,28 @@
   import {getFollowerListApi} from '@/api/user.js'
   import BsAtLi from '@/components/input/BsAtLi.vue'
   import { onMounted,ref } from 'vue';
-  defineProps(['atSelectPosition'])
   const emit = defineEmits(['selectAtUser'])
   const followerList = ref([])
+  followerList.value = [
+    {
+      username:'周权',
+      avatarUrl:'/imgs/default-avatar.png',
+      fansNumInfo:200
+    },
+    {
+      username:'卢家秦',
+      avatarUrl:'/imgs/default-avatar.png',
+      fansNumInfo:200
+    },
+    {
+      username:'谢佳辉',
+      avatarUrl:'/imgs/default-avatar.png',
+      fansNumInfo:200
+    },
+  ]
   onMounted(async () => {
-    const followerListRes = await getFollowerListApi()
-    followerList.value = followerListRes.followerList
+    // const followerListRes = await getFollowerListApi()
+    // followerList.value = followerListRes.followerList
   })
   function selectAtUser(username) {
     emit('selectAtUser', username)
@@ -15,7 +31,7 @@
 </script>
 
 <template>
-  <div class="bs-at-ul" :style="{left:atSelectPosition.left,top:atSelectPosition.top}">
+  <div class="bs-at-ul">
     <div class="bs-at-header">
       <span>选择或输入你想@的人</span>
     </div>
@@ -38,13 +54,9 @@
 <style lang="scss">
   @use '@/assets/sass/config.scss' as *;
   .bs-at-ul {
-    z-index: 10;
-    position: absolute;
-    // bottom: -180px;
     width: 200px;
     border: 1px solid #e3e5e7;
     border-radius: 6px;
-    box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.17);
     background-color: $colorG;
     .bs-at-header {
       height: 40px;

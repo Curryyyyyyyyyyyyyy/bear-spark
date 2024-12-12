@@ -2,7 +2,7 @@
   import { ref } from 'vue';
   import BsEmoji from '@/components/input/BsEmoji.vue'
   import BsTagSelect from '@/components/news/BsTagSelect.vue'
-  import BsRichTextInput from '@/components/input/BsRichTextInput.vue'
+  import BsInput from '@/components/input/BsInput.vue'
   import {fowardNewsApi} from '@/api/news.js'
   import { ElMessage } from 'element-plus';
   import router from '@/router';
@@ -19,22 +19,16 @@
   }
   /* emoji */
   const showEmojiBox = ref(false)
-  const forwardInputRef = ref()
   function insertEmoji(emojiUrl) {
-    forwardInputRef.value.insertEmoji(emojiUrl)
+    inputMethods.value.insertEmoji(emojiUrl, inputBoxRef.value.children[0])
   }
-  // document.onselectionchange = () => {
-  //   let selection = document.getSelection()
-  //   if(selection.rangeCount > 0) {
-  //     const range = selection.getRangeAt(0)
-  //     if(forwardInputRef.value&&forwardInputRef.value.contentDom.contains(range.commonAncestorContainer)) {
-  //       forwardInputRef.value.rangeOfContentBox = range
-  //     }
-  //   }
-  // }
   /* 发布 */
+  const inputBoxRef = ref()
+  const inputMethods = ref()
+  console.log(inputMethods)
   async function publishNews() {
-    const content = forwardInputRef.value.contentDom.innerHTML ? forwardInputRef.value.contentDom.innerHTML : '转发动态'
+    const content = inputBoxRef.value.children[0].innerHTML ? inputBoxRef.value.children[0].innerHTML : '转发动态'
+    console.log(content)
     await fowardNewsApi({
       quotedHappeningId:props.newsInfo.quotedHappening ? props.newsInfo.quotedHappening.id : props.newsInfo.id,
       content: content,
@@ -44,10 +38,6 @@
     closeForwardBox()
     router.replace('/news_index')
   }
-
-  defineExpose({
-    forwardInputRef
-  })
 </script>
 
 <template>
@@ -60,17 +50,20 @@
       </div>
       <div class="news-forward-body">
         <bs-tag-select @getSelectTagId="getSelectTagId"></bs-tag-select>
-        <bs-rich-text-input ref="forwardInputRef" placeholder="有什么想说的呢？"></bs-rich-text-input>
+        <div ref="inputBoxRef" class="bs-input-box">
+          <bs-input ref="inputMethods" placeholder="有什么想说的呢？"></bs-input>
+        </div>
       </div>
       <div class="news-forward-footer">
         <div class="forward-tools">
-          <div class="icon-box" tabindex="0" @blur="showEmojiBox = false">
-            <i @click="showEmojiBox = true" class="iconfont icon-biaoqing"></i>
-            <bs-emoji v-if="showEmojiBox" @insertEmoji="insertEmoji"></bs-emoji>
+          <div class="icon-box">
+            <i @click="showEmojiBox = !showEmojiBox" class="iconfont icon-biaoqing"></i>
+            <div v-if="showEmojiBox" class="emoji-box">
+              <bs-emoji @insertEmoji="insertEmoji"></bs-emoji>
+            </div>
           </div>
         </div>
         <div class="forward-headquarter">
-          <div class="text-num">{{ 300 - forwardInputRef?.contentNum }}</div>
           <button @click="publishNews" class="publish-btn">发布</button>
         </div>
       </div>
@@ -142,6 +135,9 @@
               &:hover {
                 color: $colorM;
               }
+            }
+            .emoji-box {
+              position: absolute;
             }
           }
         }
