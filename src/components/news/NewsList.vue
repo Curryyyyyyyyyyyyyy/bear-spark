@@ -2,13 +2,12 @@
   import BsEmoji from '@/components/input/BsEmoji.vue';
   import BsTagSelect from '@/components/news/BsTagSelect.vue';
   import BsVoteModal from '@/components/news/BsVoteModal.vue'
-  import {handleContentBoxClick,changePubContent} from '@/hooks/richTextInput'
+  import BsInput from '@/components/input/BsInput.vue';
   import { ElMessage, ElMessageBox } from 'element-plus';
-  import { reactive, ref } from 'vue';
+  import { ref } from 'vue';
   import { useRouter } from 'vue-router';
   import { storeToRefs } from 'pinia';
   import useUser from '@/store/user';
-  import {insertEmoji,handleContentNum} from '@/hooks/richTextInput'
   import {fowardNewsApi,getNewsListApi,deleteNewsApi,likeNewsApi} from '@/api/news'
   import {revokeBookLiveApi,modBookLiveStateApi} from '@/api/bookLive'
 
@@ -72,12 +71,6 @@
     showVoteModal.value = true
   }
   //#endregion
-  //#region 表情包
-  // /* 表情包列表失焦 */
-  function handleEmojiBoxBlur(index) {
-    newsList.value[index].showEmojiBox = false
-  }
-  //#endregion
   //#region 标签
   /* forwardTagId */
   const forwardTagIdList = ref([])
@@ -86,67 +79,22 @@
   }
   //#endregion
   //#region 动态转发输入框
-  const mineRefList = reactive([])
-  const contentNumList = reactive([])
-  const showAtSelect = reactive([])
-  let curRangeIndex = ref('')
-  function getMineRef(el, index) {
-    if(el) {
-      mineRefList[index] = el
-    }
+  const inputBoxRefList = ref([])
+  const inputMethodsList = ref([])
+  function getInputBoxRef(el, index) {
+    inputBoxRefList.value[index] = el
   }
-
-  let rangeOfContentBoxList = reactive([])
-  let focusNode = reactive({}); // 存储光标聚焦节点
-  let focusOffset = ref(0); // 存储光标聚焦偏移量
-  let chatInputOffset = reactive({}); // 存储光标聚焦的元素
-  const atSelectPosition = reactive({
-    left:"0px",
-    top:"0px",
-  })
-
-  /* 处理输入框失焦 */
-  function handleContentBlur(index) {
-    setTimeout(() => {
-      showAtSelect[index] = false
-    }, 200);
-    if (window.getSelection) {
-      let sel = window.getSelection();
-      if (sel.getRangeAt && sel.rangeCount) {
-        focusNode = sel.focusNode;
-        focusOffset.value = sel.focusOffset;
-        chatInputOffset = sel.getRangeAt(0);
-      }
-    }
-  }
-  /* @ */
-  function selectAtUser(username) {
-    let index = curRangeIndex.value
-    // if(handleContentNum(mineRefList[index]) + username.length + 1 > 300) return ElMessage.error('字数已达上限')
-    showAtSelect[index] = false
-    chatInputOffset.setStart(focusNode,focusOffset.value-1)
-    chatInputOffset.setEnd(focusNode,focusOffset.value)
-    chatInputOffset.deleteContents()
-    const atElement = `<span class="username" contenteditable="false">@${username}</span>`
-    chatInputOffset.collapse(false)
-    const atNode = chatInputOffset.createContextualFragment(atElement)
-    let lastChild = atNode.lastChild
-    chatInputOffset.insertNode(atNode)
-    chatInputOffset.setEndAfter(lastChild)
-    chatInputOffset.setStartAfter(lastChild)
-    const selection = document.getSelection()
-    selection.removeAllRanges()
-    selection.addRange(chatInputOffset)
-    contentNumList[index] = handleContentNum(mineRefList[index])
+  function getInputMethods(el, index) {
+    inputMethodsList.value[index] = el
   }
   /* 输入表情包 */
-  function insertEmojiForward(emojiUrl) {
-    insertEmoji(emojiUrl,curRangeIndex.value,contentNumList,rangeOfContentBoxList,mineRefList)
+  function insertEmoji(emojiUrl, inputMethods, inputRef) {
+    inputMethods.insertEmoji(emojiUrl, inputRef)
   }
 
   /* 转发动态 */
   async function forwardNews(index) {
-    let content = mineRefList[index].innerHTML ? mineRefList[index].innerHTML : '转发动态'
+    let content = inputBoxRefList.value[index].children[0].innerHTML ? inputBoxRefList.value[index].children[0].innerHTML : '转发动态'
     let tagId = forwardTagIdList.value[index]
     let quotedHappeningId = newsList.value[index].happeningInfo.quotedHappening ? newsList.value[index].happeningInfo.quotedHappening.happeningId : newsList.value[index].happeningId
     await fowardNewsApi({
@@ -155,14 +103,14 @@
       tagId
     })
     ElMessage.success('转发成功')
-    mineRefList[index].innerHTML = ''
+    inputBoxRefList.value[index].children[0].innerHTML = ''
+    inputMethodsList.value[index].handleContentNum(inputBoxRefList.value[index].children[0])
     forwardTagIdList.value[index] = null
     newsList.value[index].showForward = false
     newsList.value[index].forwardNumInfo++
   }
   function showForwardInput(index, showForward) {
     !showForward ? newsList.value[index].showForward = true : newsList.value[index].showForward = false
-    curRangeIndex.value = index
   }
   function showEmojiBoxForward(index,showEmojiBox){
     !showEmojiBox ? newsList.value[index].showEmojiBox = true : newsList.value[index].showEmojiBox = false
@@ -195,6 +143,165 @@
     // }, 500);
   }
   newsList.value = [
+    {
+      "happeningInfo":{
+        "happeningId":1,
+        "title": "现无称点进其原",
+        "content": "11",
+        "tag": "pariatur eiusmod aliqua labore reprehenderit",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 9,
+        "forwardNumInfo":0,
+        "commentAble": 0,
+        "advanceRelease": 0,
+        "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+        },
+        "quotedHappening":{
+          "happeningInfo":{
+          "happeningId":1,
+          "username": "万超",
+          "avatarUrl": "http://dummyimage.com/100x100",
+          "title": "现无称点进其原",
+          "content": "",
+          "tag": "pariatur eiusmod aliqua labore reprehenderit",
+          "viewNumInfo": 41,
+          "likeNumInfo": 50,
+          "commentNumInfo": 9,
+          "forwardNumInfo":0,
+          "commentAble": 0,
+          "advanceRelease": 0,
+          "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+          },
+          "imgUrlList": [
+              "http://dummyimage.com/400x400"
+          ],
+          "pubTimeInfo": "1975-04-15 04:31:03"
+          },
+        },
+        "imgUrlList": [
+            "http://dummyimage.com/400x400"
+        ],
+        "pubTimeInfo": "1975-04-15 04:31:03"
+      },
+      "publisherInfo":{
+        "userId":1001,
+        "username": "万超",
+        "avatarUrl": "http://dummyimage.com/100x100",
+      },
+    },
+    {
+      "happeningInfo":{
+        "happeningId":1,
+        "title": "现无称点进其原",
+        "content": "11",
+        "tag": "pariatur eiusmod aliqua labore reprehenderit",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 9,
+        "forwardNumInfo":0,
+        "commentAble": 0,
+        "advanceRelease": 0,
+        "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+        },
+        "quotedHappening":{
+          "happeningInfo":{
+          "happeningId":1,
+          "username": "万超",
+          "avatarUrl": "http://dummyimage.com/100x100",
+          "title": "现无称点进其原",
+          "content": "",
+          "tag": "pariatur eiusmod aliqua labore reprehenderit",
+          "viewNumInfo": 41,
+          "likeNumInfo": 50,
+          "commentNumInfo": 9,
+          "forwardNumInfo":0,
+          "commentAble": 0,
+          "advanceRelease": 0,
+          "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+          },
+          "imgUrlList": [
+              "http://dummyimage.com/400x400"
+          ],
+          "pubTimeInfo": "1975-04-15 04:31:03"
+          },
+        },
+        "imgUrlList": [
+            "http://dummyimage.com/400x400"
+        ],
+        "pubTimeInfo": "1975-04-15 04:31:03"
+      },
+      "publisherInfo":{
+        "userId":1001,
+        "username": "万超",
+        "avatarUrl": "http://dummyimage.com/100x100",
+      },
+    },
+    {
+      "happeningInfo":{
+        "happeningId":1,
+        "title": "现无称点进其原",
+        "content": "11",
+        "tag": "pariatur eiusmod aliqua labore reprehenderit",
+        "viewNumInfo": 41,
+        "likeNumInfo": 50,
+        "commentNumInfo": 9,
+        "forwardNumInfo":0,
+        "commentAble": 0,
+        "advanceRelease": 0,
+        "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+        },
+        "quotedHappening":{
+          "happeningInfo":{
+          "happeningId":1,
+          "username": "万超",
+          "avatarUrl": "http://dummyimage.com/100x100",
+          "title": "现无称点进其原",
+          "content": "",
+          "tag": "pariatur eiusmod aliqua labore reprehenderit",
+          "viewNumInfo": 41,
+          "likeNumInfo": 50,
+          "commentNumInfo": 9,
+          "forwardNumInfo":0,
+          "commentAble": 0,
+          "advanceRelease": 0,
+          "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+          },
+          "imgUrlList": [
+              "http://dummyimage.com/400x400"
+          ],
+          "pubTimeInfo": "1975-04-15 04:31:03"
+          },
+        },
+        "imgUrlList": [
+            "http://dummyimage.com/400x400"
+        ],
+        "pubTimeInfo": "1975-04-15 04:31:03"
+      },
+      "publisherInfo":{
+        "userId":1001,
+        "username": "万超",
+        "avatarUrl": "http://dummyimage.com/100x100",
+      },
+    },
     {
       "happeningInfo":{
         "happeningId":1,
@@ -289,8 +396,6 @@
   function getUserNewsList(username) {
     pageNum.value = 1
     newsList.value.splice(0, newsList.value.length)
-    contentNumList.splice(0, contentNumList.length)
-    showAtSelect.splice(0, showAtSelect.length)
     isArriveTotal.value = false
     newsLoading.value = true
     setTimeout(async () => {
@@ -301,16 +406,11 @@
       })
       newsList.value.push(...newsRes.records)
       if(newsRes.total <= newsList.value.length) isArriveTotal.value = true
-      contentNumList.push(...new Array(newsRes.records.length).fill(0))
-      showAtSelect.push(...new Array(newsRes.records.length).fill(false))
       newsLoading.value = false
     }, 500);
   }
   //#endregion 
   defineExpose({
-    mineRefList,
-    rangeOfContentBoxList,
-    curRangeIndex,
     getUserNewsList
   })
 </script>
@@ -509,37 +609,19 @@
             </div>
             <div class="forward-input-box">
               <bs-tag-select @getSelectTagId="changeForwardTagId(index,$event)"></bs-tag-select>
-              <div class="forward-input">
-                <div 
-                  :ref="el => getMineRef(el,index)"
-                  contenteditable="true"
-                  :class="{'empty-input':!contentNumList[index]}"
-                  placeholder="有什么想说的呢"
-                  @click.stop="handleContentBoxClick"
-                  tabindex="0"
-                  @input="changePubContent($event,index,showAtSelect,mineRefList,contentNumList,atSelectPosition)"
-                  @blur="handleContentBlur(index,showAtSelect,focusNode,focusOffset,chatInputOffset)"
-                >
-                </div>
-                <bs-at-ul 
-                  v-if="showAtSelect[index]"
-                  @selectAtUser="selectAtUser"
-                  contenteditable="false"
-                  :atSelectPosition="atSelectPosition"
-                >
-                </bs-at-ul>
+              <div :ref="el => getInputBoxRef(el, index)" class="input-box">
+                <bs-input :ref="el => getInputMethods(el, index)" placeholder="有什么想说的呢？"></bs-input>
               </div>
             </div>
           </div>
           <div class="forward-footer">
-            <div class="emoji-btn" tabindex="1" @blur="handleEmojiBoxBlur(index)">
+            <div class="emoji-btn">
               <i @click.stop="showEmojiBoxForward(index,item.showEmojiBox)" :class="{'active':item.showEmojiBox}" class="iconfont icon-biaoqing"></i>
               <div v-if="item.showEmojiBox" class="emoji-box">
-                <bs-emoji @insertEmoji="insertEmojiForward"></bs-emoji>
+                <bs-emoji @insertEmoji="insertEmoji($event, inputMethodsList[index], inputBoxRefList[index].children[0])"></bs-emoji>
               </div>
             </div>
             <div class="wrapper">
-              <span class="stat">{{ contentNumList[index] }}</span>
               <button @click.stop="forwardNews(index)" class="forward-btn">转发</button>
             </div>
           </div>
@@ -951,25 +1033,8 @@
             &:hover {
               border: 1px solid $colorM;
             }
-            .forward-input {
+            .input-box {
               position: relative;
-              margin-top: 6px;
-              .empty-input {
-                &::after {
-                  content: attr(placeholder);
-                  position: absolute;
-                  top: 0px;
-                  color: $colorD;
-                }
-              }
-              img{
-                height: 20px;
-                width: 20px;
-                vertical-align: middle
-              }
-              .username{
-                color: $colorM;
-              }
             }
           }
         }

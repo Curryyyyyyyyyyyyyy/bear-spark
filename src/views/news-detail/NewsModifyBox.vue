@@ -1,6 +1,6 @@
 <script setup>
   import BsTagSelect from '@/components/news/BsTagSelect.vue'
-  import BsRichTextInput from '@/components/input/BsRichTextInput.vue'
+  import BsInput from '@/components/input/BsInput.vue'
   import BsEmoji from '@/components/input/BsEmoji.vue'
   import { onMounted, ref } from 'vue';
   import {modifyNewsApi} from '@/api/news.js'
@@ -15,7 +15,7 @@
     tagId.value = id
   }
   /* title */
-  const title = ref(props.newsInfo.title)
+  const title = ref(props.newsInfo.happeningInfo.title)
   /* close */
   function closeModifyBox() {
     ElMessageBox.confirm(
@@ -32,25 +32,16 @@
   }
   /* input */
   const modifyInputRef = ref()
-  const visibility = ref(props.newsInfo.visibility)
+  const visibility = ref(props.newsInfo.happeningInfo.visibility)
   onMounted(()=>{
-    modifyInputRef.value.contentDom.innerHTML = props.newsInfo.content
-    modifyInputRef.value.contentNum = modifyInputRef.value.handleContentNum()
+    contentInputBoxRef.value.children[0].innerHTML = props.newsInfo.happeningInfo.content
+    inputMethods.value.handleContentNum(contentInputBoxRef.value.children[0])
   })
   /* emoji */
   const showEmojiBox = ref(false)
   function insertEmoji(emojiUrl) {
-    modifyInputRef.value.insertEmoji(emojiUrl)
+    inputMethods.value.insertEmoji(emojiUrl, contentInputBoxRef.value.children[0])
   }
-  // document.onselectionchange = () => {
-  //   let selection = document.getSelection()
-  //   if(selection.rangeCount > 0) {
-  //     const range = selection.getRangeAt(0)
-  //     if(modifyInputRef.value.contentDom.contains(range.commonAncestorContainer)) {
-  //       modifyInputRef.value.rangeOfContentBox = range
-  //     }
-  //   }
-  // }
   /* setting */
   const showCascader = ref(false)
   const showCascader2 = ref(false)
@@ -60,14 +51,16 @@
     showCascader2.value = false
   }
   function handleClickAt() {
-    modifyInputRef.value.handleClickAt()
+    inputMethods.value.handleClickAt(contentInputBoxRef.value.children[0])
   }
+  const contentInputBoxRef = ref()
+  const inputMethods = ref()
   /* 发布 */
   async function publishNews() {
-    const content = modifyInputRef.value.contentDom.innerHTML
+    const content = contentInputBoxRef.value.children[0].innerHTML
     if(!content) return ElMessage.error('内容不能为空')
     await modifyNewsApi({
-      happeningId:props.newsInfo.id,
+      happeningId:props.newsInfo.happeningInfo.id,
       tagId:tagId.value,
       title:title.value,
       content:content,
@@ -92,7 +85,7 @@
         <i @click="closeModifyBox" class="iconfont icon-cuowu"></i>
       </div>
       <div class="news-modify-body">
-        <bs-tag-select :defaultTag="newsInfo.tag" :defaultTagId="newsInfo.tagId" @getSelectTagId="getSelectTagId"></bs-tag-select>
+        <bs-tag-select :defaultTag="newsInfo.happeningInfo.tag" :defaultTagId="newsInfo.happeningInfo.tagId" @getSelectTagId="getSelectTagId"></bs-tag-select>
         <div class="title-input-box">
           <input type="text" v-model="title" maxlength="20" placeholder="标题（选填，建议20字内）">
           <div v-if="title" class="title-stat">
@@ -102,7 +95,9 @@
             <span>{{ title.length }}</span>
           </div>
         </div>
-        <bs-rich-text-input ref="modifyInputRef" placeholder="有什么想说的呢？"></bs-rich-text-input>
+        <div ref="contentInputBoxRef" class="content-input-box">
+          <bs-input ref="inputMethods" placeholder="有什么想说的呢？"></bs-input>
+        </div>
         <div v-if="visibility === 1" class="only-box">
           <span class="only-title"><i class="iconfont icon-suo"></i>仅自己可见</span>
           <span class="only-desc">开启后，将不支持分享、商业推广</span>
@@ -114,16 +109,17 @@
       </div>
       <div class="news-modify-footer">
         <div class="modify-tools">
-          <div class="icon-box" tabindex="0" @blur="showEmojiBox = false">
-            <i @click="showEmojiBox = true" class="iconfont icon-biaoqing"></i>
-            <bs-emoji v-if="showEmojiBox" @insertEmoji="insertEmoji"></bs-emoji>
+          <div class="icon-box" tabindex="0">
+            <i @click="showEmojiBox = !showEmojiBox" class="iconfont icon-biaoqing"></i>
+            <div v-if="showEmojiBox" class="emoji-box">
+              <bs-emoji @insertEmoji="insertEmoji"></bs-emoji>
+            </div>
           </div>
           <div @click="handleClickAt" class="icon-box">
             <i class="iconfont icon-aite"></i>
           </div>
         </div>
         <div class="modify-headquarter">
-          <div class="text-num">{{ 300 - modifyInputRef?.contentNum }}</div>
           <div class="setting" tabindex="0" @blur="showCascader = false,showCascader2 = false">
             <i @click="showCascader = true" class="iconfont icon-shezhi"></i>
             <div v-if="showCascader" class="cascader">
@@ -224,6 +220,9 @@
             }
           }
         }
+        .content-input-box {
+          position: relative;
+        }
         .only-box {
           margin-top: 10px;
           font-size: $fontL;
@@ -269,6 +268,9 @@
               &:hover {
                 color: $colorM;
               }
+            }
+            .emoji-box {
+              position: absolute;
             }
           }
         }

@@ -4,6 +4,7 @@
   import NewsForwardBox from './NewsForwardBox.vue';
   import LikeList from '@/components/news/LikeList.vue';
   import ForwardList from '@/components/news/ForwardList.vue';
+  import CommentList from '@/components/news/CommentList.vue';
   import { useRoute, useRouter } from 'vue-router';
   import {getNewsDetailApi,deleteNewsApi,getVoteDetailApi,likeNewsApi} from '@/api/news.js'
   import {revokeBookLiveApi, modBookLiveStateApi} from '@/api/bookLive'
@@ -172,22 +173,6 @@
   //#endregion
   //#region 转发
   const showForwardBox = ref(false)
-  //#endregion
-  //#region onselectionchange
-  const newsModifyRef = ref()
-  const newsForwardRef = ref()
-  document.onselectionchange = () => {
-    let selection = document.getSelection()
-    if(selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0)
-      if(showForwardBox.value && newsForwardRef.value.forwardInputRef.contentDom.contains(range.commonAncestorContainer)) {
-        newsForwardRef.value.forwardInputRef.rangeOfContentBox = range
-      }
-      if(showModifyBox.value && newsModifyRef.value.modifyInputRef.contentDom.contains(range.commonAncestorContainer)) {
-        newsModifyRef.value.modifyInputRef.rangeOfContentBox = range
-      }
-    }
-  }
   //#endregion
   //#region tab栏
   const tab = ref('comment')
@@ -426,6 +411,7 @@
       <div class="item-tabs-content">
         <like-list v-if="tab === 'like'" :likeInfoList="newsInfo.happeningInfo.likeInfoList"></like-list>
         <forward-list v-if="tab === 'forward'" :forwardInfoList="newsInfo.happeningInfo.forwardInfoList"></forward-list>
+        <comment-list v-if="tab === 'comment'"></comment-list>
       </div>
     </div>
   </div>
@@ -440,14 +426,12 @@
     v-if="showModifyBox"
     @closeModifyBox="showModifyBox = false"
     :newsInfo="newsInfo"
-    ref="newsModifyRef"
   >
   </news-modify-box>
   <news-forward-box
     v-if="showForwardBox"
     @closeForwardBox="showForwardBox = false"
     :newsInfo="newsInfo"
-    ref="newsForwardRef"
   >
   </news-forward-box>
 </template>
@@ -486,6 +470,7 @@
     .news-detail-card {
       position: relative;
       width: 750px;
+      min-height: 100vh;
       margin: 0 auto;
       border-radius: 6px;
       background-color: $colorG;
@@ -901,9 +886,7 @@
         }
       }
       .item-tabs-content {
-        padding: 14px 60px;
-        min-height: 480px;
-        margin-bottom: 20px;
+        padding: 14px 60px 0 60px;
       }
     }
   }

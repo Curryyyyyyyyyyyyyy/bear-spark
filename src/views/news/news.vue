@@ -84,7 +84,6 @@
   }
   function getUserNewsList(username) {
     activeUp.value = username
-    newsListRef.value.getUserNewsList(username)
   }
   //#endregion
   //#region tab栏
@@ -93,25 +92,6 @@
     tab.value = tabName
   }
   //#endregion
-  //#region 处理光标
-  const publishBox = ref()
-  const newsListRef = ref()
-  document.onselectionchange = () => {
-    let selection = document.getSelection()
-    if(selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0)
-      newsListRef.value.mineRefList.forEach((item,index) => {
-        if(item.contains(range.commonAncestorContainer)) {
-          newsListRef.value.rangeOfContentBoxList[index] = range
-          newsListRef.value.curRangeIndex = index
-        }
-      })
-      /* 处理publish输入框光标 */
-      if(publishBox.value.richTextInputPub.contentDom.contains(range.commonAncestorContainer)) {
-        publishBox.value.richTextInputPub.rangeOfContentBox = range
-      }
-    }
-  }
   //#endregion
   //#region 页面尺寸缩放调整
   let smallSize = ref(false)
@@ -152,7 +132,7 @@
     <div class="container" :class="{'container-small':smallSize}">
       <news-user-box></news-user-box>
       <div class="body">
-        <news-publish-box ref="publishBox"></news-publish-box>
+        <news-publish-box></news-publish-box>
         <div class="bs-up-list">
           <div class="shim"></div>
           <div @click="changeUpListScroll(-400)" class="left-btn"><i class="iconfont icon-zuojiantou"></i></div>
@@ -179,7 +159,7 @@
           </div>
           <div class="news-tabs-highlight" :style="{transform:tab==='all'?`translateX(37px)`:(tab==='video'?`translateX(98px)`:`translateX(158px)`)}"></div>
         </div>
-        <NewsList ref="newsListRef" :tab="tab" :activeUp="activeUp"></NewsList>
+        <NewsList :tab="tab" :activeUp="activeUp"></NewsList>
       </div>
       <news-aside-box :sideBarUrl="sideBarUrl" :recentTagList="recentTagList"></news-aside-box>
     </div>

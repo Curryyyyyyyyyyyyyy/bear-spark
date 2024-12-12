@@ -1,6 +1,6 @@
 <script setup>
   import BsTagSelect from '@/components/news/BsTagSelect.vue';
-  import BsRichTextInput from '@/components/input/BsRichTextInput.vue';
+  import BsInput from '@/components/input/BsInput.vue';
   import BsModal from '@/components/common/BsModal.vue'
   import { nextTick, onBeforeUnmount, ref } from 'vue';
   import dayjs from 'dayjs';
@@ -29,7 +29,7 @@
   const imgUrlList = ref([])
   const bookLiveInfo = ref(null)
   const publish = throttle(async () => {
-    if(!richTextInputPub.value.contentDom.innerHTML) return ElMessage.error('内容不能为空')
+    if(!pubInputBoxRef.value.children[0].innerHTML) return ElMessage.error('内容不能为空')
     let pubTime = ''
     if(publishDate.value && publishHour.value && publishHour.value) {
       pubTime = timeFormat(publishDate.value,publishHour.value,publishHour.value)
@@ -38,7 +38,7 @@
     }
     await publishNewsApi({
       title:newsTitle.value,
-      content:richTextInputPub.value.contentDom.innerHTML,
+      content:pubInputBoxRef.value.children[0].innerHTML,
       imgUrlList:imgUrlList.value,
       tagId:publishTagId.value,
       visibility:newsSeePermission.value,
@@ -51,8 +51,8 @@
     ElMessage.success('发布成功')
     //#region 清空表单
       newsTitle.value = ''
-      richTextInputPub.value.contentDom.innerHTML = ''
-      richTextInputPub.value.contentNum = 0
+      pubInputBoxRef.value.children[0].innerHTML = ''
+      pubInputMethods.value.handleContentNum(pubInputBoxRef.value.children[0])
       imgUrlList.value = []
       newsSeePermission.value = 0
       newsCommentPermission.value = 0
@@ -67,9 +67,16 @@
   }, 1000) 
   //#endregion
   //#region @艾特功能
-  const richTextInputPub = ref()
-  function handleClickAt() {
-    richTextInputPub.value.handleClickAt()
+  function handleClickAt(inputRef) {
+    pubInputMethods.value.handleClickAt(inputRef)
+  }
+  //#endregion
+  //#region 表情包
+  const pubInputMethods = ref()
+  const pubInputBoxRef = ref()
+  const showEmojiBox = ref(false)
+  function insertEmoji(emojiUrl, inputRef) {
+    pubInputMethods.value.insertEmoji(emojiUrl, inputRef)
   }
   //#endregion
   //#region 图片
@@ -100,44 +107,21 @@
     pictureList.value.splice(index, 1)
   }
   //#endregion
-  //#region 表情包
-  const showEmojiBoxPub = ref(false)
-  /* 展示表情包列表 */
-  function clickEmojiBtn() {
-    showEmojiBoxPub.value = !showEmojiBoxPub.value
-  }
-  /* 表情包列表失焦 */
-  function handleEmojiBoxBlur() {
-    showEmojiBoxPub.value = false
-  }
-  /* 输入表情包 */
-  function insertEmojiPub(emojiUrl) {
-    richTextInputPub.value.insertEmoji(emojiUrl)
-  }
-  //#endregion
   //#region 投票功能
   /* 展示投票表单 */
   const showPubVoteModal = ref(false)
   /* 展示投票栏 */
   const showVoteBox = ref(false)
-  /* 监测标题数 */
+  /* 标题 */
   const voteTitle = ref('')
-  const voteTitleNum = ref(0)
-  function changeVoteTitle(event) {
-    voteTitleNum.value = event.target.value.length
-  }
-  /* 展示说明输入框 */
+  /* 说明输入框 */
   const voteDesc = ref('')
   const showDescInput = ref(false)
-  /* 监测说明字数 */
-  const voteDescNum = ref(0)
-  function changeDesc(event) {
-    voteDescNum.value = event.target.value.length
-  }
   /* 投票类型 */
   const voteType = ref(1) // 1:文字 2:图片
   const textOptionList = ref([{optionContent:''},{optionContent:''}])
   function addOption() {
+    if(textOptionList.value.length === 20) return
     textOptionList.value.push({optionContent:''})
     pictureOptionList.value.push({optionContent:'',optionPhotoUrl:''})
   }
@@ -417,7 +401,6 @@
   const livesEndDate = ref('') // 预约日期
   const livesEndHour = ref('') // 预约小时
   const livesEndMinute = ref('') // 预约分钟
-  const livesTitleNum = ref(0)
   const livesHourOptions = ref(hourOptions)
   const livesMinuteOptions = ref(minuteOptions)
   const livesTitle = ref('')
@@ -425,9 +408,6 @@
     showPubBookLivesModal.value = true
     const defaultTime = dayjs(new Date().getTime() + 86400000)
     livesEndDate.value = defaultTime.format('YYYY-MM-DD')
-  }
-  function changeLivesTitle(event) {
-    livesTitleNum.value = event.target.value.length
   }
   function changeLivesDate() {
     const date = dayjs(livesEndDate.value)
@@ -867,20 +847,18 @@
     clearInterval(timer)
   })
   //#endregion
-
-  defineExpose({
-    richTextInputPub
-  })
 </script>
 
 <template>
   <div class="news-publish-box">
     <bs-tag-select @getSelectTagId="changePubTagId"></bs-tag-select>
     <div class="publish-input">
-      <input name="newsTitle" v-model="newsTitle" @input="changePubTitle" maxlength="20" type="text" class="title" placeholder="标题 (选填，20字内)" autocomplete="off">
+      <input name="newsTitle" v-model="newsTitle" maxlength="20" type="text" class="title" placeholder="标题 (选填，20字内)" autocomplete="off">
       <i v-if="newsTitle" @click="newsTitle = ''" class="iconfont icon-cuowu1"></i>
       <span v-if="newsTitle" class="title-num">{{ newsTitle.length }}</span>
-      <bs-rich-text-input ref="richTextInputPub" placeholder="有什么想和大家分享的？"></bs-rich-text-input>
+      <div ref="pubInputBoxRef" class="pub-content-input-box">
+        <bs-input ref="pubInputMethods" placeholder="有什么想和大家分享的？"></bs-input>
+      </div>
     </div>
     <div v-if="showUploadBox" class="pub-picture-list">
       <div v-for="(item,index) in pictureList" :key="index" class="picture-box">
@@ -952,17 +930,17 @@
     </div>
     <div class="publish-controls">
       <div class="publish-controls-tool">
-        <div class="emoji-btn" ref="emojiBtnDom" tabindex="1" @blur="handleEmojiBoxBlur">
-          <i @click="clickEmojiBtn" :class="{'active':showEmojiBoxPub}" class="iconfont icon-biaoqing"></i>
-          <div v-if="showEmojiBoxPub" class="emoji-box">
-            <bs-emoji @insertEmoji="insertEmojiPub"></bs-emoji>
+        <div class="emoji-btn" ref="emojiBtnDom">
+          <i @click="showEmojiBox = !showEmojiBox" :class="{'active':showEmojiBox}" class="iconfont icon-biaoqing"></i>
+          <div v-if="showEmojiBox" class="emoji-box">
+            <bs-emoji @insertEmoji="insertEmoji($event, pubInputBoxRef.children[0])"></bs-emoji>
           </div>
         </div>
         <div>
           <i @click="showUploadBox = !showUploadBox" :class="{'active':showUploadBox}" class="iconfont icon-tupian"></i>
         </div>
         <div>
-          <i @click="handleClickAt" class="iconfont icon-aite"></i>
+          <i @click="handleClickAt(pubInputBoxRef.children[0])" class="iconfont icon-aite"></i>
         </div>
         <div>
           <i @click="handleClickVote" :class="{'active':showVoteBox}" class="iconfont icon-toupiao"></i>
@@ -972,7 +950,6 @@
         </div>
       </div>
       <div class="publish-controls-headquarters">
-        <span class="content-num">{{ richTextInputPub ? richTextInputPub.contentNum : 0 }} / 300</span>
         <i @click="showSettingCascader" class="iconfont icon-shezhi"></i>
         <div v-if="settingCascader1" class="cascader"  tabindex="1" @blur="blurSettingCascader" ref="settingCascaderDom">
           <div v-if="settingCascader1" class="cascader-list">
@@ -1029,8 +1006,8 @@
         <div class="vote-title-sec">
           <p class="desc">投票标题</p>
           <div class="input-box">
-            <input v-model="voteTitle" @input="changeVoteTitle" type="text" placeholder="请填写标题" maxlength="32"/>
-            <span class="stat">{{ voteTitleNum }}/32</span>
+            <input v-model="voteTitle" type="text" placeholder="请填写标题" maxlength="32"/>
+            <span class="stat">{{ voteTitle.length }}/32</span>
           </div>
         </div>
         <div class="vote-desc-sec">
@@ -1040,8 +1017,8 @@
           </div>
           <p v-if="showDescInput" class="desc">投票说明<span>(选填)</span></p>
           <div v-if="showDescInput" class="input-box">
-            <textarea v-model="voteDesc" @input="changeDesc" type="text" placeholder="请填写投票说明(选填)" maxlength="100"></textarea>
-            <span class="stat">{{ voteDescNum }}/100</span>
+            <textarea v-model="voteDesc" type="text" placeholder="请填写投票说明(选填)" maxlength="100"></textarea>
+            <span class="stat">{{ voteDesc.length }}/100</span>
           </div>
         </div>
         <div class="vote-type-sec">
@@ -1062,7 +1039,7 @@
                 </div>
               </div>
             </div>
-            <div @click="addOption" class="add-option">
+            <div v-if="textOptionList.length < 20" @click="addOption" class="add-option">
               <i class="iconfont icon-jiahao"></i>
               <span>添加选项</span>
             </div>
@@ -1148,8 +1125,8 @@
       <div class="modal-lives-box">
         <p class="lives-box-title">发起新预约</p>
         <div class="title-input-box">
-          <input v-model="livesTitle" @input="changeLivesTitle" maxlength="14" type="text" placeholder="请填写预约标题">
-          <span class="stat">{{ livesTitleNum }}/14</span>
+          <input v-model="livesTitle" maxlength="14" type="text" placeholder="请填写预约标题">
+          <span class="stat">{{ livesTitle.length }}/14</span>
         </div>
         <div class="time-box">
           <el-date-picker
@@ -1200,6 +1177,9 @@
         border: none;
         font-size: $fontJ;
         font-weight: bold;
+      }
+      .pub-content-input-box {
+        position: relative;
       }
       .icon-cuowu1 {
         margin-right: 4px;

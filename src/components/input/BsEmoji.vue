@@ -4,16 +4,16 @@
   const emit = defineEmits(['insertEmoji'])
   const emojiUrlList = ref([])
   onMounted(async () => {
-    const emojiListRes = await getEmojiListApi()
-    emojiUrlList.value = emojiListRes.emojiUrlList
-    // emojiUrlList.value = [
-    //   '/imgs/default-avatar.png',
-    //   '/imgs/default-avatar.png',
-    //   '/imgs/default-avatar.png',
-    //   '/imgs/default-avatar.png',
-    //   '/imgs/default-avatar.png',
-    //   '/imgs/default-avatar.png',
-    // ]
+    // const emojiListRes = await getEmojiListApi()
+    // emojiUrlList.value = emojiListRes.emojiUrlList
+    emojiUrlList.value = [
+      '/imgs/default-avatar.png',
+      '/imgs/default-avatar.png',
+      '/imgs/default-avatar.png',
+      '/imgs/default-avatar.png',
+      '/imgs/default-avatar.png',
+      '/imgs/default-avatar.png',
+    ]
   })
   function insertEmoji(event) {
     let emojiUrl
@@ -41,14 +41,12 @@
   .bs-emoji {
     display: flex;
     flex-direction: column;
-    position: absolute;
     width: 384px;
     height: 252px;
     padding: 5px 4px 5px 12px;
     border: 1px solid $colorE;
     box-sizing: border-box;
     border-radius: 6px;
-    box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.17);
     background-color: $colorG;
     .bs-emoji-list {
       width: 100%;
