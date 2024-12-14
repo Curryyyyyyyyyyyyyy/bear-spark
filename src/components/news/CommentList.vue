@@ -1,13 +1,24 @@
 <script setup>
-  import { ref } from 'vue';
-  import BsInputBox from '@/components/input/BsInputBox.vue';
+  import { onMounted, ref } from 'vue';
+  import BsInputBox from '@/components/input/BsInputBox.vue'
+  import BsHtmlText from '@/components/common/BsHtmlText.vue';
+  import { ElMessage, ElPagination } from 'element-plus';
   import {throttle} from '@/hooks/performance'
+  import handleNumInfo from '@/hooks/handleNumInfo';
+  import useUser from '@/store/user'
+  import {getBldgCommentApi,getLayerCommentApi,deleteCommentApi,replyCommentApi,commentHappeningApi,likeCommentApi} from '../../api/comment'
 
+  const props = defineProps(['happeningId'])
+  const userStore = useUser()
+  onMounted(() => {
+    loadMore()
+  })
   //#region 排序方式
   const order = ref(0)
   async function changeOrder(newOrder) {
     if(newOrder === order.value) return
     order.value = newOrder
+    pageNum.value = 1
   }
   //#endregion
   //#region 控制底部评论输入框展示
@@ -21,6 +32,96 @@
     }
   }))
   //#endregion
+  //#region 加载
+  const bldgCommentList = ref([])
+  const busy = ref(false)
+  const loading = ref(false)
+  const isArriveTotal = ref(false)
+  const pageNum = ref(1)
+  const pageSize = ref(20)
+  function loadMore() {
+    if(isArriveTotal.value) return
+    busy.value = true
+    loading.value = true
+    setTimeout(async () => {
+      const res = await getBldgCommentApi({
+        pageNum:pageNum.value,
+        pageSize:pageSize.value,
+        happeningId:props.happeningId,
+        order:order.value
+      })
+      bldgCommentList.value.push(...res.bldgCommentList)
+      if(bldgCommentList.value.length >= res.bldgTotal) isArriveTotal.value = true
+      busy.value = false
+      loading.value = false
+    }, 500);
+  }
+  //#endregion
+  const activeReplyInputIndex = ref('')
+  const replyCommentId = ref('')
+  const replyUserId = ref('')
+  const replyPlaceholder = ref('')
+  function handleShowReplyInput(index, commentId, username, userId) {
+    if(commentId === replyCommentId.value) {
+      activeReplyInputIndex.value = ''
+      replyCommentId.value = ''
+      return
+    }
+    replyCommentId.value = commentId
+    replyUserId.value = userId
+    activeReplyInputIndex.value = index
+    replyPlaceholder.value = `回复 @${username} :`
+  }
+  async function showLayerComment(pageNum, index, commentId) {
+    const res = await getLayerCommentApi({
+      pageNum:pageNum,
+      pageSize:10,
+      commentId:commentId
+    })
+    bldgCommentList.value[index].layerCommentList = res.layerCommentList
+  }
+
+  //#region 评论
+  /* 发布评论 */
+  async function publishComment(content, happeningId) {
+    await commentHappeningApi({
+      happeningId,
+      content,
+    })
+    ElMessage.success('评论成功')
+  }
+  /* 回复评论 */
+  async function replyComment(content) {
+    await replyCommentApi({
+      content,
+      repliedCommentId:replyCommentId.value,
+      repliedUserId:replyUserId.value
+    })
+    ElMessage.success('评论成功')
+  }
+  /* 删除评论 */
+  async function deleteComment(commentId) {
+    console.log(commentId)
+    await deleteCommentApi({
+      commentId
+    })
+    ElMessage.info('删除成功')
+  }
+  /* 点赞/取消点赞评论 */
+  async function likeComment(item) {
+    await likeCommentApi({
+      commentId:item.commentId,
+      liked:item.liked ? 0 : 1
+    })
+    if(item.liked) {
+      item.liked = 0
+      item.likeNumInfo = handleNumInfo(item.likeNumInfo, -1)
+    } else {
+      item.liked = 1
+      item.likeNumInfo = handleNumInfo(item.likeNumInfo, 1)
+    }
+  }
+  //#endregion
 </script>
 
 <template>
@@ -33,33 +134,35 @@
           <button @click="changeOrder(1)" class="order-action time" :class="{'active':order === 1}">最新</button>
         </div>
         <div ref="headerInputBoxRef" class="comment-header-input">
-          <bs-input-box :hideFooter="true" placeholder="你猜我在评论区等着谁？"></bs-input-box>
+          <bs-input-box @publish="publishComment($event, happeningId)" :hideFooter="true" placeholder="你猜我在评论区等着谁？"></bs-input-box>
         </div>
       </div>
       <div class="news-comment-body">
         <ul class="bldg-comment-ul">
-          <li class="bldg-comment-li">
+          <li v-for="(item,index) in bldgCommentList" :key="index" class="bldg-comment-li">
             <a class="bldg-avatar-box">
-              <img src="/imgs/default-avatar.png">
+              <img :src="item.userInfo.avatarUrl">
             </a>
-            <div class="bldg-comment-main">
+            <div @mouseenter="item.showSettingBtn = true" @mouseleave = "item.showSettingBtn = false" class="bldg-comment-main">
               <div class="main-header">
-                <a href="">curryyyyyyyyy</a>
+                <a href="">{{ item.userInfo.username }}</a>
               </div>
-              <div class="main-content">啦啦啦啦啦啦</div>
+              <div class="main-content">
+                <bs-html-text :content="item.content" :atUserInfoList="item.atUserInfoList"></bs-html-text>
+              </div>
               <div class="main-footer">
-                <div class="pub-time">2023-11-11 20:34</div>
-                <div class="like">
+                <div class="pub-time">{{ item.pubTimeInfo }}</div>
+                <div @click="likeComment(item)" class="like" :class="{'avtive':item.liked}">
                   <i class="iconfont icon-dianzan"></i>
-                  <span class="like-num">5</span>
+                  <span v-if="item.likeNumInfo" class="like-num">{{ item.likeNumInfo }}</span>
                 </div>
-                <div class="reply">
+                <div @click="handleShowReplyInput(index, item.commentId, item.userInfo.username, item.userInfo.userId)" class="reply">
                   <button class="reply-btn">回复</button>
                 </div>
-                <button v-if="true" class="more">
+                <button v-if="item.showSettingBtn" @mouseenter="item.showSettingContent = true" @mouseleave="item.showSettingContent = false" class="more">
                   <i class="iconfont icon-gengduo1"></i>
-                  <div class="more-box">
-                    <div v-if="false" class="setting-ul self">
+                  <div v-if="item.showSettingContent" class="more-box">
+                    <div @click="deleteComment(item.commentId)" v-if="userStore.userId === item.userInfo.userId" class="setting-ul self">
                       <div class="setting-li">删除</div>
                     </div>
                     <div v-else class="setting-ul not-self">
@@ -71,50 +174,73 @@
               </div>
             </div>
             <div class="expander">
-              <div v-if="false" class="expand-more">
-                <span>查看 6 条回复，</span>
-                <button class="view-more-btn">点击查看</button>
+              <div v-if="item.replyNum && !item.layerCommentList" class="expand-more">
+                <span>查看 {{ item.replyNumInfo }} 条回复，</span>
+                <button @click="showLayerComment(1,index,item.commentId)" class="view-more-btn">点击查看</button>
               </div>
               <ul class="layer-comment-ul">
-                <li class="layer-comment-li">
+                <li v-for="(item, index2) in item.layerCommentList" :key="index2" class="layer-comment-li">
                   <a class="layer-avatar-box">
-                    <img src="/imgs/default-avatar.png">
+                    <img :src="item.userInfo.avatarUrl">
                   </a>
-                  <div class="layer-comment-main">
+                  <div @mouseenter="item.showSettingBtn = true" @mouseleave = "item.showSettingBtn = false" class="layer-comment-main">
                     <span class="main-header">
-                      <a href="">curryyyyyyyyy</a>
+                      <a href="">{{ item.userInfo.username }}</a>
+                      <span v-if="item.repliedUserName"> 回复 <span class="username">{{'@' + item.repliedUserName }}</span> ：</span>
+                      <span v-else> ：</span>
                     </span>
-                    <span class="main-content">啦啦啦啦啦啦</span>
+                    <span class="main-content">
+                      <bs-html-text :content="item.content" :atUserInfoList="item.atUserInfoList"></bs-html-text>
+                    </span>
                     <div class="main-footer">
-                      <div class="pub-time">2023-11-11 20:34</div>
-                      <div class="like">
+                      <div class="pub-time">{{ item.pubTimeInfo }}</div>
+                      <div @click="likeComment(item)" class="like">
                         <i class="iconfont icon-dianzan"></i>
-                        <span class="like-num">5</span>
+                        <span v-if="item.likeNumInfo" class="like-num">{{ item.likeNumInfo }}</span>
                       </div>
                       <div class="reply">
-                        <button class="reply-btn">回复</button>
+                        <button @click="handleShowReplyInput(index, item.commentId, item.userInfo.username, item.userInfo.userId)" class="reply-btn">回复</button>
                       </div>
-                      <button v-if="true" class="more">
+                      <button v-if="item.showSettingBtn" @mouseenter="item.showSettingContent = true" @mouseleave="item.showSettingContent = false" class="more">
                         <i class="iconfont icon-gengduo1"></i>
+                        <div v-if="item.showSettingContent" class="more-box">
+                          <div @click="deleteComment(item.commentId)" v-if="userStore.userId === item.userInfo.userId" class="setting-ul self">
+                            <div class="setting-li">删除</div>
+                          </div>
+                          <div v-else class="setting-ul not-self">
+                            <div class="setting-li">加入黑名单</div>
+                            <div class="setting-li">举报</div>
+                          </div>
+                        </div>
                       </button>
                     </div>
                   </div>
                 </li>
               </ul>
+              <div v-if="item.layerCommentList?.length > 0 && item.replyNum > 10" class="example-pagination-block">
+                <el-pagination @current-change="showLayerComment($event, index, item.commentId)" layout="prev, pager, next" :page-count="Math.ceil(item.replyNum/10)" />
+              </div>
             </div>
-            <div class="comment-input-box">
-              <bs-input-box :bgcOnlyWhite="true" placeholder="回复 @curryyyyy："></bs-input-box>
+            <div v-if="index === activeReplyInputIndex" class="comment-input-box">
+              <bs-input-box @publish="replyComment" :bgcOnlyWhite="true" :placeholder="replyPlaceholder"></bs-input-box>
             </div>
             <div class="border"></div>
           </li>
         </ul>
-      </div>
-      <div v-if="showCommentFooter" class="news-comment-footer">
-        <div class="comment-header-input">
-          <bs-input-box :positionTop="true" :hideFooter="true" placeholder="你猜我在评论区等着谁？"></bs-input-box>
+        <div class="load-more"
+          v-infinite-scroll="loadMore" 
+          :infinite-scroll-disabled="busy" 
+          infinite-scroll-distance="50"
+        >
+          <img src="/imgs/loading-svg/loading-spinning-bubbles.svg" v-show="!isArriveTotal && loading">
         </div>
       </div>
       <div class="end-text">没有更多评论了</div>
+      <div v-if="showCommentFooter" class="news-comment-footer">
+        <div class="comment-header-input">
+          <bs-input-box @publish="publishComment($event, happeningId)" :positionTop="true" :hideFooter="true" placeholder="你猜我在评论区等着谁？"></bs-input-box>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -168,8 +294,11 @@
                 color: $colorB;
               }
               .main-content {
+                display: inline-block;
                 font-size: 15px;
                 margin-top: 8px;
+                word-break: break-word;
+                white-space: pre-line;
               }
               .main-footer {
                 @include flex(left);
@@ -183,6 +312,9 @@
                   @include flex();
                   cursor: pointer;
                   &:hover {
+                    color: $colorM;
+                  }
+                  &.avtive {
                     color: $colorM;
                   }
                   .icon-dianzan {
@@ -213,7 +345,7 @@
                   .more-box {
                     z-index: 20;
                     position: absolute;
-                    right: 4px;
+                    right: 0;
                     padding-top: 6px;
                     .setting-ul {
                       padding: 8px 0;
@@ -224,6 +356,8 @@
                         min-width: 100px;
                         padding: 10px 16px;
                         text-align: left;
+                        color: $colorI;
+                        font-size: $fontK;
                         &:hover {
                           background-color: $colorN;
                         }
@@ -268,10 +402,18 @@
                       font-size: 13px;
                       color: $colorB;
                       margin-right: 6px;
+                      .username {
+                        color: $colorM;
+                        cursor: pointer;
+                      }
                     }
                     .main-content {
+                      display: inline-block;
+                      margin-top: 8px;
                       font-size: 15px;
                       margin-top: 8px;
+                      word-break: break-word;
+                      white-space: pre-line;
                     }
                     .main-footer {
                       @include flex(left);
@@ -307,8 +449,32 @@
                         border: none;
                         cursor: pointer;
                         color: $colorD;
-                        &:hover {
-                          color: $colorM;
+                        .icon-gengduo1 {
+                          &:hover {
+                            color: $colorM;
+                          }
+                        }
+                        .more-box {
+                          z-index: 20;
+                          position: absolute;
+                          right: 0;
+                          padding-top: 6px;
+                          .setting-ul {
+                            padding: 8px 0;
+                            border: 1px solid $colorF;
+                            border-radius: 6px;
+                            background-color: $colorG;
+                            .setting-li {
+                              min-width: 100px;
+                              padding: 10px 16px;
+                              text-align: left;
+                              color: $colorI;
+                              font-size: $fontK;
+                              &:hover {
+                                background-color: $colorN;
+                              }
+                            }
+                          }
                         }
                       }
                     }

@@ -5,10 +5,12 @@
   import LikeList from '@/components/news/LikeList.vue';
   import ForwardList from '@/components/news/ForwardList.vue';
   import CommentList from '@/components/news/CommentList.vue';
+  import BsHtmlText from '@/components/common/BsHtmlText.vue';
+  import handleNumInfo from '@/hooks/handleNumInfo';
   import { useRoute, useRouter } from 'vue-router';
   import {getNewsDetailApi,deleteNewsApi,getVoteDetailApi,likeNewsApi} from '@/api/news.js'
   import {revokeBookLiveApi, modBookLiveStateApi} from '@/api/bookLive'
-  import { onMounted, ref } from 'vue';
+  import { onBeforeMount, ref } from 'vue';
   import useUser from '@/store/user.js'
   import { ElMessage, ElMessageBox } from 'element-plus';
 
@@ -20,63 +22,15 @@
   const route = useRoute()
   /* onMounted */
   const newsInfo = ref({})
-  newsInfo.value = {
-    "happeningInfo":{
-      "happeningId":1,
-      "title": "现无称点进其原",
-      "content": "11",
-      "tag": "pariatur eiusmod aliqua labore reprehenderit",
-      "viewNumInfo": 41,
-      "likeNumInfo": 50,
-      "commentNumInfo": 9,
-      "forwardNumInfo":0,
-      "commentAble": 0,
-      "advanceRelease": 0,
-      "voteSimpleInfo": {
-          "voteId": 8,
-          "title": "需观反干分取必",
-          "voteNumInfo": "43"
-      },
-      "quotedHappening":{
-        "happeningInfo":{
-        "happeningId":1,
-        "username": "万超",
-        "avatarUrl": "http://dummyimage.com/100x100",
-        "title": "现无称点进其原",
-        "content": "",
-        "tag": "pariatur eiusmod aliqua labore reprehenderit",
-        "viewNumInfo": 41,
-        "likeNumInfo": 50,
-        "commentNumInfo": 9,
-        "forwardNumInfo":0,
-        "commentAble": 0,
-        "advanceRelease": 0,
-        "voteSimpleInfo": {
-          "voteId": 8,
-          "title": "需观反干分取必",
-          "voteNumInfo": "43"
-        },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
-        "pubTimeInfo": "1975-04-15 04:31:03"
-        },
-      },
-      "imgUrlList": [
-          "http://dummyimage.com/400x400"
-      ],
-      "pubTimeInfo": "1975-04-15 04:31:03"
-    },
-    "publisherInfo":{
-      "userId":1001,
-      "username": "万超",
-      "avatarUrl": "/imgs/default-avatar.png",
-    },
-  }
-  onMounted(async () => {
-  // newsInfo.value = await getNewsDetailApi({
-  //   happeningId:route.params.id
+  // getNewsDetailApi({
+  //     happeningId:route.params.id
+  // }).then(res => {
+  //   newsInfo.value = res
   // })
+  onBeforeMount(async () => {
+    newsInfo.value = await getNewsDetailApi({
+      happeningId:route.params.id
+    })
   })
   //#region 投票
   const showVoteModal = ref(false)
@@ -152,18 +106,18 @@
   }
   //#endregion
   //#region 点赞
-  async function likeNews(id, liked) {
+  async function likeNews(item) {
     await likeNewsApi({
-      happeningId:id,
-      liked:liked ? 0 : 1
+      happeningId:item.id,
+      liked:item.liked ? 0 : 1
     })
-    if(liked) {
-      newsInfo.value.happeningInfo.liked = 0
-      newsInfo.value.happeningInfo.likeNumInfo--
+    if(item.liked) {
+      item.liked = 0
+      item.likeNumInfo = handleNumInfo(item.likeNumInfo, -1)
       ElMessage.info('取消点赞')
     } else {
-      newsInfo.value.happeningInfo.liked = 1
-      newsInfo.value.happeningInfo.likeNumInfo++
+      item.liked = 1
+      item.likeNumInfo = handleNumInfo(item.likeNumInfo, 1)
       ElMessage.success('点赞成功')
     }
   }
@@ -207,12 +161,12 @@
             <img :src="newsInfo.publisherInfo.avatarUrl" alt="头像">
           </div>
           <div class="news-item-header">
-            <span class="news-item-author">{{ newsInfo.username }}</span>
-            <span v-if="!newsInfo.advanceRelease" class="news-item-early-pub">提前发布</span>
+            <span class="news-item-author">{{ newsInfo.publisherInfo.username }}</span>
+            <span v-if="!newsInfo.happeningInfo.advanceRelease" class="news-item-early-pub">提前发布</span>
             <div class="news-item-desc">
-              <span class="news-item-time">{{ newsInfo.pubTimeInfo }}</span>
+              <span class="news-item-time">{{ newsInfo.happeningInfo.pubTimeInfo }}</span>
               <div class="news-item-visibility">
-                <div v-if="newsInfo.visibility === 0" class="visibility-item">
+                <div v-if="newsInfo.happeningInfo.visibility === 0" class="visibility-item">
                   <i class="iconfont icon-jiesuo1"></i>
                   <span>所有人都可见</span>
                 </div>
@@ -225,7 +179,7 @@
             <div @mouseenter="showCascader = true"  @mouseleave="showCascader = false,showCascaderSecond=false" class="news-item-more-btn">
               <i class="iconfont icon-gengduo1"></i>
               <div v-if="showCascader" class="new-item-cascader">
-                <div v-if="username !== newsInfo.username" class="cascader-list">
+                <div v-if="username !== newsInfo.publisherInfo.username" class="cascader-list">
                   <div class="cascader-item">取消关注</div>
                   <div class="cascader-item">举报</div>
                 </div>
@@ -242,7 +196,9 @@
               <span>{{ newsInfo.happeningInfo.tag }}</span>
             </div>
             <div class="news-title">{{ newsInfo.happeningInfo.title }}</div>
-            <div class="news-text-content" v-html="newsInfo.happeningInfo.content"></div>
+            <div class="news-text-content">
+              <bs-html-text :content="newsInfo.happeningInfo.content" :atUserInfoList="newsInfo.happeningInfo.atUserInfoList"></bs-html-text>
+            </div>
             <div v-if="newsInfo.happeningInfo.imgUrlList" class="news-album">
               <div class="news-album-preview grid">
                 <div v-for="(item, index) in newsInfo.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
@@ -318,7 +274,9 @@
               <span>{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.tag }}</span>
             </div>
             <div class="news-title">{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.title }}</div>
-            <div class="news-text-content" v-html="newsInfo.happeningInfo.quotedHappening.happeningInfo.content"></div>
+            <div class="news-text-content">
+              <bs-html-text :content="newsInfo.happeningInfo.quotedHappening.happeningInfo.content" :atUserInfoList="newsInfo.happeningInfo.quotedHappening.happeningInfo.atUserInfoList"></bs-html-text>
+            </div>
             <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.imgUrlList" class="news-album">
               <div class="news-album-preview grid">
                 <div v-for="(item,index) in newsInfo.happeningInfo.quotedHappening.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
@@ -388,7 +346,7 @@
         </div>
       </div>
       <div class="side-toolbar">
-        <div @click="likeNews(newsInfo.happeningInfo.happeningId, newsInfo.happeningInfo.liked)" class="side-toolbar-item like-info" :class="{'active':newsInfo.happeningInfo.liked}">
+        <div @click="likeNews(newsInfo.happeningInfo)" class="side-toolbar-item like-info" :class="{'active':newsInfo.happeningInfo.liked}">
           <i class="iconfont icon-dianzan"></i>
           <div class="side-toolbar-item-text">
             {{ newsInfo.happeningInfo.likeNumInfo }}
@@ -416,9 +374,9 @@
         </div>
       </div>
       <div class="item-tabs-content">
-        <like-list v-if="tab === 'like'"></like-list>
-        <forward-list v-if="tab === 'forward'" :happeningId="newsInfo.happeningInfo.happeningId"></forward-list>
         <comment-list v-if="tab === 'comment'" :happeningId="newsInfo.happeningInfo.happeningId"></comment-list>
+        <like-list v-if="tab === 'like'" :happeningId="newsInfo.happeningInfo.happeningId"></like-list>
+        <forward-list v-if="tab === 'forward'" :happeningId="newsInfo.happeningInfo.happeningId"></forward-list>
       </div>
     </div>
   </div>

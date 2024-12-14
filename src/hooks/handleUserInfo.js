@@ -4,6 +4,7 @@ const userStore = useUser()
 
 export function updateUserInfo() {
   getUserInfoApi().then(userInfo => {
+    userStore.userId = userInfo.userId
     userStore.username = userInfo.username
     userStore.avatarUrl = userInfo.avatarUrl
     userStore.followerNumInfo = userInfo.followerNumInfo

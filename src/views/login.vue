@@ -50,7 +50,8 @@
     })
     if(!res) return ElMessage.error('手机号或密码错误')
     userStore.token = res.token
-    userStore.expires = Date.now()
+    userStore.expire = res.expire
+    userStore.timestamp = res.timestamp
     updateUserInfo()
     ElMessage({
       type:'success',

@@ -13,7 +13,8 @@ const useUser = defineStore('user', {
       meritNumInfo:'',
       coinNumInfo:'',
     },
-    expires:0
+    expire:'',
+    timestamp:''
   }),
   getters:{},
   actions:{},

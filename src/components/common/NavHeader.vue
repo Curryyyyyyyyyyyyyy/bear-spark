@@ -217,6 +217,7 @@
         vertical-align: middle;
       }
       .nav-left {
+        @include flex();
         height: 40px;
         line-height: 40px;
         .logo {
@@ -239,19 +240,11 @@
           }
         }
         .icon-shouye {
-          font-size: $fontH;
+          font-size: $fontC;
+          vertical-align: middle;
         }
         .icon-down {
           font-size: $fontH;
-          transition: all .3s;
-        }
-        .jump-enter-from,.jump-leave-to {
-          transform: translateY(0);
-        }
-        .jump-enter-to,.jump-leave-from {
-          transform: translateY(-10px);
-        }
-        .jump-enter-active,.jump-leave-active {
           transition: all .3s;
         }
       }

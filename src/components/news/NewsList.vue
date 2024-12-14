@@ -3,8 +3,10 @@
   import BsTagSelect from '@/components/news/BsTagSelect.vue';
   import BsVoteModal from '@/components/news/BsVoteModal.vue'
   import BsInput from '@/components/input/BsInput.vue';
+  import BsHtmlText from '@/components/common/BsHtmlText.vue'
   import { ElMessage, ElMessageBox } from 'element-plus';
   import { ref } from 'vue';
+  import handleNumInfo from '@/hooks/handleNumInfo'
   import { useRouter } from 'vue-router';
   import { storeToRefs } from 'pinia';
   import useUser from '@/store/user';
@@ -96,7 +98,7 @@
   async function forwardNews(index) {
     let content = inputBoxRefList.value[index].children[0].innerHTML ? inputBoxRefList.value[index].children[0].innerHTML : '转发动态'
     let tagId = forwardTagIdList.value[index]
-    let quotedHappeningId = newsList.value[index].happeningInfo.quotedHappening ? newsList.value[index].happeningInfo.quotedHappening.happeningId : newsList.value[index].happeningId
+    let quotedHappeningId = newsList.value[index].happeningInfo.quotedHappening ? newsList.value[index].happeningInfo.quotedHappening.happeningId : newsList.value[index].happeningInfo.happeningId
     await fowardNewsApi({
       quotedHappeningId,
       content,
@@ -129,228 +131,228 @@
     newsLoading.value = true
     busy.value = true;
     setTimeout(async () => {
-      // const newsRes = await getNewsListApi({
-      //   pageNum:pageNum.value++,
-      //   pageSize:pageSize.value,
-      //   username:props.activeUp
-      // })
-      const newsRes = {
-        "total": 4,
-        "records": [
-          {
-            "happeningInfo":{
-              "happeningId":1,
-              "title": "现无称点进其原",
-              "content": "11",
-              "tag": "pariatur eiusmod aliqua labore reprehenderit",
-              "viewNumInfo": 41,
-              "likeNumInfo": 50,
-              "commentNumInfo": 9,
-              "forwardNumInfo":0,
-              "commentAble": 0,
-              "advanceRelease": 0,
-              "voteSimpleInfo": {
-                  "voteId": 8,
-                  "title": "需观反干分取必",
-                  "voteNumInfo": "43"
-              },
-              "quotedHappening":{
-                "happeningInfo":{
-                "happeningId":1,
-                "username": "万超",
-                "avatarUrl": "http://dummyimage.com/100x100",
-                "title": "现无称点进其原",
-                "content": "",
-                "tag": "pariatur eiusmod aliqua labore reprehenderit",
-                "viewNumInfo": 41,
-                "likeNumInfo": 50,
-                "commentNumInfo": 9,
-                "forwardNumInfo":0,
-                "commentAble": 0,
-                "advanceRelease": 0,
-                "voteSimpleInfo": {
-                  "voteId": 8,
-                  "title": "需观反干分取必",
-                  "voteNumInfo": "43"
-                },
-                "imgUrlList": [
-                    "http://dummyimage.com/400x400"
-                ],
-                "pubTimeInfo": "1975-04-15 04:31:03"
-                },
-              },
-              "imgUrlList": [
-                  "http://dummyimage.com/400x400"
-              ],
-              "pubTimeInfo": "1975-04-15 04:31:03"
-            },
-            "publisherInfo":{
-              "userId":1001,
-              "username": "万超",
-              "avatarUrl": "http://dummyimage.com/100x100",
-            },
-          },
-          {
-            "happeningInfo":{
-              "happeningId":1,
-              "title": "现无称点进其原",
-              "content": "11",
-              "tag": "pariatur eiusmod aliqua labore reprehenderit",
-              "viewNumInfo": 41,
-              "likeNumInfo": 50,
-              "commentNumInfo": 9,
-              "forwardNumInfo":0,
-              "commentAble": 0,
-              "advanceRelease": 0,
-              "voteSimpleInfo": {
-                  "voteId": 8,
-                  "title": "需观反干分取必",
-                  "voteNumInfo": "43"
-              },
-              "quotedHappening":{
-                "happeningInfo":{
-                "happeningId":1,
-                "username": "万超",
-                "avatarUrl": "http://dummyimage.com/100x100",
-                "title": "现无称点进其原",
-                "content": "",
-                "tag": "pariatur eiusmod aliqua labore reprehenderit",
-                "viewNumInfo": 41,
-                "likeNumInfo": 50,
-                "commentNumInfo": 9,
-                "forwardNumInfo":0,
-                "commentAble": 0,
-                "advanceRelease": 0,
-                "voteSimpleInfo": {
-                  "voteId": 8,
-                  "title": "需观反干分取必",
-                  "voteNumInfo": "43"
-                },
-                "imgUrlList": [
-                    "http://dummyimage.com/400x400"
-                ],
-                "pubTimeInfo": "1975-04-15 04:31:03"
-                },
-              },
-              "imgUrlList": [
-                  "http://dummyimage.com/400x400"
-              ],
-              "pubTimeInfo": "1975-04-15 04:31:03"
-            },
-            "publisherInfo":{
-              "userId":1001,
-              "username": "万超",
-              "avatarUrl": "http://dummyimage.com/100x100",
-            },
-          },
-          {
-            "happeningInfo":{
-              "happeningId":1,
-              "title": "现无称点进其原",
-              "content": "11",
-              "tag": "pariatur eiusmod aliqua labore reprehenderit",
-              "viewNumInfo": 41,
-              "likeNumInfo": 50,
-              "commentNumInfo": 9,
-              "forwardNumInfo":0,
-              "commentAble": 0,
-              "advanceRelease": 0,
-              "voteSimpleInfo": {
-                  "voteId": 8,
-                  "title": "需观反干分取必",
-                  "voteNumInfo": "43"
-              },
-              "quotedHappening":{
-                "happeningInfo":{
-                "happeningId":1,
-                "username": "万超",
-                "avatarUrl": "http://dummyimage.com/100x100",
-                "title": "现无称点进其原",
-                "content": "",
-                "tag": "pariatur eiusmod aliqua labore reprehenderit",
-                "viewNumInfo": 41,
-                "likeNumInfo": 50,
-                "commentNumInfo": 9,
-                "forwardNumInfo":0,
-                "commentAble": 0,
-                "advanceRelease": 0,
-                "voteSimpleInfo": {
-                  "voteId": 8,
-                  "title": "需观反干分取必",
-                  "voteNumInfo": "43"
-                },
-                "imgUrlList": [
-                    "http://dummyimage.com/400x400"
-                ],
-                "pubTimeInfo": "1975-04-15 04:31:03"
-                },
-              },
-              "imgUrlList": [
-                  "http://dummyimage.com/400x400"
-              ],
-              "pubTimeInfo": "1975-04-15 04:31:03"
-            },
-            "publisherInfo":{
-              "userId":1001,
-              "username": "万超",
-              "avatarUrl": "http://dummyimage.com/100x100",
-            },
-          },
-          {
-            "happeningInfo":{
-              "happeningId":1,
-              "title": "现无称点进其原",
-              "content": "11",
-              "tag": "pariatur eiusmod aliqua labore reprehenderit",
-              "viewNumInfo": 41,
-              "likeNumInfo": 50,
-              "commentNumInfo": 9,
-              "forwardNumInfo":0,
-              "commentAble": 0,
-              "advanceRelease": 0,
-              "voteSimpleInfo": {
-                  "voteId": 8,
-                  "title": "需观反干分取必",
-                  "voteNumInfo": "43"
-              },
-              "quotedHappening":{
-                "happeningInfo":{
-                "happeningId":1,
-                "username": "万超",
-                "avatarUrl": "http://dummyimage.com/100x100",
-                "title": "现无称点进其原",
-                "content": "",
-                "tag": "pariatur eiusmod aliqua labore reprehenderit",
-                "viewNumInfo": 41,
-                "likeNumInfo": 50,
-                "commentNumInfo": 9,
-                "forwardNumInfo":0,
-                "commentAble": 0,
-                "advanceRelease": 0,
-                "voteSimpleInfo": {
-                  "voteId": 8,
-                  "title": "需观反干分取必",
-                  "voteNumInfo": "43"
-                },
-                "imgUrlList": [
-                    "http://dummyimage.com/400x400"
-                ],
-                "pubTimeInfo": "1975-04-15 04:31:03"
-                },
-              },
-              "imgUrlList": [
-                  "http://dummyimage.com/400x400"
-              ],
-              "pubTimeInfo": "1975-04-15 04:31:03"
-            },
-            "publisherInfo":{
-              "userId":1001,
-              "username": "万超",
-              "avatarUrl": "http://dummyimage.com/100x100",
-            },
-          }
-        ]
-      }
+      const newsRes = await getNewsListApi({
+        pageNum:pageNum.value++,
+        pageSize:pageSize.value,
+        username:props.activeUp
+      })
+      // const newsRes = {
+      //   "total": 4,
+      //   "records": [
+      //     {
+      //       "happeningInfo":{
+      //         "happeningId":1,
+      //         "title": "现无称点进其原",
+      //         "content": "11",
+      //         "tag": "pariatur eiusmod aliqua labore reprehenderit",
+      //         "viewNumInfo": 41,
+      //         "likeNumInfo": '50',
+      //         "commentNumInfo": 9,
+      //         "forwardNumInfo":0,
+      //         "commentAble": 0,
+      //         "advanceRelease": 0,
+      //         "voteSimpleInfo": {
+      //             "voteId": 8,
+      //             "title": "需观反干分取必",
+      //             "voteNumInfo": "43"
+      //         },
+      //         "quotedHappening":{
+      //           "happeningInfo":{
+      //           "happeningId":1,
+      //           "username": "万超",
+      //           "avatarUrl": "http://dummyimage.com/100x100",
+      //           "title": "现无称点进其原",
+      //           "content": "",
+      //           "tag": "pariatur eiusmod aliqua labore reprehenderit",
+      //           "viewNumInfo": 41,
+      //           "likeNumInfo": '50',
+      //           "commentNumInfo": 9,
+      //           "forwardNumInfo":0,
+      //           "commentAble": 0,
+      //           "advanceRelease": 0,
+      //           "voteSimpleInfo": {
+      //             "voteId": 8,
+      //             "title": "需观反干分取必",
+      //             "voteNumInfo": "43"
+      //           },
+      //           "imgUrlList": [
+      //               "http://dummyimage.com/400x400"
+      //           ],
+      //           "pubTimeInfo": "1975-04-15 04:31:03"
+      //           },
+      //         },
+      //         "imgUrlList": [
+      //             "http://dummyimage.com/400x400"
+      //         ],
+      //         "pubTimeInfo": "1975-04-15 04:31:03"
+      //       },
+      //       "publisherInfo":{
+      //         "userId":1001,
+      //         "username": "万超",
+      //         "avatarUrl": "http://dummyimage.com/100x100",
+      //       },
+      //     },
+      //     {
+      //       "happeningInfo":{
+      //         "happeningId":1,
+      //         "title": "现无称点进其原",
+      //         "content": "11",
+      //         "tag": "pariatur eiusmod aliqua labore reprehenderit",
+      //         "viewNumInfo": 41,
+      //         "likeNumInfo": '50',
+      //         "commentNumInfo": 9,
+      //         "forwardNumInfo":0,
+      //         "commentAble": 0,
+      //         "advanceRelease": 0,
+      //         "voteSimpleInfo": {
+      //             "voteId": 8,
+      //             "title": "需观反干分取必",
+      //             "voteNumInfo": "43"
+      //         },
+      //         "quotedHappening":{
+      //           "happeningInfo":{
+      //           "happeningId":1,
+      //           "username": "万超",
+      //           "avatarUrl": "http://dummyimage.com/100x100",
+      //           "title": "现无称点进其原",
+      //           "content": "",
+      //           "tag": "pariatur eiusmod aliqua labore reprehenderit",
+      //           "viewNumInfo": 41,
+      //           "likeNumInfo": '50',
+      //           "commentNumInfo": 9,
+      //           "forwardNumInfo":0,
+      //           "commentAble": 0,
+      //           "advanceRelease": 0,
+      //           "voteSimpleInfo": {
+      //             "voteId": 8,
+      //             "title": "需观反干分取必",
+      //             "voteNumInfo": "43"
+      //           },
+      //           "imgUrlList": [
+      //               "http://dummyimage.com/400x400"
+      //           ],
+      //           "pubTimeInfo": "1975-04-15 04:31:03"
+      //           },
+      //         },
+      //         "imgUrlList": [
+      //             "http://dummyimage.com/400x400"
+      //         ],
+      //         "pubTimeInfo": "1975-04-15 04:31:03"
+      //       },
+      //       "publisherInfo":{
+      //         "userId":1001,
+      //         "username": "万超",
+      //         "avatarUrl": "http://dummyimage.com/100x100",
+      //       },
+      //     },
+      //     {
+      //       "happeningInfo":{
+      //         "happeningId":1,
+      //         "title": "现无称点进其原",
+      //         "content": "11",
+      //         "tag": "pariatur eiusmod aliqua labore reprehenderit",
+      //         "viewNumInfo": 41,
+      //         "likeNumInfo": '50',
+      //         "commentNumInfo": 9,
+      //         "forwardNumInfo":0,
+      //         "commentAble": 0,
+      //         "advanceRelease": 0,
+      //         "voteSimpleInfo": {
+      //             "voteId": 8,
+      //             "title": "需观反干分取必",
+      //             "voteNumInfo": "43"
+      //         },
+      //         "quotedHappening":{
+      //           "happeningInfo":{
+      //           "happeningId":1,
+      //           "username": "万超",
+      //           "avatarUrl": "http://dummyimage.com/100x100",
+      //           "title": "现无称点进其原",
+      //           "content": "",
+      //           "tag": "pariatur eiusmod aliqua labore reprehenderit",
+      //           "viewNumInfo": 41,
+      //           "likeNumInfo": '50',
+      //           "commentNumInfo": 9,
+      //           "forwardNumInfo":0,
+      //           "commentAble": 0,
+      //           "advanceRelease": 0,
+      //           "voteSimpleInfo": {
+      //             "voteId": 8,
+      //             "title": "需观反干分取必",
+      //             "voteNumInfo": "43"
+      //           },
+      //           "imgUrlList": [
+      //               "http://dummyimage.com/400x400"
+      //           ],
+      //           "pubTimeInfo": "1975-04-15 04:31:03"
+      //           },
+      //         },
+      //         "imgUrlList": [
+      //             "http://dummyimage.com/400x400"
+      //         ],
+      //         "pubTimeInfo": "1975-04-15 04:31:03"
+      //       },
+      //       "publisherInfo":{
+      //         "userId":1001,
+      //         "username": "万超",
+      //         "avatarUrl": "http://dummyimage.com/100x100",
+      //       },
+      //     },
+      //     {
+      //       "happeningInfo":{
+      //         "happeningId":1,
+      //         "title": "现无称点进其原",
+      //         "content": "11",
+      //         "tag": "pariatur eiusmod aliqua labore reprehenderit",
+      //         "viewNumInfo": 41,
+      //         "likeNumInfo": '50',
+      //         "commentNumInfo": 9,
+      //         "forwardNumInfo":0,
+      //         "commentAble": 0,
+      //         "advanceRelease": 0,
+      //         "voteSimpleInfo": {
+      //             "voteId": 8,
+      //             "title": "需观反干分取必",
+      //             "voteNumInfo": "43"
+      //         },
+      //         "quotedHappening":{
+      //           "happeningInfo":{
+      //           "happeningId":1,
+      //           "username": "万超",
+      //           "avatarUrl": "http://dummyimage.com/100x100",
+      //           "title": "现无称点进其原",
+      //           "content": "",
+      //           "tag": "pariatur eiusmod aliqua labore reprehenderit",
+      //           "viewNumInfo": 41,
+      //           "likeNumInfo": '50',
+      //           "commentNumInfo": 9,
+      //           "forwardNumInfo":0,
+      //           "commentAble": 0,
+      //           "advanceRelease": 0,
+      //           "voteSimpleInfo": {
+      //             "voteId": 8,
+      //             "title": "需观反干分取必",
+      //             "voteNumInfo": "43"
+      //           },
+      //           "imgUrlList": [
+      //               "http://dummyimage.com/400x400"
+      //           ],
+      //           "pubTimeInfo": "1975-04-15 04:31:03"
+      //           },
+      //         },
+      //         "imgUrlList": [
+      //             "http://dummyimage.com/400x400"
+      //         ],
+      //         "pubTimeInfo": "1975-04-15 04:31:03"
+      //       },
+      //       "publisherInfo":{
+      //         "userId":1001,
+      //         "username": "万超",
+      //         "avatarUrl": "http://dummyimage.com/100x100",
+      //       },
+      //     }
+      //   ]
+      // }
       newsList.value.push(...newsRes.records)
       if(newsRes.total <= newsList.value.length) isArriveTotal.value = true
       busy.value = false;
@@ -377,24 +379,24 @@
     })
   }
   /* 点赞/取消点赞 */
-  async function likeNews(id, liked, index) {
+  async function likeNews(item) {
     await likeNewsApi({
-      happeningId:id,
-      liked:liked ? 0 : 1
+      happeningId:item.happeningId,
+      liked:item.liked ? 0 : 1
     })
-    if(liked) {
+    if(item.liked) {
       ElMessage.info('已取消点赞')
-      newsList.value[index].liked = 0
-      newsList.value[index].likeNumInfo--
+      item.likeNumInfo = handleNumInfo(item.likeNumInfo, -1)
+      item.liked = 0
     } else {
       ElMessage.success('点赞成功')
-      newsList.value[index].liked = 1
-      newsList.value[index].likeNumInfo++
+      item.likeNumInfo = handleNumInfo(item.likeNumInfo, 1)
+      item.liked = 1
     }
   }
   //#endregion
   //#region 查看指定用户动态
-  function getUserNewsList(username) {
+  function getUserNewsList(userId) {
     pageNum.value = 1
     newsList.value.splice(0, newsList.value.length)
     isArriveTotal.value = false
@@ -403,7 +405,7 @@
       const newsRes = await getNewsListApi({
         pageNum:pageNum.value++,
         pageSize:pageSize.value,
-        username:username
+        userId:userId
       })
       newsList.value.push(...newsRes.records)
       if(newsRes.total <= newsList.value.length) isArriveTotal.value = true
@@ -446,7 +448,9 @@
             <span>{{ item.happeningInfo.tag }}</span>
           </div>
           <div @click="router.push(`/news_detail/${item.happeningInfo.happeningId}`)" class="news-title">{{ item.happeningInfo.title }}</div>
-          <div @click="router.push(`/news_detail/${item.happeningInfo.happeningId}`)" class="news-text-content" v-html="item.happeningInfo.content"></div>
+          <div @click="router.push(`/news_detail/${item.happeningInfo.happeningId}`)" class="news-text-content">
+            <bs-html-text :content="item.happeningInfo.content" :atUserInfoList="item.happeningInfo.atUserInfoList"></bs-html-text>
+          </div>
           <div v-if="item.happeningInfo.imgUrlList" class="news-album">
             <div class="news-album-preview grid">
               <div v-for="(item, index) in item.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
@@ -519,10 +523,12 @@
             </div>
             <div v-if="item.happeningInfo.quotedHappening.happeningInfo.tag" class="news-tag">
               <i class="iconfont icon-huati"></i>
-              <span>{{ item.quotedHappening.tag }}</span>
+              <span>{{ item.happeningInfo.quotedHappening.happeningInfo.tag }}</span>
             </div>
             <div @click="router.push(`/news_detail/${item.happeningInfo.quotedHappening.happeningInfo.happeningId}`)" class="news-title">{{ item.happeningInfo.quotedHappening.happeningInfo.title }}</div>
-            <div @click="router.push(`/news_detail/${item.happeningInfo.quotedHappening.happeningInfo.happeningId}`)" class="news-text-content" v-html="item.happeningInfo.quotedHappening.happeningInfo.content"></div>
+            <div @click="router.push(`/news_detail/${item.happeningInfo.quotedHappening.happeningInfo.happeningId}`)" class="news-text-content">
+              <bs-html-text :content="item.happeningInfo.quotedHappening.happeningInfo.content" :atUserInfoList="item.happeningInfo.quotedHappening.happeningInfo.atUserInfoList"></bs-html-text>
+            </div>
             <div v-if="item.happeningInfo.quotedHappening.happeningInfo.imgUrlList" class="news-album">
               <div class="news-album-preview grid">
                 <div v-for="(item,index) in item.happeningInfo.quotedHappening.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
@@ -598,7 +604,7 @@
             <i class="iconfont icon-pinglun"></i>
             {{ item.happeningInfo.commentNumInfo === '0' ? '评论' : item.happeningInfo.commentNumInfo }}
           </div>
-          <div @click.stop="likeNews(item.happeningInfo.happeningId, item.happeningInfo.liked, index)" class="footer-item news-like" :class="{'highlight':item.happeningInfo.liked}">
+          <div @click.stop="likeNews(item.happeningInfo)" class="footer-item news-like" :class="{'highlight':item.happeningInfo.liked}">
             <i class="iconfont icon-dianzan"></i>
             {{ item.happeningInfo.likeNumInfo === '0' ? '点赞' : item.happeningInfo.likeNumInfo}}
           </div>

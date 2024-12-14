@@ -1,9 +1,13 @@
 <script setup>
   import BsInput from '@/components/input/BsInput.vue';
   import BsEmoji from '@/components/input/BsEmoji.vue';
+  import useUser from '@/store/user'
   import { ref } from 'vue';
-  defineProps(['placeholder','hideFooter','bgcOnlyWhite','positionTop'])
 
+  defineProps(['placeholder','hideFooter','bgcOnlyWhite','positionTop'])
+  const emit = defineEmits(['publish'])
+  const userStore = useUser()
+  
   const headerInputBoxRef = ref()
   const headerInputMethods = ref()
   const showEmojiBox = ref(false)
@@ -17,8 +21,10 @@
     inputMethods.handleClickAt(inputRef)
   }
   /* 发布评论 */
-  function publishComment(inputRef) {
-    console.log(inputRef.innerHTML)
+  function publish(inputRef) {
+    emit('publish',inputRef.innerHTML)
+    headerInputBoxRef.value.children[0].innerHTML = ''
+    headerInputMethods.value.handleContentNum(headerInputBoxRef.value.children[0])
   }
   const pubInputBoxRef = ref()
   const showInputFooter = ref(false)
@@ -34,7 +40,7 @@
 <template>
   <div class="bs-input-box">
     <div class="avatar-box">
-      <img src="/imgs/default-avatar.png">
+      <img :src="userStore.avatarUrl">
     </div>
     <div ref="pubInputBoxRef" tabindex="0" class="pub-input-box">
       <div ref="headerInputBoxRef" class="input-box" :class="{'bgcWhite':bgcOnlyWhite || showInputFooter}">
@@ -52,7 +58,7 @@
             <i class="iconfont icon-aite"></i>
           </div>
         </div>
-        <div @click="publishComment(headerInputBoxRef.children[0])" class="pub-btn">
+        <div @click="publish(headerInputBoxRef.children[0])" class="pub-btn">
           <button>发布</button>
         </div>
       </div>

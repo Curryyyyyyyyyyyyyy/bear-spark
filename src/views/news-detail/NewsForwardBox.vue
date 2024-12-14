@@ -25,13 +25,11 @@
   /* 发布 */
   const inputBoxRef = ref()
   const inputMethods = ref()
-  console.log(inputMethods)
   async function publishNews() {
     const content = inputBoxRef.value.children[0].innerHTML ? inputBoxRef.value.children[0].innerHTML : '转发动态'
-    console.log(content)
     await fowardNewsApi({
       quotedHappeningId:props.newsInfo.quotedHappening ? props.newsInfo.quotedHappening.id : props.newsInfo.id,
-      content: content,
+      content,
       tagId:tagId.value
     })
     ElMessage.success('发布成功')

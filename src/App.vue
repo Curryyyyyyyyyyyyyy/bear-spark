@@ -2,7 +2,7 @@
   import useUser from '@/store/user';
   import { ElMessage } from 'element-plus';
   const userStore = useUser()
-  if(Date.now() - userStore.expires > 1.296e9) {
+  if(Date.now() > userStore.timestamp + userStore.expire) {
     userStore.token = ''
     ElMessage.info('登录失效，请重新登录')
     location.href('/#/index')

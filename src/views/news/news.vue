@@ -8,6 +8,7 @@
   import {useRouter} from 'vue-router'
   import {getNewsPrepareApi} from '@/api/news.js'
   import { debounce } from '@/hooks/performance';
+  import { updateUserInfo } from '@/hooks/handleUserInfo';
 
   /* Router */
   const router = useRouter()
@@ -74,16 +75,19 @@
     recentTagList.value = res.recentTagList
     sideBarUrl.value = res.sideBarUrl
     followerList.value = res.followerList
+    updateUserInfo()
   })
   //#endregion
   //#region up列表
   const activeUp = ref(null)
   const upListDom = ref()
+  const newsListRef = ref()
   function changeUpListScroll(n) {
     upListDom.value.scrollLeft += n
   }
-  function getUserNewsList(username) {
-    activeUp.value = username
+  function getUserNewsList(userId) {
+    activeUp.value = userId
+    newsListRef.value.getUserNewsList(userId)
   }
   //#endregion
   //#region tab栏
@@ -141,11 +145,11 @@
           <div @click="changeUpListScroll(-400)" class="left-btn"><i class="iconfont icon-zuojiantou"></i></div>
           <div ref="upListDom" @click="showArrow = true" class="up-list">
             <div class="up-box-list" @hover="showArrow = true">
-              <div @click="getUserNewsList('')" class="all-news" :class="{'active':!activeUp}">
+              <div @click="getUserNewsList(null)" class="all-news" :class="{'active':!activeUp}">
                 <span><i class="iconfont icon-dongtai"></i></span>
                 <p>全部动态</p>
               </div>
-              <div v-for="(item,index) in followerList" :key="index" @click="getUserNewsList(item.username)" class="up-box" :class="{'active':activeUp === item.username}">
+              <div v-for="(item,index) in followerList" :key="index" @click="getUserNewsList(item.userId)" class="up-box" :class="{'active':activeUp === item.username}">
                 <img :src="item.avatarUrl" alt="头像">
                 <p>{{ item.username }}</p>
               </div>
@@ -162,7 +166,7 @@
           </div>
           <div class="news-tabs-highlight" :style="{transform:tab==='all'?`translateX(37px)`:(tab==='video'?`translateX(98px)`:`translateX(158px)`)}"></div>
         </div>
-        <NewsList :tab="tab" :activeUp="activeUp"></NewsList>
+        <NewsList ref="newsListRef" :tab="tab" :activeUp="activeUp"></NewsList>
       </div>
       <news-aside-box :sideBarUrl="sideBarUrl" :recentTagList="recentTagList"></news-aside-box>
     </div>

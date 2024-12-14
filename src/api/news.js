@@ -1,5 +1,7 @@
 import request from '@/util/request.js'
 
+const mock = true
+
 /* 发布动态 */
 export const publishNewsApi = (params) => {
   return request.post('/happening/publish',params)
@@ -22,9 +24,65 @@ export const getTagListApi = (params) => {
 }
 /* 获取动态详情 */
 export const getNewsDetailApi = (params) => {
-  return request.get('/happening/detail', {
-    params
-  })
+  if(mock) {
+    return {
+      "happeningInfo":{
+        "happeningId":1,
+        "title": "现无称点进其原",
+        "content": "11",
+        "tag": "pariatur eiusmod aliqua labore reprehenderit",
+        "viewNumInfo": 41,
+        "likeNumInfo": '50',
+        "commentNumInfo": 9,
+        "forwardNumInfo":0,
+        "commentAble": 0,
+        "advanceRelease": 0,
+        "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+        },
+        "quotedHappening":{
+          "happeningInfo":{
+          "happeningId":1,
+          "username": "万超",
+          "avatarUrl": "http://dummyimage.com/100x100",
+          "title": "现无称点进其原",
+          "content": "",
+          "tag": "pariatur eiusmod aliqua labore reprehenderit",
+          "viewNumInfo": 41,
+          "likeNumInfo": '50',
+          "commentNumInfo": 9,
+          "forwardNumInfo":0,
+          "commentAble": 0,
+          "advanceRelease": 0,
+          "voteSimpleInfo": {
+            "voteId": 8,
+            "title": "需观反干分取必",
+            "voteNumInfo": "43"
+          },
+          "imgUrlList": [
+              "http://dummyimage.com/400x400"
+          ],
+          "pubTimeInfo": "1975-04-15 04:31:03"
+          },
+        },
+        "imgUrlList": [
+            "http://dummyimage.com/400x400"
+        ],
+        "pubTimeInfo": "1975-04-15 04:31:03"
+      },
+      "publisherInfo":{
+        "userId":1001,
+        "username": "万超",
+        "avatarUrl": "/imgs/default-avatar.png",
+      },
+    }
+  } else {
+    return request.get('/happening/detail', {
+      params
+    })
+  }
 }
 /* 转发动态 */
 export const fowardNewsApi = (params) => {

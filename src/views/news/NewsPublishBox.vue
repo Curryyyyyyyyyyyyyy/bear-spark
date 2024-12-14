@@ -11,7 +11,7 @@
   import {uploadApi} from '@/api/file'
   import useNews from '@/store/news.js'
   import { storeToRefs } from 'pinia';
-  import { throttle } from '../../hooks/performance';
+  import { throttle } from '@/hooks/performance';
 
   /* Store */
   const newsStore = useNews()
@@ -36,9 +36,10 @@
     } else {
       pubTime = timeFormat(dayjs().format('YYYY-MM-DD'), dayjs().$H, dayjs().$m)
     }
+    let content = pubInputBoxRef.value.children[0].innerHTML
     await publishNewsApi({
       title:newsTitle.value,
-      content:pubInputBoxRef.value.children[0].innerHTML,
+      content,
       imgUrlList:imgUrlList.value,
       tagId:publishTagId.value,
       visibility:newsSeePermission.value,
