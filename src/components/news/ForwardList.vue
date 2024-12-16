@@ -1,6 +1,7 @@
 <script setup>
   import { onMounted, ref } from 'vue';
   import {getForwardListApi} from '@/api/news'
+  import Loading from '@/components/common/Loading.vue'
   const props = defineProps(['happeningId'])
   onMounted(()=>{
     loadMore()
@@ -44,7 +45,7 @@
     :infinite-scroll-disabled="busy" 
     infinite-scroll-distance="50"
   >
-    <img src="/imgs/loading-svg/loading-spinning-bubbles.svg" v-show="!isArriveTotal && loading">
+    <Loading v-show="!isArriveTotal && loading"></Loading>
   </div>
   <div v-if="isArriveTotal" class="forward-list-full">人家是有底线的呢 ~</div>
 </template>
@@ -82,7 +83,7 @@
     }
   }
   .load-more {
-    text-align: center;
+    @include flex(center);
   }
   .forward-list-full {
     text-align: center;

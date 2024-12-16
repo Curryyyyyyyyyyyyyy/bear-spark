@@ -1,5 +1,6 @@
 <script setup>
   import {getLikeListApi} from '@/api/news'
+  import Loading from '@/components/common/Loading.vue'
   import { onMounted, ref } from 'vue';
 
   const props = defineProps(['happeningId'])
@@ -45,7 +46,7 @@
     :infinite-scroll-disabled="busy" 
     infinite-scroll-distance="50"
   >
-    <img src="/imgs/loading-svg/loading-spinning-bubbles.svg" v-show="!isArriveTotal && loading">
+    <Loading v-show="!isArriveTotal && loading"></Loading>
   </div>
   <div v-if="isArriveTotal" class="like-list-full">人家是有底线的呢 ~</div>
 </template>
@@ -83,7 +84,7 @@
     }
   }
   .load-more {
-    text-align: center;
+    @include flex(center);
   }
   .like-list-full {
     text-align: center;

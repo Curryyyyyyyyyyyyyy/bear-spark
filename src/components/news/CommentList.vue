@@ -549,6 +549,9 @@
             }
           }
         }
+        .load-more {
+          @include flex(center);
+        }
       }
       .news-comment-footer {
         z-index: 20;

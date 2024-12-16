@@ -230,7 +230,7 @@ export const getNewsDetailApi = (params) => {
         "commentNumInfo": 9,
         "forwardNumInfo":0,
         "commentAble": 0,
-        "advanceRelease": 1,
+        "advanceRelease": 0,
         "voteSimpleInfo": {
             "voteId": 8,
             "title": "需观反干分取必",

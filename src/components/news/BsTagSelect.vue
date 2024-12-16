@@ -107,6 +107,7 @@
 
 <style lang="scss">
   @use '@/assets/sass/config.scss' as *;
+  @use '@/assets/sass/mixin.scss' as *;
   .tag-desk {
     .tag-search {
       height: 24px;
@@ -195,11 +196,7 @@
               }
             }
             .load-more-tag {
-              text-align: center;
-              img {
-                width: 30px;
-                height: 30px;
-              }
+              @include flex(center);
             }
             .prompt {
               color: $colorD;
