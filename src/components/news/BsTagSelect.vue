@@ -1,4 +1,5 @@
 <script setup>
+  import Loading from '@/components/common/Loading.vue'
   import { onMounted, ref } from 'vue';
   import {getTagListApi} from '@/api/news'
   import { debounce } from '../../hooks/performance';
@@ -15,68 +16,6 @@
   const tagList = ref([])
   const pageNum = ref(1)
   const pageSize = ref(10)
-  // tagList.value = [
-  //   {
-  //     "id": 98,
-  //     "viewNumInfo": "21",
-  //     "discussNumInfo": "93",
-  //     "content": "laboris <em>anim</em> pariatur"
-  //   },
-  //   {
-  //     "id": 59,
-  //     "viewNumInfo": "97",
-  //     "discussNumInfo": "65",
-  //     "content": "laboris irure ut dolor nulla"
-  //   },
-  //   {
-  //     "id": 59,
-  //     "viewNumInfo": "97",
-  //     "discussNumInfo": "65",
-  //     "content": "laboris irure ut dolor nulla"
-  //   },
-  //   {
-  //     "id": 59,
-  //     "viewNumInfo": "97",
-  //     "discussNumInfo": "65",
-  //     "content": "laboris irure ut dolor nulla"
-  //   },
-  //   {
-  //     "id": 59,
-  //     "viewNumInfo": "97",
-  //     "discussNumInfo": "65",
-  //     "content": "laboris irure ut dolor nulla"
-  //   },
-  //   {
-  //     "id": 59,
-  //     "viewNumInfo": "97",
-  //     "discussNumInfo": "65",
-  //     "content": "laboris irure ut dolor nulla"
-  //   },
-  //   {
-  //     "id": 59,
-  //     "viewNumInfo": "97",
-  //     "discussNumInfo": "65",
-  //     "content": "laboris irure ut dolor nulla"
-  //   },
-  //   {
-  //     "id": 59,
-  //     "viewNumInfo": "97",
-  //     "discussNumInfo": "65",
-  //     "content": "laboris irure ut dolor nulla"
-  //   },
-  //   {
-  //     "id": 59,
-  //     "viewNumInfo": "97",
-  //     "discussNumInfo": "65",
-  //     "content": "laboris irure ut dolor nulla"
-  //   },
-  //   {
-  //     "id": 59,
-  //     "viewNumInfo": "97",
-  //     "discussNumInfo": "65",
-  //     "content": "laboris irure ut dolor nulla"
-  //   },
-  // ]
   const showTagCol = ref(false)
   const tagLoading = ref(true)
   const selectTagName = ref('')
@@ -155,7 +94,7 @@
               :infinite-scroll-disabled="busy" 
               infinite-scroll-distance="50"
             >
-              <img src="/imgs/loading-svg/loading-spinning-bubbles.svg" v-show="!isArriveTotal && loadingTag">
+              <loading v-show="!isArriveTotal && loadingTag"></loading>
             </div>
             <div v-if="isArriveTotal" class="prompt">已经到最底啦~</div>
           </div>

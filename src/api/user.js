@@ -22,9 +22,69 @@ export const modifyPwdApi = (params) => {
 }
 /* 获取用户信息 */
 export const getUserInfoApi = () => {
+  if(import.meta.env.VITE_MOCK) {
+    return {
+      "userId": 1,
+      "username": "curryyyy",
+      "avatarUrl": "/imgs/default-avatar.png",
+      "followerNumInfo": "66",
+      "fanNumInfo": "77",
+      "happeningNumInfo": "88",
+      "currencyInfo": {
+        "meritNumInfo": "99",
+        "coinNumInfo": "111"
+      }
+    }
+  }
   return request.get('/info/user')
 }
 /* 获取用户关注列表 */
 export const getFollowerListApi = () => {
+  if(import.meta.env.VITE_MOCK) {
+    return {
+      "followerList":[
+        {
+          username:'周权',
+          avatarUrl:'/imgs/default-avatar.png',
+          fansNumInfo:200
+        },
+        {
+          username:'周权',
+          avatarUrl:'/imgs/default-avatar.png',
+          fansNumInfo:200
+        },
+        {
+          username:'周权',
+          avatarUrl:'/imgs/default-avatar.png',
+          fansNumInfo:200
+        },
+        {
+          username:'周权',
+          avatarUrl:'/imgs/default-avatar.png',
+          fansNumInfo:200
+        },
+        {
+          username:'周权',
+          avatarUrl:'/imgs/default-avatar.png',
+          fansNumInfo:200
+        },
+        {
+          username:'周权',
+          avatarUrl:'/imgs/default-avatar.png',
+          fansNumInfo:200
+        },
+        {
+          username:'卢家秦',
+          avatarUrl:'/imgs/default-avatar.png',
+          fansNumInfo:200
+        },
+        {
+          username:'谢佳辉',
+          avatarUrl:'/imgs/default-avatar.png',
+          fansNumInfo:200
+        },
+      ]
+    }
+  }
   return request.get('/happening/followerList')
 }

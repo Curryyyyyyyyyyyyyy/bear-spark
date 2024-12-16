@@ -60,13 +60,13 @@ export function parseSpan(content) {
 
 export function unparseSpan(content, atUserInfoList) {
     if (!atUserInfoList.length) {
-      return {
+      return [{
         content,
         isAtSpan:0
-      }
+      }]
     }
-    let index = 0;
-    let atUserIndex = 0;
+    let index = 0
+    let atUserIndex = 0
     let res = []
     while (true) {
       let openIndex = content.indexOf("<s>", index);
@@ -83,9 +83,9 @@ export function unparseSpan(content, atUserInfoList) {
       })
       content = content.substring(openIndex + "<s>".length)
       res.push({
-        content:atUserInfoList[atUserIndex].atUsername,
+        content:'@' + atUserInfoList[atUserIndex].username,
         isAtSpan:1,
-        atUserId:atUserInfoList[atUserIndex].atUserId
+        atUserId:atUserInfoList[atUserIndex].userId
       })
       atUserIndex++
     }

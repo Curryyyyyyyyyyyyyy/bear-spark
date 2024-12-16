@@ -10,60 +10,6 @@
   const props = defineProps(['voteId'])
 
   const voteDetailInfo = ref({})
-  // voteDetailInfo.value = {
-  //       "publisherInfo":{
-  //         "userId":1111,
-  //         "username":"李四",
-  //         "avatarUrl":'/imgs/default-avatar.png'
-  //       },
-  //       "title": "非住矿八",
-  //       "desc":'无',
-  //       "voteNumInfo": "37",
-  //       "voteType": 2,
-  //       "optionList": [
-  //           {
-  //               "optionId": 56,
-  //               "optionContent": "Duis ea aliqua",
-  //               "optionPhotoUrl": "http://dummyimage.com/400x400",
-  //               "optionPercent": "officia ullamco minim dolore",
-  //               "selected": 1
-  //           },
-  //           {
-  //               "optionId": 29,
-  //               "optionContent": "ullamco",
-  //               "optionPhotoUrl": "http://dummyimage.com/400x400",
-  //               "optionPercent": "nisi deserunt",
-  //               "selected": 0
-  //           },
-  //           {
-  //               "optionId": 38,
-  //               "optionContent": "fugiat officia dolore ut irure",
-  //               "optionPhotoUrl": "http://dummyimage.com/400x400",
-  //               "optionPercent": "labore mollit deserunt amet",
-  //               "selected": 1
-  //           }
-  //       ],
-  //       "voteLim": 74,
-  //       "voted": 1,
-  //       "dead": 0,
-  //       "voterInfoList": [
-  //           {
-  //               "username": "丁敏",
-  //               "avatarUrl": "http://dummyimage.com/100x100",
-  //               "optionsInfo": "tempor ut"
-  //           },
-  //           {
-  //               "username": "武刚",
-  //               "avatarUrl": "http://dummyimage.com/100x100",
-  //               "optionsInfo": "sint nisi est"
-  //           },
-  //           {
-  //               "username": "顾强",
-  //               "avatarUrl": "http://dummyimage.com/100x100",
-  //               "optionsInfo": "Lorem consectetur quis exercitation deserunt"
-  //           }
-  //       ]
-  //   }
   onMounted(async ()=>{
     voteDetailInfo.value = await getVoteDetailApi({
       voteId:props.voteId

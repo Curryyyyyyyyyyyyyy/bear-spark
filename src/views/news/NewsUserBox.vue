@@ -1,30 +1,31 @@
 <script setup>
-  import router from '@/router';
   import {updateUserInfo} from '@/hooks/handleUserInfo';
   import useUser from '@/store/user';
   import { storeToRefs } from 'pinia';
   const userStore = useUser()
   updateUserInfo()
-  const {avatarUrl,username,followerNumInfo,fanNumInfo,happeningNumInfo} = storeToRefs(userStore)
+  const {avatarUrl,userId,username,followerNumInfo,fanNumInfo,happeningNumInfo} = storeToRefs(userStore)
 </script>
 
 <template>
   <div class="news-user-box">
-    <img @click="router.push('/mainInterface')" :src="avatarUrl" alt="头像">
-    <span @click="router.push('/mainInterface')" class="username">{{ username }}</span>
+    <a :href="`/#/mainInterface/${userId}`">
+      <img :src="avatarUrl" alt="头像">
+    </a>
+    <a :href="`/#/mainInterface/${userId}`" class="username">{{ username }}</a>
     <div class="infos">
-      <div @click="router.push('/mainInterface')" class="info-box">
+      <a :href="`/#/mainInterface/${userId}`" class="info-box">
         <p class="num">{{ followerNumInfo }}</p>
         <p class="desc">关注</p>
-      </div>
-      <div @click="router.push('/mainInterface')" class="info-box">
+      </a>
+      <a :href="`/#/mainInterface/${userId}`" class="info-box">
         <p class="num">{{ fanNumInfo }}</p>
         <p class="desc">粉丝</p>
-      </div>
-      <div @click="router.push('/mainInterface')" class="info-box">
+      </a>
+      <a :href="`/#/mainInterface/${userId}`" class="info-box">
         <p class="num">{{ happeningNumInfo }}</p>
         <p class="desc">动态</p>
-      </div>
+      </a>
     </div>
   </div>
 </template>

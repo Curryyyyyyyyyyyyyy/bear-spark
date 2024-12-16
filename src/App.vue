@@ -5,7 +5,7 @@
   if(Date.now() > userStore.timestamp + userStore.expire) {
     userStore.token = ''
     ElMessage.info('登录失效，请重新登录')
-    location.href('/#/index')
+    location.href = '/#/index'
   } else {
     userStore.expires = Date.now()
   }

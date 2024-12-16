@@ -7,15 +7,23 @@
 
 <template>
   <span v-for="(item,index) in htmlArr" :key="index">
-    <span v-html="item.content" class="at-username" v-if="item.isAtSpan" @click="router.push(`/mainInterface/${item.atUserId}`)"></span>
-    <span v-html="item.content" v-else></span>
+    <a v-html="item.content" class="at-username" v-if="item.isAtSpan" :href="`/#/mainInterface/${item.atUserId}`" target="_blank"></a>
+    <span class="content" v-html="item.content" v-else></span>
   </span>
 </template>
 
 <style lang="scss">
   @use '@/assets/sass/config.scss' as *;
   .at-username {
-    color: $colorM;
+    color: $colorM !important;
+    cursor: pointer;
+  }
+  .content {
+    img {
+      height: 20px;
+      width: 20px;
+      vertical-align: middle;
+    }
   }
 </style>
 

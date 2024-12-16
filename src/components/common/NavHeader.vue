@@ -10,7 +10,7 @@
   /* Router */
   const router = useRouter()
   const userStore = useUser()
-  const {token,username,avatarUrl,fanNumInfo,followerNumInfo,happeningNumInfo,currencyInfo} = storeToRefs(userStore)
+  const {token,userId,username,avatarUrl,fanNumInfo,followerNumInfo,happeningNumInfo,currencyInfo} = storeToRefs(userStore)
   /* Mounted */
   let showLogin = ref(false)
   function openLogin() {
@@ -21,7 +21,7 @@
   }
   function toMainInterface() {
     const {href} = router.resolve({
-      path:`/mainInterface`,
+      path:`/mainInterface/${userId.value}`,
     })
     window.open(href, '_blank')
   }

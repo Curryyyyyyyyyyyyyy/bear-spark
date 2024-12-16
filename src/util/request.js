@@ -43,7 +43,7 @@ instance.interceptors.response.use(function (response) {
       return Promise.reject('请先登录')
     }
     if(res.code === 500) {
-      ElMessage.error('服务器异常')
+      ElMessage.error('服务器开了点小差...')
       return Promise.reject('服务器异常')
     }
     ElMessage.error(res.msg)

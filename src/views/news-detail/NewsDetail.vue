@@ -10,7 +10,7 @@
   import { useRoute, useRouter } from 'vue-router';
   import {getNewsDetailApi,deleteNewsApi,getVoteDetailApi,likeNewsApi} from '@/api/news.js'
   import {revokeBookLiveApi, modBookLiveStateApi} from '@/api/bookLive'
-  import { onBeforeMount, ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import useUser from '@/store/user.js'
   import { ElMessage, ElMessageBox } from 'element-plus';
 
@@ -22,12 +22,7 @@
   const route = useRoute()
   /* onMounted */
   const newsInfo = ref({})
-  // getNewsDetailApi({
-  //     happeningId:route.params.id
-  // }).then(res => {
-  //   newsInfo.value = res
-  // })
-  onBeforeMount(async () => {
+  onMounted(async () => {
     newsInfo.value = await getNewsDetailApi({
       happeningId:route.params.id
     })
@@ -108,7 +103,7 @@
   //#region 点赞
   async function likeNews(item) {
     await likeNewsApi({
-      happeningId:item.id,
+      happeningId:item.happeningId,
       liked:item.liked ? 0 : 1
     })
     if(item.liked) {
@@ -156,12 +151,16 @@
     <div class="bg"></div>
     <div class="news-detail-card">
       <div class="news-item">
-        <div v-if="newsInfo.happeningInfo.content" class="item-warpper">
+        <div v-if="newsInfo.happeningInfo?.content" class="item-warpper">
           <div class="news-item-avatar">
-            <img :src="newsInfo.publisherInfo.avatarUrl" alt="头像">
+            <a :href="`/#/mainInterface/${newsInfo.publisherInfo.userId}`" target="_blank">
+              <img :src="newsInfo.publisherInfo.avatarUrl" alt="头像">
+            </a>
           </div>
           <div class="news-item-header">
-            <span class="news-item-author">{{ newsInfo.publisherInfo.username }}</span>
+            <a class="news-item-author" :href="`/#/mainInterface/${newsInfo.publisherInfo.userId}`" target="_blank">
+              {{ newsInfo.publisherInfo.username }}
+            </a>
             <span v-if="!newsInfo.happeningInfo.advanceRelease" class="news-item-early-pub">提前发布</span>
             <div class="news-item-desc">
               <span class="news-item-time">{{ newsInfo.happeningInfo.pubTimeInfo }}</span>
@@ -346,22 +345,22 @@
         </div>
       </div>
       <div class="side-toolbar">
-        <div @click="likeNews(newsInfo.happeningInfo)" class="side-toolbar-item like-info" :class="{'active':newsInfo.happeningInfo.liked}">
+        <div @click="likeNews(newsInfo.happeningInfo)" class="side-toolbar-item like-info" :class="{'active':newsInfo.happeningInfo?.liked}">
           <i class="iconfont icon-dianzan"></i>
           <div class="side-toolbar-item-text">
-            {{ newsInfo.happeningInfo.likeNumInfo }}
+            {{ newsInfo.happeningInfo?.likeNumInfo }}
           </div>
         </div>
         <div @click="showForwardBox = true" class="side-toolbar-item forward-info">
           <i class="iconfont icon-zhuanfa"></i>
           <div class="side-toolbar-item-text">
-            {{ newsInfo.happeningInfo.forwardNumInfo }}
+            {{ newsInfo.happeningInfo?.forwardNumInfo }}
           </div>
         </div>
         <div @click="handleClickComment" class="side-toolbar-item comment-info">
           <i class="iconfont icon-pinglun"></i>
           <div class="side-toolbar-item-text">
-            {{ newsInfo.happeningInfo.commentNumInfo }}
+            {{ newsInfo.happeningInfo?.commentNumInfo }}
           </div>
         </div>
       </div>
@@ -374,9 +373,9 @@
         </div>
       </div>
       <div class="item-tabs-content">
-        <comment-list v-if="tab === 'comment'" :happeningId="newsInfo.happeningInfo.happeningId"></comment-list>
-        <like-list v-if="tab === 'like'" :happeningId="newsInfo.happeningInfo.happeningId"></like-list>
-        <forward-list v-if="tab === 'forward'" :happeningId="newsInfo.happeningInfo.happeningId"></forward-list>
+        <comment-list v-if="tab === 'comment'" :advanceRelease="newsInfo.happeningInfo?.advanceRelease" :happeningId="newsInfo.happeningInfo?.happeningId"></comment-list>
+        <like-list v-if="tab === 'like'" :happeningId="newsInfo.happeningInfo?.happeningId"></like-list>
+        <forward-list v-if="tab === 'forward'" :happeningId="newsInfo.happeningInfo?.happeningId"></forward-list>
       </div>
     </div>
   </div>

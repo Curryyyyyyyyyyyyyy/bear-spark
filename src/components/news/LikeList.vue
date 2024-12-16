@@ -22,41 +22,6 @@
         pageSize:pageSize.value,
         happeningId:props.happeningId
       })
-      // const res = {
-      //   "total": 6,
-      //   "records": [
-      //     {
-      //       "userId": 1,
-      //       "username": "curyyyy",
-      //       "avatarUrl": "/imgs/default-avatar.png"
-      //     },
-      //     {
-      //       "userId": 1,
-      //       "username": "curyyyy",
-      //       "avatarUrl": "/imgs/default-avatar.png"
-      //     },
-      //     {
-      //       "userId": 1,
-      //       "username": "curyyyy",
-      //       "avatarUrl": "/imgs/default-avatar.png"
-      //     },
-      //     {
-      //       "userId": 1,
-      //       "username": "curyyyy",
-      //       "avatarUrl": "/imgs/default-avatar.png"
-      //     },
-      //     {
-      //       "userId": 1,
-      //       "username": "curyyyy",
-      //       "avatarUrl": "/imgs/default-avatar.png"
-      //     },
-      //     {
-      //       "userId": 1,
-      //       "username": "curyyyy",
-      //       "avatarUrl": "/imgs/default-avatar.png"
-      //     },
-      //   ]
-      // }
       likeList.value.push(...res.records)
       if(likeList.value.length >= res.total) isArriveTotal.value = true
     }, 500);

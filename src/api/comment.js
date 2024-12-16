@@ -1,17 +1,21 @@
 import request from '@/util/request'
 
-const mock = true
-
 /* 分页查询动态的楼评论 */
 export const getBldgCommentApi = (params) => {
-  if(mock) {
+  if(import.meta.env.VITE_MOCK) {
     return {
       "total": 20,
       "bldgTotal": 6,
       "bldgCommentList": [
         {
-          "commentId": 0,
-          "content": "哈哈哈哈哈哈哈哈",
+          "commentId": 1,
+          "content": "哈哈哈哈哈哈哈哈<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2020-11-11 18:00:00",
           "likeNumInfo": "3",
           "liked": 0,
@@ -24,8 +28,14 @@ export const getBldgCommentApi = (params) => {
           }
         },
         {
-          "commentId": 0,
-          "content": "哈哈哈哈哈哈哈哈",
+          "commentId": 2,
+          "content": "哈哈哈哈哈哈哈哈<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2020-11-11 18:00:00",
           "likeNumInfo": "3",
           "liked": 0,
@@ -38,8 +48,14 @@ export const getBldgCommentApi = (params) => {
           }
         },
         {
-          "commentId": 0,
-          "content": "哈哈哈哈哈哈哈哈",
+          "commentId": 3,
+          "content": "哈哈哈哈哈哈哈哈<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2020-11-11 18:00:00",
           "likeNumInfo": "3",
           "liked": 0,
@@ -52,8 +68,14 @@ export const getBldgCommentApi = (params) => {
           }
         },
         {
-          "commentId": 0,
-          "content": "哈哈哈哈哈哈哈哈",
+          "commentId": 4,
+          "content": "哈哈哈哈哈哈哈哈<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2020-11-11 18:00:00",
           "likeNumInfo": "3",
           "liked": 0,
@@ -66,8 +88,14 @@ export const getBldgCommentApi = (params) => {
           }
         },
         {
-          "commentId": 0,
-          "content": "哈哈哈哈哈哈哈哈",
+          "commentId": 5,
+          "content": "哈哈哈哈哈哈哈哈<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2020-11-11 18:00:00",
           "likeNumInfo": "3",
           "liked": 0,
@@ -80,8 +108,14 @@ export const getBldgCommentApi = (params) => {
           }
         },
         {
-          "commentId": 0,
-          "content": "哈哈哈哈哈哈哈哈",
+          "commentId": 6,
+          "content": "哈哈哈哈哈哈哈哈<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2020-11-11 18:00:00",
           "likeNumInfo": "3",
           "liked": 0,
@@ -103,12 +137,18 @@ export const getBldgCommentApi = (params) => {
 }
 /* 分页查询层评论 */
 export const getLayerCommentApi = (params) => {
-  if(mock) {
+  if(import.meta.env.VITE_MOCK) {
     return {
       "layerCommentList": [
         {
           "commentId": 90,
-          "content": "喜喜喜喜喜喜",
+          "content": "喜喜喜喜喜喜<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2033-3-3 12:12:56",
           "likeNumInfo": "12",
           "liked": 0,
@@ -122,7 +162,13 @@ export const getLayerCommentApi = (params) => {
         },
         {
           "commentId": 91,
-          "content": "喜喜喜喜喜喜",
+          "content": "喜喜喜喜喜喜<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2033-3-3 12:12:56",
           "likeNumInfo": "12",
           "liked": 0,
@@ -135,8 +181,14 @@ export const getLayerCommentApi = (params) => {
           }
         },
         {
-          "commentId": 91,
-          "content": "喜喜喜喜喜喜",
+          "commentId": 92,
+          "content": "喜喜喜喜喜喜<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2033-3-3 12:12:56",
           "likeNumInfo": "12",
           "liked": 0,
@@ -149,8 +201,14 @@ export const getLayerCommentApi = (params) => {
           }
         },
         {
-          "commentId": 91,
-          "content": "喜喜喜喜喜喜",
+          "commentId": 93,
+          "content": "喜喜喜喜喜喜<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2033-3-3 12:12:56",
           "likeNumInfo": "12",
           "liked": 0,
@@ -163,8 +221,14 @@ export const getLayerCommentApi = (params) => {
           }
         },
         {
-          "commentId": 91,
-          "content": "喜喜喜喜喜喜",
+          "commentId": 94,
+          "content": "喜喜喜喜喜喜<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2033-3-3 12:12:56",
           "likeNumInfo": "12",
           "liked": 0,
@@ -177,8 +241,14 @@ export const getLayerCommentApi = (params) => {
           }
         },
         {
-          "commentId": 91,
-          "content": "喜喜喜喜喜喜",
+          "commentId": 95,
+          "content": "喜喜喜喜喜喜<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2033-3-3 12:12:56",
           "likeNumInfo": "12",
           "liked": 0,
@@ -191,8 +261,14 @@ export const getLayerCommentApi = (params) => {
           }
         },
         {
-          "commentId": 91,
-          "content": "喜喜喜喜喜喜",
+          "commentId": 96,
+          "content": "喜喜喜喜喜喜<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2033-3-3 12:12:56",
           "likeNumInfo": "12",
           "liked": 0,
@@ -205,8 +281,14 @@ export const getLayerCommentApi = (params) => {
           }
         },
         {
-          "commentId": 91,
-          "content": "喜喜喜喜喜喜",
+          "commentId": 97,
+          "content": "喜喜喜喜喜喜<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2033-3-3 12:12:56",
           "likeNumInfo": "12",
           "liked": 0,
@@ -219,8 +301,14 @@ export const getLayerCommentApi = (params) => {
           }
         },
         {
-          "commentId": 91,
-          "content": "喜喜喜喜喜喜",
+          "commentId": 98,
+          "content": "喜喜喜喜喜喜<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2033-3-3 12:12:56",
           "likeNumInfo": "12",
           "liked": 0,
@@ -233,8 +321,14 @@ export const getLayerCommentApi = (params) => {
           }
         },
         {
-          "commentId": 91,
-          "content": "喜喜喜喜喜喜",
+          "commentId": 99,
+          "content": "喜喜喜喜喜喜<s>",
+          "atUserInfoList":[
+            {
+              "username":"周权",
+              "userId":1
+            }
+          ],
           "pubTimeInfo": "2033-3-3 12:12:56",
           "likeNumInfo": "12",
           "liked": 0,

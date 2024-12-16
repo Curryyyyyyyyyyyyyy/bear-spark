@@ -21,5 +21,8 @@
     height: 152px;
     background-color: pink;
     color: $colorG;
+    a {
+      color: $colorG;
+    }
   }
 </style>

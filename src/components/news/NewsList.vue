@@ -4,6 +4,7 @@
   import BsVoteModal from '@/components/news/BsVoteModal.vue'
   import BsInput from '@/components/input/BsInput.vue';
   import BsHtmlText from '@/components/common/BsHtmlText.vue'
+  import Loading from '@/components/common/Loading.vue'
   import { ElMessage, ElMessageBox } from 'element-plus';
   import { ref } from 'vue';
   import handleNumInfo from '@/hooks/handleNumInfo'
@@ -136,223 +137,6 @@
         pageSize:pageSize.value,
         username:props.activeUp
       })
-      // const newsRes = {
-      //   "total": 4,
-      //   "records": [
-      //     {
-      //       "happeningInfo":{
-      //         "happeningId":1,
-      //         "title": "现无称点进其原",
-      //         "content": "11",
-      //         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-      //         "viewNumInfo": 41,
-      //         "likeNumInfo": '50',
-      //         "commentNumInfo": 9,
-      //         "forwardNumInfo":0,
-      //         "commentAble": 0,
-      //         "advanceRelease": 0,
-      //         "voteSimpleInfo": {
-      //             "voteId": 8,
-      //             "title": "需观反干分取必",
-      //             "voteNumInfo": "43"
-      //         },
-      //         "quotedHappening":{
-      //           "happeningInfo":{
-      //           "happeningId":1,
-      //           "username": "万超",
-      //           "avatarUrl": "http://dummyimage.com/100x100",
-      //           "title": "现无称点进其原",
-      //           "content": "",
-      //           "tag": "pariatur eiusmod aliqua labore reprehenderit",
-      //           "viewNumInfo": 41,
-      //           "likeNumInfo": '50',
-      //           "commentNumInfo": 9,
-      //           "forwardNumInfo":0,
-      //           "commentAble": 0,
-      //           "advanceRelease": 0,
-      //           "voteSimpleInfo": {
-      //             "voteId": 8,
-      //             "title": "需观反干分取必",
-      //             "voteNumInfo": "43"
-      //           },
-      //           "imgUrlList": [
-      //               "http://dummyimage.com/400x400"
-      //           ],
-      //           "pubTimeInfo": "1975-04-15 04:31:03"
-      //           },
-      //         },
-      //         "imgUrlList": [
-      //             "http://dummyimage.com/400x400"
-      //         ],
-      //         "pubTimeInfo": "1975-04-15 04:31:03"
-      //       },
-      //       "publisherInfo":{
-      //         "userId":1001,
-      //         "username": "万超",
-      //         "avatarUrl": "http://dummyimage.com/100x100",
-      //       },
-      //     },
-      //     {
-      //       "happeningInfo":{
-      //         "happeningId":1,
-      //         "title": "现无称点进其原",
-      //         "content": "11",
-      //         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-      //         "viewNumInfo": 41,
-      //         "likeNumInfo": '50',
-      //         "commentNumInfo": 9,
-      //         "forwardNumInfo":0,
-      //         "commentAble": 0,
-      //         "advanceRelease": 0,
-      //         "voteSimpleInfo": {
-      //             "voteId": 8,
-      //             "title": "需观反干分取必",
-      //             "voteNumInfo": "43"
-      //         },
-      //         "quotedHappening":{
-      //           "happeningInfo":{
-      //           "happeningId":1,
-      //           "username": "万超",
-      //           "avatarUrl": "http://dummyimage.com/100x100",
-      //           "title": "现无称点进其原",
-      //           "content": "",
-      //           "tag": "pariatur eiusmod aliqua labore reprehenderit",
-      //           "viewNumInfo": 41,
-      //           "likeNumInfo": '50',
-      //           "commentNumInfo": 9,
-      //           "forwardNumInfo":0,
-      //           "commentAble": 0,
-      //           "advanceRelease": 0,
-      //           "voteSimpleInfo": {
-      //             "voteId": 8,
-      //             "title": "需观反干分取必",
-      //             "voteNumInfo": "43"
-      //           },
-      //           "imgUrlList": [
-      //               "http://dummyimage.com/400x400"
-      //           ],
-      //           "pubTimeInfo": "1975-04-15 04:31:03"
-      //           },
-      //         },
-      //         "imgUrlList": [
-      //             "http://dummyimage.com/400x400"
-      //         ],
-      //         "pubTimeInfo": "1975-04-15 04:31:03"
-      //       },
-      //       "publisherInfo":{
-      //         "userId":1001,
-      //         "username": "万超",
-      //         "avatarUrl": "http://dummyimage.com/100x100",
-      //       },
-      //     },
-      //     {
-      //       "happeningInfo":{
-      //         "happeningId":1,
-      //         "title": "现无称点进其原",
-      //         "content": "11",
-      //         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-      //         "viewNumInfo": 41,
-      //         "likeNumInfo": '50',
-      //         "commentNumInfo": 9,
-      //         "forwardNumInfo":0,
-      //         "commentAble": 0,
-      //         "advanceRelease": 0,
-      //         "voteSimpleInfo": {
-      //             "voteId": 8,
-      //             "title": "需观反干分取必",
-      //             "voteNumInfo": "43"
-      //         },
-      //         "quotedHappening":{
-      //           "happeningInfo":{
-      //           "happeningId":1,
-      //           "username": "万超",
-      //           "avatarUrl": "http://dummyimage.com/100x100",
-      //           "title": "现无称点进其原",
-      //           "content": "",
-      //           "tag": "pariatur eiusmod aliqua labore reprehenderit",
-      //           "viewNumInfo": 41,
-      //           "likeNumInfo": '50',
-      //           "commentNumInfo": 9,
-      //           "forwardNumInfo":0,
-      //           "commentAble": 0,
-      //           "advanceRelease": 0,
-      //           "voteSimpleInfo": {
-      //             "voteId": 8,
-      //             "title": "需观反干分取必",
-      //             "voteNumInfo": "43"
-      //           },
-      //           "imgUrlList": [
-      //               "http://dummyimage.com/400x400"
-      //           ],
-      //           "pubTimeInfo": "1975-04-15 04:31:03"
-      //           },
-      //         },
-      //         "imgUrlList": [
-      //             "http://dummyimage.com/400x400"
-      //         ],
-      //         "pubTimeInfo": "1975-04-15 04:31:03"
-      //       },
-      //       "publisherInfo":{
-      //         "userId":1001,
-      //         "username": "万超",
-      //         "avatarUrl": "http://dummyimage.com/100x100",
-      //       },
-      //     },
-      //     {
-      //       "happeningInfo":{
-      //         "happeningId":1,
-      //         "title": "现无称点进其原",
-      //         "content": "11",
-      //         "tag": "pariatur eiusmod aliqua labore reprehenderit",
-      //         "viewNumInfo": 41,
-      //         "likeNumInfo": '50',
-      //         "commentNumInfo": 9,
-      //         "forwardNumInfo":0,
-      //         "commentAble": 0,
-      //         "advanceRelease": 0,
-      //         "voteSimpleInfo": {
-      //             "voteId": 8,
-      //             "title": "需观反干分取必",
-      //             "voteNumInfo": "43"
-      //         },
-      //         "quotedHappening":{
-      //           "happeningInfo":{
-      //           "happeningId":1,
-      //           "username": "万超",
-      //           "avatarUrl": "http://dummyimage.com/100x100",
-      //           "title": "现无称点进其原",
-      //           "content": "",
-      //           "tag": "pariatur eiusmod aliqua labore reprehenderit",
-      //           "viewNumInfo": 41,
-      //           "likeNumInfo": '50',
-      //           "commentNumInfo": 9,
-      //           "forwardNumInfo":0,
-      //           "commentAble": 0,
-      //           "advanceRelease": 0,
-      //           "voteSimpleInfo": {
-      //             "voteId": 8,
-      //             "title": "需观反干分取必",
-      //             "voteNumInfo": "43"
-      //           },
-      //           "imgUrlList": [
-      //               "http://dummyimage.com/400x400"
-      //           ],
-      //           "pubTimeInfo": "1975-04-15 04:31:03"
-      //           },
-      //         },
-      //         "imgUrlList": [
-      //             "http://dummyimage.com/400x400"
-      //         ],
-      //         "pubTimeInfo": "1975-04-15 04:31:03"
-      //       },
-      //       "publisherInfo":{
-      //         "userId":1001,
-      //         "username": "万超",
-      //         "avatarUrl": "http://dummyimage.com/100x100",
-      //       },
-      //     }
-      //   ]
-      // }
       newsList.value.push(...newsRes.records)
       if(newsRes.total <= newsList.value.length) isArriveTotal.value = true
       busy.value = false;
@@ -422,11 +206,11 @@
   <div class="news-list">
     <div v-for="(item,index) in newsList" :key="index" class="news-item">
       <div v-if="item.happeningInfo.content" class="item-warpper">
-        <div class="news-item-avatar">
+        <a class="news-item-avatar" :href="`/#/mainInterface/${item.publisherInfo.userId}`">
           <img :src="item.publisherInfo.avatarUrl" alt="头像">
-        </div>
+        </a>
         <div class="news-item-header">
-          <span class="news-item-author">{{ item.publisherInfo.username }}</span>
+          <a class="news-item-author" :href="`/#/mainInterface/${item.publisherInfo.userId}`">{{ item.publisherInfo.username }}</a>
           <span v-if="!item.happeningInfo.advanceRelease" class="news-item-early-pub">提前发布</span>
           <p class="news-item-time">{{ item.happeningInfo.pubTimeInfo }}</p>
           <div @mouseenter="newsList[index].isOpen = true" @mouseleave="newsList[index].isOpen = false" class="news-item-more-btn">
@@ -641,7 +425,7 @@
     :infinite-scroll-disabled="busy" 
     infinite-scroll-distance="50"
   >
-    <img src="/imgs/loading-svg/loading-spinning-bubbles.svg" v-show="!isArriveTotal && newsLoading">
+    <loading v-show="!isArriveTotal && newsLoading"></loading>
   </div>
   <div v-show="isArriveTotal" class="prompt">已经到最底啦~</div>
   <bs-vote-modal
@@ -1092,7 +876,7 @@
     }
   }
   .load-more-news {
-    text-align: center;
+    @include flex(center);
   }
   .prompt {
     color: $colorD;

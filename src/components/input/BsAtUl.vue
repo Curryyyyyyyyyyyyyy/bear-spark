@@ -4,23 +4,6 @@
   import { onMounted,ref } from 'vue';
   const emit = defineEmits(['selectAtUser'])
   const followerList = ref([])
-  // followerList.value = [
-  //   {
-  //     username:'周权',
-  //     avatarUrl:'/imgs/default-avatar.png',
-  //     fansNumInfo:200
-  //   },
-  //   {
-  //     username:'卢家秦',
-  //     avatarUrl:'/imgs/default-avatar.png',
-  //     fansNumInfo:200
-  //   },
-  //   {
-  //     username:'谢佳辉',
-  //     avatarUrl:'/imgs/default-avatar.png',
-  //     fansNumInfo:200
-  //   },
-  // ]
   onMounted(async () => {
     const followerListRes = await getFollowerListApi()
     followerList.value = followerListRes.followerList
