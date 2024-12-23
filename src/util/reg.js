@@ -11,3 +11,18 @@ export const regPwd = (value) => {
 export const regVEcode = (value) => {
   return VEcodeReg.test(value)
 }
+/* 校验时间，不能早于当前 */
+/**
+ * 
+ * @param {YYYY-MM-DD} date 
+ * @param {HH} hour 
+ * @param {mm} minute 
+ * @returns {boolean}
+ */
+export const regTime = (date, hour, minute) => {
+  const time = new Date(date + ' '+ hour + ':' + minute +':00').getTime()
+  const nowTime = new Date().getTime()
+  console.log(new Date(date + ' '+ hour + ':' + minute +':00'))
+  console.log(time, nowTime, time < nowTime)
+  return time < nowTime
+}

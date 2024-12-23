@@ -57,14 +57,14 @@
         <span>投票</span>
         <i @click="closeVoteModal" class="iconfont icon-cuowu"></i>
       </div>
-      <div class="bs-vote-container" :style="{transform:`translateX(${-showVoteDetail*560}px)`}">
+      <div v-if="voteDetailInfo" class="bs-vote-container" :style="{transform:`translateX(${-showVoteDetail*560}px)`}">
         <div class="vote-main-wrapper">
           <div class="bs-vote-body">
             <div class="vote-title">{{voteDetailInfo.title}}</div>
             <div class="vote-info">
               <div class="author-info">
-                <img :src="voteDetailInfo.publisherInfo.avatarUrl" alt="头像">
-                <span class="author-username">{{ voteDetailInfo.publisherInfo.username }}</span>
+                <img :src="voteDetailInfo.publisherInfo?.avatarUrl" alt="">
+                <span class="author-username">{{ voteDetailInfo.publisherInfo?.username }}</span>
               </div>
               <div class="vote-text">发起</div>
               <div class="vote-stat"><span class="involveNum">{{voteDetailInfo.voteNumInfo}}人</span>参与</div>
@@ -77,16 +77,16 @@
               </div>
               <ul class="option-list">
                 <div v-for="(item,index) in voteDetailInfo.optionList" :key="index" class="option-item" :class="{'image-vote':voteDetailInfo.voteType===2}" @click="handleClickOption(item.optionId,voteDetailInfo.voteLim)">
-                  <div class="option-photo">
+                  <div v-if="voteDetailInfo.voteType === 2" class="option-photo">
                     <img v-lazy="item.optionPhotoUrl" alt="">
                   </div>
                   <div class="option-content-wrap">
-                    <div v-if="!voteDetailInfo.voted || username === voteDetailInfo.username" class="percentage-bar" :class="{'full':item.optionPercent==='100'}" :style="{width:`${item.optionPercent}%`,backgroundColor: item.selected?'#e3e5e7':'#8dd0ff'}"></div>
+                    <div v-if="!voteDetailInfo.voted || username === voteDetailInfo.publisherInfo?.username" class="percentage-bar" :class="{'full':item.optionPercent==='100'}" :style="{width:`${item.optionPercent}%`,backgroundColor: item.selected?'#e3e5e7':'#8dd0ff'}"></div>
                     <div class="option-content">
                       <p>{{ item.optionContent }}</p>
                     </div>
-                    <p v-if="voteDetailInfo.username === username || !voteDetailInfo.voted" class="option-percentage" :style="{color:item.selected?'#999999':(item.optionPercent === '100' ? '#ffffff' : '#8dd0ff')}">{{item.optionPercent}}%</p>
-                    <p v-if="voteDetailInfo.username !== username && voteDetailInfo.voted" class="select-btn" :class="{'checked':isChecked(item.optionId)}">
+                    <p v-if="voteDetailInfo.publisherInfo?.username === username || !voteDetailInfo.voted" class="option-percentage" :style="{color:item.selected?'#999999':(item.optionPercent === '100' ? '#ffffff' : '#8dd0ff')}">{{item.optionPercent}}%</p>
+                    <p v-if="voteDetailInfo.publisherInfo?.username !== username && voteDetailInfo.voted" class="select-btn" :class="{'checked':isChecked(item.optionId)}">
                       <i v-if="isChecked(item.optionId)" class="iconfont icon-gou"></i>
                     </p>
                   </div>
@@ -103,7 +103,7 @@
                     </p>
                   </div>
                 </div> -->
-                <div v-if="username !== voteDetailInfo.username && voteDetailInfo.voted" class="vote-privacy">
+                <div v-if="username !== voteDetailInfo.publisherInfo?.username && voteDetailInfo.voted" class="vote-privacy">
                   <div @click="synchronous = Math.abs(synchronous-1)" class="share-to-news">
                     <span class="select-btn" :style="{backgroundColor:synchronous ? '#ffffff' : '#03a0d6'}">
                       <i v-if="synchronous === 0" class="iconfont icon-gou"></i>
@@ -121,7 +121,7 @@
             </div>
           </div>
           <div class="bs-vote-footer">
-            <div v-if="username === voteDetailInfo.username && voteDetailInfo.voterInfoList.length" class="follower-vote">
+            <div v-if="username === voteDetailInfo.publisherInfo?.username && voteDetailInfo.voterInfoList.length" class="follower-vote">
               <div @click="showVoteDetail = 1" class="desc">
                 <p>你关注的人</p>
                 <p>也参与了投票</p>
@@ -134,9 +134,9 @@
             </div>
             <!-- <button v-if="username !== voteDetailInfo.username" class="vote-btn" :style="{backgroundColor:!voteDetailInfo.voted || voteDetailInfo.dead?'#e5e9ef':'#00aeec',color:!voteDetailInfo.voted||voteDetailInfo.dead?'#999999':'#ffffff'}">{{ !voteDetailInfo.voted ? '感谢你的投票' : (voteDetailInfo.dead ? '投票已结束' : '投票') }}</button> -->
             <button v-if="voteDetailInfo.dead" class="vote-btn" :style="{backgroundColor:'#e5e9ef',color:'#999999'}">投票已结束</button>
-            <button v-else-if="username !== voteDetailInfo.username && voteDetailInfo.voted" @click="handleVote()" class="vote-btn" :style="{backgroundColor:'#00aeec',color:'#ffffff'}">投票</button>
-            <button v-else-if="username !== voteDetailInfo.username && !voteDetailInfo.voted" class="vote-btn" :style="{backgroundColor:'#e5e9ef',color:'#999999'}">感谢你的投票</button>
-            <div v-if="username === voteDetailInfo.username && !voteDetailInfo.voterInfoList.length" @click="showVoteDetail = 1" class="vote-detail-btn">
+            <button v-else-if="username !== voteDetailInfo.publisherInfo?.username && voteDetailInfo.voted" @click="handleVote()" class="vote-btn" :style="{backgroundColor:'#00aeec',color:'#ffffff'}">投票</button>
+            <button v-else-if="username !== voteDetailInfo.publisherInfo?.username && !voteDetailInfo.voted" class="vote-btn" :style="{backgroundColor:'#e5e9ef',color:'#999999'}">感谢你的投票</button>
+            <div v-if="username === voteDetailInfo.publisherInfo?.username && !voteDetailInfo.voterInfoList.length" @click="showVoteDetail = 1" class="vote-detail-btn">
               <span>投票详情</span>
               <i class="iconfont icon-youjiantou"></i>
             </div>
@@ -441,6 +441,7 @@
             max-height: 390px;
             overflow-x: hidden;
             overflow-y: auto;
+            overscroll-behavior-y: contain;
             padding: 20px;
             box-sizing: border-box;
             &::-webkit-scrollbar {

@@ -30,7 +30,7 @@ instance.interceptors.response.use(function (response) {
   // 对响应数据做点什么
   const res = response.data
   if(res.code !== 200) {
-    if(res.code === 400) {
+    if(res.code === 401) {
       let errMsg
       if(!userStore.token) {
         errMsg = '请先登录'
@@ -43,8 +43,7 @@ instance.interceptors.response.use(function (response) {
       return Promise.reject('请先登录')
     }
     if(res.code === 500) {
-      ElMessage.error('服务器开了点小差...')
-      return Promise.reject('服务器异常')
+      return Promise.reject(res.msg)
     }
     ElMessage.error(res.msg)
     return Promise.reject(res.msg)

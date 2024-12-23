@@ -10,7 +10,7 @@
   import router from '@/router/index'
   import {getBldgCommentApi,getLayerCommentApi,deleteCommentApi,replyCommentApi,commentHappeningApi,likeCommentApi} from '../../api/comment'
 
-  const props = defineProps(['happeningId','advanceRelease'])
+  const props = defineProps(['happeningId','commentAble'])
   const userStore = useUser()
   onMounted(() => {
     loadMore()
@@ -153,7 +153,7 @@
 </script>
 
 <template>
-  <div v-if="advanceRelease" class="advanceRelease">
+  <div v-if="commentAble" class="advanceRelease">
     <div class="avatar-box">
       <img :src="userStore.avatarUrl" alt="">
     </div>
@@ -258,7 +258,7 @@
               </div>
             </div>
             <div :ref="el => getInputRef(el, index)" class="comment-input-box">
-              <bs-input-box v-if="index === activeReplyInputIndex" @publish="replyComment($event, item2.commentId, index)" :bgcOnlyWhite="true" :placeholder="replyPlaceholder"></bs-input-box>
+              <bs-input-box v-if="index === activeReplyInputIndex" @publish="replyComment($event, item.commentId, index)" :bgcOnlyWhite="true" :placeholder="replyPlaceholder"></bs-input-box>
             </div>
             <div class="border"></div>
           </li>

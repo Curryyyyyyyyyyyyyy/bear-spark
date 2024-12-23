@@ -1,5 +1,5 @@
 <script setup>
-  import NavHeader from '@/components/common/NavHeader.vue'
+  import NavHeader from '@/components/nav-header/NavHeader.vue'
   import NewsModifyBox from './NewsModifyBox.vue';
   import NewsForwardBox from './NewsForwardBox.vue';
   import LikeList from '@/components/news/LikeList.vue';
@@ -153,13 +153,13 @@
       <div class="news-item">
         <div v-if="newsInfo.happeningInfo?.content" class="item-warpper">
           <div class="news-item-avatar">
-            <a :href="`/#/mainInterface/${newsInfo.publisherInfo.userId}`" target="_blank">
+            <a :href="`/#/mainInterface/${newsInfo.publisherInfo?.userId}`" target="_blank">
               <img :src="newsInfo.publisherInfo.avatarUrl" alt="头像">
             </a>
           </div>
           <div class="news-item-header">
-            <a class="news-item-author" :href="`/#/mainInterface/${newsInfo.publisherInfo.userId}`" target="_blank">
-              {{ newsInfo.publisherInfo.username }}
+            <a class="news-item-author" :href="`/#/mainInterface/${newsInfo.publisherInfo?.userId}`" target="_blank">
+              {{ newsInfo.publisherInfo?.username }}
             </a>
             <span v-if="!newsInfo.happeningInfo.advanceRelease" class="news-item-early-pub">提前发布</span>
             <div class="news-item-desc">
@@ -198,7 +198,7 @@
             <div class="news-text-content">
               <bs-html-text :content="newsInfo.happeningInfo.content" :atUserInfoList="newsInfo.happeningInfo.atUserInfoList"></bs-html-text>
             </div>
-            <div v-if="newsInfo.happeningInfo.imgUrlList" class="news-album">
+            <div v-if="newsInfo.happeningInfo.imgUrlList.length" class="news-album">
               <div class="news-album-preview grid">
                 <div v-for="(item, index) in newsInfo.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
                   <img :src="item" alt="图片">
@@ -263,8 +263,12 @@
             <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.content" class="quote-wrapper">
             <div class="refer-author-box">
               <div class="author-info">
-                <img :src="newsInfo.happeningInfo.quotedHappening.publisherInfo.avatarUrl" alt="头像">
-                <span class="author-username">{{ newsInfo.happeningInfo.quotedHappening.publisherInfo.username }}</span>
+                <a :href="`/#/mainInterface/${newsInfo.happeningInfo.quotedHappening.publisherInfo.userId}`" target="_blank">
+                  <img :src="newsInfo.happeningInfo.quotedHappening.publisherInfo.avatarUrl" alt="头像">
+                </a>
+                <a :href="`/#/mainInterface/${newsInfo.happeningInfo.quotedHappening.publisherInfo.userId}`" target="_blank">
+                  <span class="author-username">{{ newsInfo.happeningInfo.quotedHappening.publisherInfo.username }}</span>
+                </a>
                 <span class="refer-text">投稿了文章</span>
               </div>
             </div>
@@ -272,11 +276,11 @@
               <i class="iconfont icon-huati"></i>
               <span>{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.tag }}</span>
             </div>
-            <div class="news-title">{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.title }}</div>
-            <div class="news-text-content">
+            <a :href="`/#/news_detail/quote/${newsInfo.happeningInfo.quotedHappening.happeningInfo.happeningId}`" target="_blank" class="news-title">{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.title }}</a>
+            <a :href="`/#/news_detail/quote/${newsInfo.happeningInfo.quotedHappening.happeningInfo.happeningId}`" target="_blank" class="news-text-content">
               <bs-html-text :content="newsInfo.happeningInfo.quotedHappening.happeningInfo.content" :atUserInfoList="newsInfo.happeningInfo.quotedHappening.happeningInfo.atUserInfoList"></bs-html-text>
-            </div>
-            <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.imgUrlList" class="news-album">
+            </a>
+            <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.imgUrlList.length" class="news-album">
               <div class="news-album-preview grid">
                 <div v-for="(item,index) in newsInfo.happeningInfo.quotedHappening.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
                   <img :src="item" alt="图片">
@@ -373,7 +377,7 @@
         </div>
       </div>
       <div class="item-tabs-content">
-        <comment-list v-if="tab === 'comment'" :advanceRelease="newsInfo.happeningInfo?.advanceRelease" :happeningId="newsInfo.happeningInfo?.happeningId"></comment-list>
+        <comment-list v-if="tab === 'comment'" :commentAble="newsInfo.happeningInfo?.commentAble" :happeningId="newsInfo.happeningInfo?.happeningId"></comment-list>
         <like-list v-if="tab === 'like'" :happeningId="newsInfo.happeningInfo?.happeningId"></like-list>
         <forward-list v-if="tab === 'forward'" :happeningId="newsInfo.happeningInfo?.happeningId"></forward-list>
       </div>

@@ -23,6 +23,7 @@
   @use './assets/sass/config.scss' as *;
   .app {
     margin: 0 auto;
+    height: 100%;
     min-width: $min-width;
     max-width: $max-width;
   }

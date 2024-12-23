@@ -7,7 +7,7 @@
 </script>
 
 <template>
-  <li class="bs-at-li" @click="selectAtUser">
+  <li class="bs-at-li" @click.stop="selectAtUser">
     <div class="bs-at-item-avatar">
       <img :src="props.avatarUrl" alt="">
     </div>

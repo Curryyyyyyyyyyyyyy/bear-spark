@@ -1,7 +1,12 @@
 @use './config.scss' as *;
 
-body {
+html,body {
   background-color: $colorN;
+  height: 100%;
+}
+
+#app {
+  height: 100%;
 }
 
 .container{

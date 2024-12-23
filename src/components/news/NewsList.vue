@@ -35,7 +35,7 @@
       await revokeBookLiveApi({
         bookLiveId
       })
-      newsList.value[index].bookLiveInfo.canceled = 1
+      newsList.value[index].happeningInfo.bookLiveInfo.canceled = 1
       ElMessage({ 
         type: 'info',
         message: '已撤销',
@@ -50,7 +50,7 @@
       bookLiveId,
       booked:0
     })
-    newsList.value[index].bookLiveInfo.booked = 0
+    newsList.value[index].happeningInfo.bookLiveInfo.booked = 0
     ElMessage.success('预约成功')
   }
   async function cancelBookLive(bookLiveId,index) {
@@ -58,7 +58,7 @@
       bookLiveId,
       booked:1
     })
-    newsList.value[index].bookLiveInfo.booked = 1
+    newsList.value[index].happeningInfo.bookLiveInfo.booked = 1
     ElMessage.info('已取消预约')
   }
   //#endregion
@@ -99,7 +99,7 @@
   async function forwardNews(index) {
     let content = inputBoxRefList.value[index].children[0].innerHTML ? inputBoxRefList.value[index].children[0].innerHTML : '转发动态'
     let tagId = forwardTagIdList.value[index]
-    let quotedHappeningId = newsList.value[index].happeningInfo.quotedHappening ? newsList.value[index].happeningInfo.quotedHappening.happeningId : newsList.value[index].happeningInfo.happeningId
+    let quotedHappeningId = newsList.value[index].happeningInfo.quotedHappening ? newsList.value[index].happeningInfo.quotedHappening.happeningInfo.happeningId : newsList.value[index].happeningInfo.happeningId
     await fowardNewsApi({
       quotedHappeningId,
       content,
@@ -160,6 +160,10 @@
       })
       newsList.value[index].content = ''
       ElMessage.info('删除成功')
+      pageNum.value = 1
+      isArriveTotal.value = false
+      newsList.value = []
+      loadMoreNews()
     })
   }
   /* 点赞/取消点赞 */
@@ -189,7 +193,7 @@
       const newsRes = await getNewsListApi({
         pageNum:pageNum.value++,
         pageSize:pageSize.value,
-        userId:userId
+        selectedUserId:userId
       })
       newsList.value.push(...newsRes.records)
       if(newsRes.total <= newsList.value.length) isArriveTotal.value = true
@@ -235,7 +239,7 @@
           <div @click="router.push(`/news_detail/${item.happeningInfo.happeningId}`)" class="news-text-content">
             <bs-html-text :content="item.happeningInfo.content" :atUserInfoList="item.happeningInfo.atUserInfoList"></bs-html-text>
           </div>
-          <div v-if="item.happeningInfo.imgUrlList" class="news-album">
+          <div v-if="item.happeningInfo.imgUrlList.length" class="news-album">
             <div class="news-album-preview grid">
               <div v-for="(item, index) in item.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
                 <img v-lazy="item" alt="图片">
@@ -313,7 +317,7 @@
             <div @click="router.push(`/news_detail/${item.happeningInfo.quotedHappening.happeningInfo.happeningId}`)" class="news-text-content">
               <bs-html-text :content="item.happeningInfo.quotedHappening.happeningInfo.content" :atUserInfoList="item.happeningInfo.quotedHappening.happeningInfo.atUserInfoList"></bs-html-text>
             </div>
-            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.imgUrlList" class="news-album">
+            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.imgUrlList.length" class="news-album">
               <div class="news-album-preview grid">
                 <div v-for="(item,index) in item.happeningInfo.quotedHappening.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
                   <img :src="item" alt="图片">

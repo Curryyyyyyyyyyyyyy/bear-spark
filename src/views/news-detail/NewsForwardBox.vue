@@ -28,7 +28,7 @@
   async function publishNews() {
     const content = inputBoxRef.value.children[0].innerHTML ? inputBoxRef.value.children[0].innerHTML : '转发动态'
     await fowardNewsApi({
-      quotedHappeningId:props.newsInfo.quotedHappening ? props.newsInfo.quotedHappening.id : props.newsInfo.id,
+      quotedHappeningId:props.newsInfo.happeningInfo.quotedHappening ? props.newsInfo.happeningInfo.quotedHappening.happeningInfo.happeningId : props.newsInfo.happeningInfo.happeningId,
       content,
       tagId:tagId.value
     })
@@ -115,6 +115,9 @@
       }
       .news-forward-body {
         padding: 10px 16px;
+        .bs-input-box {
+          position: relative;
+        }
       }
       .news-forward-footer {
         @include flex();

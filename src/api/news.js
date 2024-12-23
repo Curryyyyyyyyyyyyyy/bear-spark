@@ -96,27 +96,36 @@ export const getNewsListApi = (params) => {
             },
             "quotedHappening":{
               "happeningInfo":{
-              "happeningId":1,
-              "username": "万超",
-              "avatarUrl": "http://dummyimage.com/100x100",
-              "title": "现无称点进其原",
-              "content": "",
-              "tag": "pariatur eiusmod aliqua labore reprehenderit",
-              "viewNumInfo": 41,
-              "likeNumInfo": '50',
-              "commentNumInfo": 9,
-              "forwardNumInfo":0,
-              "commentAble": 0,
-              "advanceRelease": 0,
-              "voteSimpleInfo": {
-                "voteId": 8,
-                "title": "需观反干分取必",
-                "voteNumInfo": "43"
+                "happeningId":1,
+                "title": "现无称点进其原",
+                "content": "11<s>",
+                "atUserInfoList":[
+                  {
+                    "atUsername":'周权',
+                    "atUserId":1
+                  }
+                ],
+                "tag": "pariatur eiusmod aliqua labore reprehenderit",
+                "viewNumInfo": 41,
+                "likeNumInfo": '50',
+                "commentNumInfo": 9,
+                "forwardNumInfo":0,
+                "commentAble": 0,
+                "advanceRelease": 0,
+                "voteSimpleInfo": {
+                  "voteId": 8,
+                  "title": "需观反干分取必",
+                  "voteNumInfo": "43"
+                },
+                "imgUrlList": [
+                    "http://dummyimage.com/400x400"
+                ],
+                "pubTimeInfo": "1975-04-15 04:31:03"
               },
-              "imgUrlList": [
-                  "http://dummyimage.com/400x400"
-              ],
-              "pubTimeInfo": "1975-04-15 04:31:03"
+              "publisherInfo":{
+                "userId":1001,
+                "username": "万超",
+                "avatarUrl": "http://dummyimage.com/100x100",
               },
             },
             "imgUrlList": [
@@ -144,61 +153,61 @@ export const getTagListApi = (params) => {
       "total":10,
       "records":[
         {
-          "id": 98,
+          "tagId": 98,
           "viewNumInfo": "21",
           "discussNumInfo": "93",
           "content": "laboris <em>anim</em> pariatur"
         },
         {
-          "id": 59,
+          "tagId": 59,
           "viewNumInfo": "97",
           "discussNumInfo": "65",
           "content": "laboris irure ut dolor nulla"
         },
         {
-          "id": 59,
+          "tagId": 59,
           "viewNumInfo": "97",
           "discussNumInfo": "65",
           "content": "laboris irure ut dolor nulla"
         },
         {
-          "id": 59,
+          "tagId": 59,
           "viewNumInfo": "97",
           "discussNumInfo": "65",
           "content": "laboris irure ut dolor nulla"
         },
         {
-          "id": 59,
+          "tagId": 59,
           "viewNumInfo": "97",
           "discussNumInfo": "65",
           "content": "laboris irure ut dolor nulla"
         },
         {
-          "id": 59,
+          "tagId": 59,
           "viewNumInfo": "97",
           "discussNumInfo": "65",
           "content": "laboris irure ut dolor nulla"
         },
         {
-          "id": 59,
+          "tagId": 59,
           "viewNumInfo": "97",
           "discussNumInfo": "65",
           "content": "laboris irure ut dolor nulla"
         },
         {
-          "id": 59,
+          "tagId": 59,
           "viewNumInfo": "97",
           "discussNumInfo": "65",
           "content": "laboris irure ut dolor nulla"
         },
         {
-          "id": 59,
+          "tagId": 59,
           "viewNumInfo": "97",
           "discussNumInfo": "65",
           "content": "laboris irure ut dolor nulla"
         },
         {
-          "id": 59,
+          "tagId": 59,
           "viewNumInfo": "97",
           "discussNumInfo": "65",
           "content": "laboris irure ut dolor nulla"
@@ -238,27 +247,36 @@ export const getNewsDetailApi = (params) => {
         },
         "quotedHappening":{
           "happeningInfo":{
-          "happeningId":1,
-          "username": "万超",
-          "avatarUrl": "http://dummyimage.com/100x100",
-          "title": "现无称点进其原",
-          "content": "",
-          "tag": "pariatur eiusmod aliqua labore reprehenderit",
-          "viewNumInfo": 41,
-          "likeNumInfo": '50',
-          "commentNumInfo": 9,
-          "forwardNumInfo":0,
-          "commentAble": 0,
-          "advanceRelease": 0,
-          "voteSimpleInfo": {
-            "voteId": 8,
-            "title": "需观反干分取必",
-            "voteNumInfo": "43"
+            "happeningId":2,
+            "title": "现无称点进其原",
+            "content": "11<s>",
+            "atUserInfoList":[
+              {
+                "username":'周权',
+                "userId":1
+              }
+            ],
+            "tag": "pariatur eiusmod aliqua labore reprehenderit",
+            "viewNumInfo": 41,
+            "likeNumInfo": '50',
+            "commentNumInfo": 9,
+            "forwardNumInfo":0,
+            "commentAble": 0,
+            "advanceRelease": 0,
+            "voteSimpleInfo": {
+              "voteId": 8,
+              "title": "需观反干分取必",
+              "voteNumInfo": "43"
+            },
+            "imgUrlList": [
+                "http://dummyimage.com/400x400"
+            ],
+            "pubTimeInfo": "1975-04-15 04:31:03"
           },
-          "imgUrlList": [
-              "http://dummyimage.com/400x400"
-          ],
-          "pubTimeInfo": "1975-04-15 04:31:03"
+          "publisherInfo":{
+            "userId":1001,
+            "username": "万超",
+            "avatarUrl": "http://dummyimage.com/100x100",
           },
         },
         "imgUrlList": [

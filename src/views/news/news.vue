@@ -1,6 +1,6 @@
 <script setup>
   import { onMounted, ref } from 'vue';
-  import NavHeader from '@/components/common/NavHeader.vue'
+  import NavHeader from '@/components/nav-header/NavHeader.vue'
   import NewsUserBox from './NewsUserBox.vue';
   import NewsPublishBox from './NewsPublishBox.vue';
   import NewsAsideBox from './NewsAsideBox.vue';
@@ -42,7 +42,6 @@
   function changeTab(tabName) {
     tab.value = tabName
   }
-  //#endregion
   //#endregion
   //#region 页面尺寸缩放调整
   let smallSize = ref(false)

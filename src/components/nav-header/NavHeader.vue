@@ -1,16 +1,14 @@
 <script setup>
   import login from '@/views/login.vue'
-  import { ElMessage, ElMessageBox } from 'element-plus';
+  import HeaderAvatar from '@/components/nav-header/HeaderAvatar.vue';
+  import HeaderMessage from '@/components/nav-header/HeaderMessage.vue';
   import useUser from '@/store/user';
   import { storeToRefs } from 'pinia';
   import { ref} from 'vue';
-  import { useRouter } from 'vue-router';
-  import { deleteUserInfo } from '@/hooks/handleUserInfo';
 
   /* Router */
-  const router = useRouter()
   const userStore = useUser()
-  const {token,userId,username,avatarUrl,fanNumInfo,followerNumInfo,happeningNumInfo,currencyInfo} = storeToRefs(userStore)
+  const {token} = storeToRefs(userStore)
   /* Mounted */
   let showLogin = ref(false)
   function openLogin() {
@@ -18,28 +16,6 @@
   }
   function closeLogin() {
     showLogin.value = false
-  }
-  function toMainInterface() {
-    const {href} = router.resolve({
-      path:`/mainInterface/${userId.value}`,
-    })
-    window.open(href, '_blank')
-  }
-  function logout() {
-    ElMessageBox.confirm('您确定退出登录吗？','温馨提示',{
-      confirmButtonText:'确定',
-      cancelButtonText:'取消',
-      type:'warning'      
-    }).then(()=>{
-      ElMessage({
-        type:'success',
-        message:'退出成功',
-        duration:1000
-      })
-      token.value = ''
-      deleteUserInfo()
-      router.replace('/index')
-    })
   }
   // 防止刷新显示问题
   let pageSmall = ref(false)
@@ -110,62 +86,14 @@
           </div>
         </div>
         <div v-else class="avatar-box right-item">
-          <div class="avatar" @click="toMainInterface">
-            <img :src="avatarUrl" alt="">
-          </div>
-          <div class="avatar-children">
-            <div class="nickname"  @click="toMainInterface">{{ username }}</div>
-            <div class="coins"  @click="toMainInterface">
-              功德：<span class="coin-num">{{ currencyInfo.meritNumInfo }}</span>
-              硬币：<span class="coin-num">{{ currencyInfo.coinNumInfo }}</span>
-            </div>
-            <div class="infos">
-              <div class="info-item">
-                <span class="count">{{ followerNumInfo }}</span>
-                <p class="desc">关注</p>
-              </div>
-              <div class="info-item">
-                <span class="count">{{ fanNumInfo }}</span>
-                <p class="desc">粉丝</p>
-              </div>
-              <div class="info-item">
-                <span class="count">{{ happeningNumInfo }}</span>
-                <p class="desc">动态</p>
-              </div>
-            </div>
-            <div class="vip-info">
-              <span class="vip-desc">最后3天 大会员4.6折</span>
-              <span class="vip-btn">会员中心</span>
-            </div>
-            <div class="user-item user-center" @click="toMainInterface">
-              <i class="iconfont icon-geren"></i>
-              <span>个人中心</span>
-              <i class="iconfont icon-xiangyoujiantou"></i>
-            </div>
-            <div class="user-item sub-manage">
-              <i class="iconfont icon-tougaogaojian"></i>
-              <span>投稿管理</span>
-              <i class="iconfont icon-xiangyoujiantou"></i>
-            </div>
-            <div class="user-item recommend-service">
-              <i class="iconfont icon-tuijian"></i>
-              <span>推荐服务</span>
-              <i class="iconfont icon-xiangyoujiantou"></i>
-            </div>
-            <div class="split-line"></div>
-            <div class="user-item logout" @click="logout">
-              <i class="iconfont icon-tuichu"></i>
-              <span>退出登录</span>
-            </div>
-          </div>
+          <header-avatar></header-avatar>
         </div>
         <a class="right-item">
           <i class="iconfont icon-huiyuan jump" :class="{'onlyIcon':pageSmall}"></i>
           <p v-if="!pageSmall">大会员</p>
         </a>
         <a class="right-item">
-          <i class="iconfont icon-xiaoxi jump" :class="{'onlyIcon':pageSmall}"></i>
-          <p v-if="!pageSmall">消息</p>
+          <header-message :showText="!pageSmall"></header-message>
         </a>
         <a class="right-item" href="/#/news_index" target="_blank">
           <i class="iconfont icon-dongtai jump" :class="{'onlyIcon':pageSmall}"></i>
@@ -186,6 +114,22 @@
         <div class="submit right-item">
           <i class="iconfont icon-shangchuan" :class="{'onlyIcon':pageSmall}"></i>
           <span v-if="!pageSmall">投稿</span>
+          <div class="submit-ways">
+            <div class="submit-ways-wrapper">
+              <a href="/#/submit/article" target="_blank" class="submit-item">
+                <i class="iconfont icon-zhenggaotougao"></i>
+                <span class="submit-item-text">专栏投稿</span>
+              </a>
+              <a href="/#/submit/video" target="_blank" class="submit-item">
+                <i class="iconfont icon-shipinshangchuan"></i>
+                <span class="submit-item-text">视频投稿</span>
+              </a>
+              <a href="/#/submit/draft" target="_blank" class="submit-item">
+                <i class="iconfont icon-caogaoxiang"></i>
+                <span class="submit-item-text">草稿箱</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -198,6 +142,8 @@
   @use '@/assets/sass/config.scss' as *;
   @use '@/assets/sass/animation.scss' as *;
   .nav-header {
+    z-index: 100;
+    position: relative;
     min-width: $min-width;
     max-width: $max-width;
     margin: 0 auto;
@@ -307,9 +253,6 @@
             display: inline-block;
             font-size: $fontH;
           }
-          &:visited{
-            color: inherit;
-          }
           .onlyIcon {
             line-height: 36px;
             font-size: 24px;
@@ -399,151 +342,53 @@
             }
           }
         }
-        .avatar-box {
-          position: relative;
-          &:hover {
-            .avatar {
-              transform: translate(-50%,100%) scale(1.5);
-            }
-            .avatar-children {
-              display: block;
-            }
-          }
-          .avatar {
-            position: relative;
-            z-index: 1;
-            height: 36px;
-            line-height: 36px;
-            width: 36px;
-            border-radius: 18px;
-            cursor: pointer;
-            background-size: 36px 36px;
-            transition: all .3s;
-            img {
-              width: 100%;
-              height: 100%;
-              border-radius: 50%;
-            }
-          }
-          .avatar-children {
-            display: none;
-            height: 336px;
-            width: 216px;
-            position: absolute;
-            top: 58px;
-            left: -112px;
-            padding: 0 20px;
-            padding-top: 40px;
-            box-sizing: border-box;
-            border-radius: 5px;
-            background-color: $colorG;
-            box-shadow: 0 0 5px $colorF;
-            color:$colorI;
-            .nickname {
-              cursor: pointer;
-              font-weight: bold;
-              margin-bottom: 10px;
-            }
-            .coins {
-              font-size: $fontL;
-              color: $colorD;
-              margin-bottom: 10px;
-              cursor: pointer;
-              .coin-num {
-                color: $colorI;
-                margin-right: 5px
-              }
-            }
-            .infos {
-              @include flex();
-              margin-bottom: 10px;
-              .info-item {
-                flex: 1;
-                cursor: pointer;
-                &:hover {
-                  color: $colorM;
-                }
-                .desc {
-                  color: $colorD;
-                  font-size: $fontL;
-                }
-              }
-            }
-            .vip-info {
-              width: 176px;
-              height: 50px;
-              line-height: 50px;
-              background-color: $colorO;
-              color: $colorA;
-              font-size: $fontL;
-              text-align: left;
-              padding: 0 8px;
-              border-radius: 5px;
-              box-sizing: border-box;
-              margin-bottom: 10px;
-              .vip-desc {
-                font-weight: bold;
-              }
-              .vip-btn {
-                display: inline-block;
-                height: 24px;
-                line-height: 24px;
-                width: 50px;
-                text-align: center;
-                border-radius: 6px;
-                margin-left: 15px;
-                background-color: $colorG;
-                cursor: pointer;
-              }
-            }
-            .user-item {
-              position: relative;
-              height: 25px;
-              line-height: 25px;
-              padding: 0 5px;
-              box-sizing: border-box;
-              margin-bottom: 10px;
-              text-align: left;
-              font-size: $fontK;
-              color: $colorB;
-              border-radius: 5px;
-              cursor: pointer;
-              &:hover {
-                background-color: $colorN;
-              }
-              span {
-                margin-left: 10px;
-              }
-              .icon-xiangyoujiantou {
-                position: absolute;
-                right: 0;
-                font-size: $fontH;
-                vertical-align: middle;
-              }
-              .icon-tougaogaojian {
-                font-size: $fontI;
-              }
-            }
-            .split-line {
-              height: 1px;
-              background-color: $colorF;
-              margin-bottom: 10px;
-            }
-          }
-        }
         .submit {
-          // width: 80px;
+          position: relative;
+          @include flex();
           height: 35px;
-          line-height: 35px;
           padding: 0 10px;
           border-radius: 15px;
           background-color: $colorA;
           span {
-            margin-left: 6px;
+            margin-left: 3px;
           }
           &:hover {
             cursor: pointer;
             background-color: #f987a7;
+            .submit-ways {
+              display: block;
+            }
+          }
+          .submit-ways {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 88%;
+            padding-top: 20px;
+            opacity: 1;
+            transition: all .1s;
+            .submit-ways-wrapper {
+              @include flex();
+              padding: 6px 10px;
+              border-radius: 6px;
+              box-shadow: 0 0 1px $colorD;
+              background-color: $colorG;
+              .submit-item {
+                @include flex();
+                flex-direction: column;
+                padding: 4px 2px;
+                min-width:54px;
+                border-radius: 6px;
+                color: $colorC;
+                &:hover {
+                  background-color: $colorN;
+                }
+                .submit-item-text {
+                  font-size: $fontL;
+                  margin-top: 4px;
+                }
+              }
+            }
           }
         }
       }

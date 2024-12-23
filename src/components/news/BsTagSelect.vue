@@ -1,13 +1,14 @@
 <script setup>
   import Loading from '@/components/common/Loading.vue'
-  import { onMounted, ref } from 'vue';
+  import { nextTick, onMounted, ref } from 'vue';
   import {getTagListApi} from '@/api/news'
   import { debounce } from '../../hooks/performance';
 
   const emit = defineEmits(['getSelectTagId'])
   const props = defineProps(['defaultTag','defaultTagId'])
   
-  onMounted(()=>{
+  onMounted(async ()=>{
+    await nextTick()
     if(props.defaultTag) {
       handleSelectTag(props.defaultTag,props.defaultTagId)
     }
@@ -77,7 +78,7 @@
       <div class="tag-search-popover" :class="{'active':showTagCol}">
         <label :class="{'tag-active':tagSelected}" class="tag-search-input">
           <i v-if="!showTagCol" @click="handleTagCol" class="iconfont icon-huati"></i>
-          <span v-if="!showTagCol" @click="handleTagCol">{{ selectTagName ? selectTagName : '选择标签' }}</span>
+          <span v-if="!showTagCol" @click="handleTagCol" class="select-tag-btn">{{ selectTagName ? selectTagName : '选择标签' }}</span>
           <span v-if="tagSelected && !showTagCol" @click="deleteTag" class="delete-tag-btn"><i class="iconfont icon-cuowu"></i></span>
           <i v-if="showTagCol" class="iconfont icon-sousuo"></i>
           <input v-if="showTagCol" v-model="tagKeyWord" @input="searchTag" @blur="handleTagBlur" type="text" placeholder="搜索标签">
@@ -109,6 +110,7 @@
   @use '@/assets/sass/config.scss' as *;
   @use '@/assets/sass/mixin.scss' as *;
   .tag-desk {
+    flex-grow: 1;
     .tag-search {
       height: 24px;
       position: relative;
@@ -170,6 +172,7 @@
           height: 228px;
           overflow-x: hidden;
           overflow-y: scroll;
+          overscroll-behavior-y: contain;
           .tag-search-list {
             .tag-search-item {
               padding: 10px 16px;

@@ -1,11 +1,11 @@
 <script setup>
   const props = defineProps(['title','button1Text','button1BackgroundColor','button2Text','button2BackgroundColor','button1Color','button2Color','buttonNum'])
-  const emit = defineEmits(['closeModal','submit'])
+  const emit = defineEmits(['closeModal','submit','cancel'])
   function closeModal() {
     emit('closeModal')
   }
   function handleClickBtn2() {
-
+    emit('cancel')
   }
   function handleClickBtn1() {
     emit('submit')
@@ -35,7 +35,7 @@
   @use '@/assets/sass/config.scss' as *;
   .bs-modal {
     .mask {
-      z-index: 200;
+      z-index: 2000;
       position: fixed;
       top: 0;
       left: 0;
@@ -46,7 +46,7 @@
       opacity: .5;
     }
     .modal-box {
-      z-index: 201;
+      z-index: 2001;
       position: fixed;
       top: 50%;
       left: 50%;

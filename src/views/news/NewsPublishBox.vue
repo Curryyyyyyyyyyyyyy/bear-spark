@@ -12,6 +12,7 @@
   import useNews from '@/store/news.js'
   import { storeToRefs } from 'pinia';
   import { throttle } from '@/hooks/performance';
+  import { regTime } from '@/util/reg';
 
   /* Store */
   const newsStore = useNews()
@@ -31,8 +32,11 @@
   const publish = throttle(async () => {
     if(!pubInputBoxRef.value.children[0].innerHTML) return ElMessage.error('内容不能为空')
     let pubTime = ''
-    if(publishDate.value && publishHour.value && publishHour.value) {
-      pubTime = timeFormat(publishDate.value,publishHour.value,publishHour.value)
+    if(!earlyPublish.value && regTime(publishDate.value,publishHour.value,publishMinute.value)) return ElMessage.error('发布时间不能早于当前')
+    if(showVoteBox.value && regTime(voteEndDate.value,voteEndHour.value,voteEndMinute.value)) return ElMessage.error('投票截止时间不能早于当前')
+    if(showLivesBox.value && regTime(livesEndDate.value,livesEndHour.value,livesEndMinute.value)) return ElMessage.error('预约直播时间不能早于当前')
+    if(publishDate.value && publishHour.value && publishMinute.value) {
+      pubTime = timeFormat(publishDate.value,publishHour.value,publishMinute.value)
     } else {
       pubTime = timeFormat(dayjs().format('YYYY-MM-DD'), dayjs().$H, dayjs().$m)
     }
@@ -94,13 +98,13 @@
   }, 1000);
   async function uploadPicture(event) {
     const pictureFile = event.target.files[0]
-    if(pictureFile.size / 1024 / 1024 > 5) {
-      return ElMessage.error('图片大小不能超过5MB')
+    if(pictureFile.size / 1024 / 1024 > 1) {
+      return ElMessage.error('图片大小不能超过1MB')
     }
     const fd = new FormData()
     fd.append('file',pictureFile)
-    const imgUrl = await uploadApi(fd)
-    pictureList.value.push({src:imgUrl.data,remainTime:1800})
+    const imgUrl = await uploadApi(fd, 0)
+    pictureList.value.push({src:imgUrl,remainTime:1800})
     imgUrlList.value = pictureList.value.map(item => item.src)
     event.target.value = null
   }
@@ -134,13 +138,13 @@
   /* 上传图片选项 */
   async function uploadPictureOption(event,index) {
     const pictureFile = event.target.files[0]
-    if(pictureFile.size / 1024 / 1024 > 5) {
-      return ElMessage.error('图片大小不能超过5MB')
+    if(pictureFile.size / 1024 / 1024 > 1) {
+      return ElMessage.error('图片大小不能超过1MB')
     }
     const fd = new FormData()
     fd.append('file',pictureFile)
-    const optionPhotoUrl = await uploadApi(fd)
-    pictureOptionList.value[index].optionPhotoUrl = optionPhotoUrl.data
+    const optionPhotoUrl = await uploadApi(fd, 0)
+    pictureOptionList.value[index].optionPhotoUrl = optionPhotoUrl
     event.target.value = null
   }
   /* 限选和截止时间 */
@@ -148,183 +152,39 @@
   const voteEndDate = ref('')
   const voteEndHour = ref('')
   const voteEndMinute = ref('')
-  const voteHourOptions = ref(hourOptions)
-  const voteMinuteOptions = ref(minuteOptions)
+  const voteHourOptions = ref([...hourOptions])
+  const voteMinuteOptions = ref([...minuteOptions])
   const disabledVoteAndLiveDate = (time) => {
-    return time.getTime() < Date.now() - 8.46e7
+    return time.getTime() < Date.now() - 8.46e7 || time.getTime() > Date.now() + 90 * 8.64e7
   }
   function handleClickVote() {
     showPubVoteModal.value = true
     const defaultTime = dayjs(new Date().getTime() + 86400000)
     voteEndDate.value = defaultTime.format('YYYY-MM-DD')
+    voteHourOptions.value = [...hourOptions]
+    voteMinuteOptions.value = [...minuteOptions]
   }
   function changeVoteDate() {
     const date = dayjs(voteEndDate.value)
     if(date.$D === new Date().getDate()) {
-      voteHourOptions.value.splice(0, new Date().getHours())
-      if(livesEndHour.value === new Date().getHours()) {
-        voteMinuteOptions.value.splice(0, new Date().getMinutes() + 1)
+      if(new Date().getMinutes() >= 55) {
+        voteHourOptions.value.splice(0, new Date().getHours() + 1)
+      } else {
+        voteHourOptions.value.splice(0, new Date().getHours())
       }
     } else {
-      voteHourOptions.value = [
-      {label:'0时',value:'00'},
-      {label:'1时',value:'01'},
-      {label:'2时',value:'02'},
-      {label:'3时',value:'03'},
-      {label:'4时',value:'04'},
-      {label:'5时',value:'05'},
-      {label:'6时',value:'06'},
-      {label:'7时',value:'07'},
-      {label:'8时',value:'08'},
-      {label:'9时',value:'09'},
-      {label:'10时',value:'10'},
-      {label:'11时',value:'11'},
-      {label:'12时',value:'12'},
-      {label:'13时',value:'13'},
-      {label:'14时',value:'14'},
-      {label:'15时',value:'15'},
-      {label:'16时',value:'16'},
-      {label:'17时',value:'17'},
-      {label:'18时',value:'18'},
-      {label:'19时',value:'19'},
-      {label:'20时',value:'20'},
-      {label:'21时',value:'21'},
-      {label:'22时',value:'22'},
-      {label:'23时',value:'23'},
-      ]
-      voteMinuteOptions.value = [
-        {"label":"0分","value":'00'},
-        {"label":"1分","value":'01'},
-        {"label":"2分","value":'02'},
-        {"label":"3分","value":'03'},
-        {"label":"4分","value":'04'},
-        {"label":"5分","value":'05'},
-        {"label":"6分","value":'06'},
-        {"label":"7分","value":'07'},
-        {"label":"8分","value":'08'},
-        {"label":"9分","value":'09'},
-        {"label":"10分","value":'10'},
-        {"label":"11分","value":'11'},
-        {"label":"12分","value":'12'},
-        {"label":"13分","value":'13'},
-        {"label":"14分","value":'14'},
-        {"label":"15分","value":'15'},
-        {"label":"16分","value":'16'},
-        {"label":"17分","value":'17'},
-        {"label":"18分","value":'18'},
-        {"label":"19分","value":'19'},
-        {"label":"20分","value":'20'},
-        {"label":"21分","value":'21'},
-        {"label":"22分","value":'22'},
-        {"label":"23分","value":'23'},
-        {"label":"24分","value":'24'},
-        {"label":"25分","value":'25'},
-        {"label":"26分","value":'26'},
-        {"label":"27分","value":'27'},
-        {"label":"28分","value":'28'},
-        {"label":"29分","value":'29'},
-        {"label":"30分","value":'30'},
-        {"label":"31分","value":'31'},
-        {"label":"32分","value":'32'},
-        {"label":"33分","value":'33'},
-        {"label":"34分","value":'34'},
-        {"label":"35分","value":'35'},
-        {"label":"36分","value":'36'},
-        {"label":"37分","value":'37'},
-        {"label":"38分","value":'38'},
-        {"label":"39分","value":'39'},
-        {"label":"40分","value":'40'},
-        {"label":"41分","value":'41'},
-        {"label":"42分","value":'42'},
-        {"label":"43分","value":'43'},
-        {"label":"44分","value":'44'},
-        {"label":"45分","value":'45'},
-        {"label":"46分","value":'46'},
-        {"label":"47分","value":'47'},
-        {"label":"48分","value":'48'},
-        {"label":"49分","value":'49'},
-        {"label":"50分","value":'50'},
-        {"label":"51分","value":'51'},
-        {"label":"52分","value":'52'},
-        {"label":"53分","value":'53'},
-        {"label":"54分","value":'54'},
-        {"label":"55分","value":'55'},
-        {"label":"56分","value":'56'},
-        {"label":"57分","value":'57'},
-        {"label":"58分","value":'58'},
-        {"label":"59分","value":'59'}
-      ]
+      voteHourOptions.value = [...hourOptions]
+      voteMinuteOptions.value = [...minuteOptions]
     }
     voteEndHour.value = ''
     voteEndMinute.value = ''
   }
   function changeVoteHour() {
     const date = dayjs(voteEndDate.value)
-    if(date.$D === new Date().getDate() && voteEndHour.value === new Date().getHours()) {
+    if(date.$D === new Date().getDate() && +voteEndHour.value === new Date().getHours()) {
       voteMinuteOptions.value.splice(0, new Date().getMinutes() + 5)
     } else {
-      voteMinuteOptions.value = [
-        {"label":"0分","value":'00'},
-        {"label":"1分","value":'01'},
-        {"label":"2分","value":'02'},
-        {"label":"3分","value":'03'},
-        {"label":"4分","value":'04'},
-        {"label":"5分","value":'05'},
-        {"label":"6分","value":'06'},
-        {"label":"7分","value":'07'},
-        {"label":"8分","value":'08'},
-        {"label":"9分","value":'09'},
-        {"label":"10分","value":'10'},
-        {"label":"11分","value":'11'},
-        {"label":"12分","value":'12'},
-        {"label":"13分","value":'13'},
-        {"label":"14分","value":'14'},
-        {"label":"15分","value":'15'},
-        {"label":"16分","value":'16'},
-        {"label":"17分","value":'17'},
-        {"label":"18分","value":'18'},
-        {"label":"19分","value":'19'},
-        {"label":"20分","value":'20'},
-        {"label":"21分","value":'21'},
-        {"label":"22分","value":'22'},
-        {"label":"23分","value":'23'},
-        {"label":"24分","value":'24'},
-        {"label":"25分","value":'25'},
-        {"label":"26分","value":'26'},
-        {"label":"27分","value":'27'},
-        {"label":"28分","value":'28'},
-        {"label":"29分","value":'29'},
-        {"label":"30分","value":'30'},
-        {"label":"31分","value":'31'},
-        {"label":"32分","value":'32'},
-        {"label":"33分","value":'33'},
-        {"label":"34分","value":'34'},
-        {"label":"35分","value":'35'},
-        {"label":"36分","value":'36'},
-        {"label":"37分","value":'37'},
-        {"label":"38分","value":'38'},
-        {"label":"39分","value":'39'},
-        {"label":"40分","value":'40'},
-        {"label":"41分","value":'41'},
-        {"label":"42分","value":'42'},
-        {"label":"43分","value":'43'},
-        {"label":"44分","value":'44'},
-        {"label":"45分","value":'45'},
-        {"label":"46分","value":'46'},
-        {"label":"47分","value":'47'},
-        {"label":"48分","value":'48'},
-        {"label":"49分","value":'49'},
-        {"label":"50分","value":'50'},
-        {"label":"51分","value":'51'},
-        {"label":"52分","value":'52'},
-        {"label":"53分","value":'53'},
-        {"label":"54分","value":'54'},
-        {"label":"55分","value":'55'},
-        {"label":"56分","value":'56'},
-        {"label":"57分","value":'57'},
-        {"label":"58分","value":'58'},
-        {"label":"59分","value":'59'}
-      ]
+      voteMinuteOptions.value = [...minuteOptions]
     }
     voteEndMinute.value = ''
   }
@@ -402,181 +262,37 @@
   const livesEndDate = ref('') // 预约日期
   const livesEndHour = ref('') // 预约小时
   const livesEndMinute = ref('') // 预约分钟
-  const livesHourOptions = ref(hourOptions)
-  const livesMinuteOptions = ref(minuteOptions)
+  const livesHourOptions = ref([...hourOptions])
+  const livesMinuteOptions = ref([...minuteOptions])
   const livesTitle = ref('')
   function handleClickLive() {
     showPubBookLivesModal.value = true
     const defaultTime = dayjs(new Date().getTime() + 86400000)
     livesEndDate.value = defaultTime.format('YYYY-MM-DD')
+    livesHourOptions.value = [...hourOptions]
+    livesMinuteOptions.value = [...minuteOptions]
   }
   function changeLivesDate() {
     const date = dayjs(livesEndDate.value)
     if(date.$D === new Date().getDate()) {
-      livesHourOptions.value.splice(0, new Date().getHours())
-      if(livesEndHour.value === new Date().getHours()) {
-        livesMinuteOptions.value.splice(0, new Date().getMinutes() + 1)
+      if(new Date().getMinutes() >= 55) {
+        livesHourOptions.value.splice(0, new Date().getHours() + 1)
+      } else {
+        livesHourOptions.value.splice(0, new Date().getHours())
       }
     } else {
-      livesHourOptions.value = [
-        {label:'0时',value:'00'},
-        {label:'1时',value:'01'},
-        {label:'2时',value:'02'},
-        {label:'3时',value:'03'},
-        {label:'4时',value:'04'},
-        {label:'5时',value:'05'},
-        {label:'6时',value:'06'},
-        {label:'7时',value:'07'},
-        {label:'8时',value:'08'},
-        {label:'9时',value:'09'},
-        {label:'10时',value:'10'},
-        {label:'11时',value:'11'},
-        {label:'12时',value:'12'},
-        {label:'13时',value:'13'},
-        {label:'14时',value:'14'},
-        {label:'15时',value:'15'},
-        {label:'16时',value:'16'},
-        {label:'17时',value:'17'},
-        {label:'18时',value:'18'},
-        {label:'19时',value:'19'},
-        {label:'20时',value:'20'},
-        {label:'21时',value:'21'},
-        {label:'22时',value:'22'},
-        {label:'23时',value:'23'},
-      ]
-      livesMinuteOptions.value = [
-        {"label":"0分","value":'00'},
-        {"label":"1分","value":'01'},
-        {"label":"2分","value":'02'},
-        {"label":"3分","value":'03'},
-        {"label":"4分","value":'04'},
-        {"label":"5分","value":'05'},
-        {"label":"6分","value":'06'},
-        {"label":"7分","value":'07'},
-        {"label":"8分","value":'08'},
-        {"label":"9分","value":'09'},
-        {"label":"10分","value":'10'},
-        {"label":"11分","value":'11'},
-        {"label":"12分","value":'12'},
-        {"label":"13分","value":'13'},
-        {"label":"14分","value":'14'},
-        {"label":"15分","value":'15'},
-        {"label":"16分","value":'16'},
-        {"label":"17分","value":'17'},
-        {"label":"18分","value":'18'},
-        {"label":"19分","value":'19'},
-        {"label":"20分","value":'20'},
-        {"label":"21分","value":'21'},
-        {"label":"22分","value":'22'},
-        {"label":"23分","value":'23'},
-        {"label":"24分","value":'24'},
-        {"label":"25分","value":'25'},
-        {"label":"26分","value":'26'},
-        {"label":"27分","value":'27'},
-        {"label":"28分","value":'28'},
-        {"label":"29分","value":'29'},
-        {"label":"30分","value":'30'},
-        {"label":"31分","value":'31'},
-        {"label":"32分","value":'32'},
-        {"label":"33分","value":'33'},
-        {"label":"34分","value":'34'},
-        {"label":"35分","value":'35'},
-        {"label":"36分","value":'36'},
-        {"label":"37分","value":'37'},
-        {"label":"38分","value":'38'},
-        {"label":"39分","value":'39'},
-        {"label":"40分","value":'40'},
-        {"label":"41分","value":'41'},
-        {"label":"42分","value":'42'},
-        {"label":"43分","value":'43'},
-        {"label":"44分","value":'44'},
-        {"label":"45分","value":'45'},
-        {"label":"46分","value":'46'},
-        {"label":"47分","value":'47'},
-        {"label":"48分","value":'48'},
-        {"label":"49分","value":'49'},
-        {"label":"50分","value":'50'},
-        {"label":"51分","value":'51'},
-        {"label":"52分","value":'52'},
-        {"label":"53分","value":'53'},
-        {"label":"54分","value":'54'},
-        {"label":"55分","value":'55'},
-        {"label":"56分","value":'56'},
-        {"label":"57分","value":'57'},
-        {"label":"58分","value":'58'},
-        {"label":"59分","value":'59'}
-      ]
+      livesHourOptions.value = [...hourOptions]
+      livesMinuteOptions.value = [...minuteOptions]
     }
     livesEndHour.value = ''
     livesEndMinute.value = ''
   }
   function changeLivesHour() {
     const date = dayjs(livesEndDate.value)
-    if(date.$D === new Date().getDate() && livesEndHour.value === new Date().getHours()) {
+    if(date.$D === new Date().getDate() && +livesEndHour.value === new Date().getHours()) {
       livesMinuteOptions.value.splice(0, new Date().getMinutes() + 5)
     } else {
-      livesMinuteOptions.value = [
-        {"label":"0分","value":'00'},
-        {"label":"1分","value":'01'},
-        {"label":"2分","value":'02'},
-        {"label":"3分","value":'03'},
-        {"label":"4分","value":'04'},
-        {"label":"5分","value":'05'},
-        {"label":"6分","value":'06'},
-        {"label":"7分","value":'07'},
-        {"label":"8分","value":'08'},
-        {"label":"9分","value":'09'},
-        {"label":"10分","value":'10'},
-        {"label":"11分","value":'11'},
-        {"label":"12分","value":'12'},
-        {"label":"13分","value":'13'},
-        {"label":"14分","value":'14'},
-        {"label":"15分","value":'15'},
-        {"label":"16分","value":'16'},
-        {"label":"17分","value":'17'},
-        {"label":"18分","value":'18'},
-        {"label":"19分","value":'19'},
-        {"label":"20分","value":'20'},
-        {"label":"21分","value":'21'},
-        {"label":"22分","value":'22'},
-        {"label":"23分","value":'23'},
-        {"label":"24分","value":'24'},
-        {"label":"25分","value":'25'},
-        {"label":"26分","value":'26'},
-        {"label":"27分","value":'27'},
-        {"label":"28分","value":'28'},
-        {"label":"29分","value":'29'},
-        {"label":"30分","value":'30'},
-        {"label":"31分","value":'31'},
-        {"label":"32分","value":'32'},
-        {"label":"33分","value":'33'},
-        {"label":"34分","value":'34'},
-        {"label":"35分","value":'35'},
-        {"label":"36分","value":'36'},
-        {"label":"37分","value":'37'},
-        {"label":"38分","value":'38'},
-        {"label":"39分","value":'39'},
-        {"label":"40分","value":'40'},
-        {"label":"41分","value":'41'},
-        {"label":"42分","value":'42'},
-        {"label":"43分","value":'43'},
-        {"label":"44分","value":'44'},
-        {"label":"45分","value":'45'},
-        {"label":"46分","value":'46'},
-        {"label":"47分","value":'47'},
-        {"label":"48分","value":'48'},
-        {"label":"49分","value":'49'},
-        {"label":"50分","value":'50'},
-        {"label":"51分","value":'51'},
-        {"label":"52分","value":'52'},
-        {"label":"53分","value":'53'},
-        {"label":"54分","value":'54'},
-        {"label":"55分","value":'55'},
-        {"label":"56分","value":'56'},
-        {"label":"57分","value":'57'},
-        {"label":"58分","value":'58'},
-        {"label":"59分","value":'59'}
-      ]
+      livesMinuteOptions.value = [...minuteOptions]
     }
     livesEndMinute.value = ''
   }
@@ -634,19 +350,21 @@
   const publishDate = ref()
   const publishHour = ref()
   const publishMinute = ref()
-  const pubHourOptions = ref(hourOptions)
-  const pubMinuteOptions = ref(minuteOptions)
+  const pubHourOptions = ref([...hourOptions])
+  const pubMinuteOptions = ref([...minuteOptions])
   const earlyPublish = ref(1) // 1:不提前发布 0：提前发布
   /* 禁用某些日期 */
   const disabledPubDate = (time) => {
-    if(earlyPublish.value) return time.getTime() < Date.now() - 8.64e7
-    else return time.getTime() > Date.now() - 8.64e7
+    if(!earlyPublish.value) return time.getTime() > Date.now() - 8.64e7
+    else return time.getTime() < Date.now() - 8.64e7 || time.getTime() > Date.now() + 90 * 8.64e7
   }
   function handleClickPubTime() {
     pubTimeBox.value = true
     settingCascader1.value = false
     const defaultTime = dayjs(new Date().getTime() + 86400000)
     publishDate.value = defaultTime.format('YYYY-MM-DD')
+    pubHourOptions.value = [...hourOptions]
+    pubMinuteOptions.value = [...minuteOptions]
     /* 禁止发布投票和预约直播 */
     bookLiveInfo.value = null
     showLivesBox.value = false
@@ -656,170 +374,24 @@
   function changePubDate() {
     const date = dayjs(publishDate.value)
     if(date.$D === new Date().getDate()) {
-      pubHourOptions.value.splice(0, new Date().getHours())
-      if(publishHour.value === new Date().getHours()) {
-        pubMinuteOptions.value.splice(0, new Date().getMinutes() + 1)
+      if(new Date().getMinutes() >= 55) {
+        pubHourOptions.value.splice(0, new Date().getHours() + 1)
+      } else {
+        pubHourOptions.value.splice(0, new Date().getHours())
       }
     } else {
-      pubHourOptions.value = [
-        {label:'0时',value:'00'},
-        {label:'1时',value:'01'},
-        {label:'2时',value:'02'},
-        {label:'3时',value:'03'},
-        {label:'4时',value:'04'},
-        {label:'5时',value:'05'},
-        {label:'6时',value:'06'},
-        {label:'7时',value:'07'},
-        {label:'8时',value:'08'},
-        {label:'9时',value:'09'},
-        {label:'10时',value:'10'},
-        {label:'11时',value:'11'},
-        {label:'12时',value:'12'},
-        {label:'13时',value:'13'},
-        {label:'14时',value:'14'},
-        {label:'15时',value:'15'},
-        {label:'16时',value:'16'},
-        {label:'17时',value:'17'},
-        {label:'18时',value:'18'},
-        {label:'19时',value:'19'},
-        {label:'20时',value:'20'},
-        {label:'21时',value:'21'},
-        {label:'22时',value:'22'},
-        {label:'23时',value:'23'},
-      ]
-      pubMinuteOptions.value = [
-        {"label":"0分","value":'00'},
-        {"label":"1分","value":'01'},
-        {"label":"2分","value":'02'},
-        {"label":"3分","value":'03'},
-        {"label":"4分","value":'04'},
-        {"label":"5分","value":'05'},
-        {"label":"6分","value":'06'},
-        {"label":"7分","value":'07'},
-        {"label":"8分","value":'08'},
-        {"label":"9分","value":'09'},
-        {"label":"10分","value":'10'},
-        {"label":"11分","value":'11'},
-        {"label":"12分","value":'12'},
-        {"label":"13分","value":'13'},
-        {"label":"14分","value":'14'},
-        {"label":"15分","value":'15'},
-        {"label":"16分","value":'16'},
-        {"label":"17分","value":'17'},
-        {"label":"18分","value":'18'},
-        {"label":"19分","value":'19'},
-        {"label":"20分","value":'20'},
-        {"label":"21分","value":'21'},
-        {"label":"22分","value":'22'},
-        {"label":"23分","value":'23'},
-        {"label":"24分","value":'24'},
-        {"label":"25分","value":'25'},
-        {"label":"26分","value":'26'},
-        {"label":"27分","value":'27'},
-        {"label":"28分","value":'28'},
-        {"label":"29分","value":'29'},
-        {"label":"30分","value":'30'},
-        {"label":"31分","value":'31'},
-        {"label":"32分","value":'32'},
-        {"label":"33分","value":'33'},
-        {"label":"34分","value":'34'},
-        {"label":"35分","value":'35'},
-        {"label":"36分","value":'36'},
-        {"label":"37分","value":'37'},
-        {"label":"38分","value":'38'},
-        {"label":"39分","value":'39'},
-        {"label":"40分","value":'40'},
-        {"label":"41分","value":'41'},
-        {"label":"42分","value":'42'},
-        {"label":"43分","value":'43'},
-        {"label":"44分","value":'44'},
-        {"label":"45分","value":'45'},
-        {"label":"46分","value":'46'},
-        {"label":"47分","value":'47'},
-        {"label":"48分","value":'48'},
-        {"label":"49分","value":'49'},
-        {"label":"50分","value":'50'},
-        {"label":"51分","value":'51'},
-        {"label":"52分","value":'52'},
-        {"label":"53分","value":'53'},
-        {"label":"54分","value":'54'},
-        {"label":"55分","value":'55'},
-        {"label":"56分","value":'56'},
-        {"label":"57分","value":'57'},
-        {"label":"58分","value":'58'},
-        {"label":"59分","value":'59'}
-      ]
+      pubHourOptions.value = [...hourOptions]
+      pubMinuteOptions.value = [...minuteOptions]
     }
     publishHour.value = ''
     publishMinute.value = ''
   }
   function changePubHour() {
     const date = dayjs(publishDate.value)
-    if(date.$D === new Date().getDate() && publishHour.value === new Date().getHours()) {
+    if(date.$D === new Date().getDate() && +publishHour.value === new Date().getHours()) {
       pubMinuteOptions.value.splice(0, new Date().getMinutes() + 5)
     } else {
-      pubMinuteOptions.value = [
-        {"label":"0分","value":'00'},
-        {"label":"1分","value":'01'},
-        {"label":"2分","value":'02'},
-        {"label":"3分","value":'03'},
-        {"label":"4分","value":'04'},
-        {"label":"5分","value":'05'},
-        {"label":"6分","value":'06'},
-        {"label":"7分","value":'07'},
-        {"label":"8分","value":'08'},
-        {"label":"9分","value":'09'},
-        {"label":"10分","value":'10'},
-        {"label":"11分","value":'11'},
-        {"label":"12分","value":'12'},
-        {"label":"13分","value":'13'},
-        {"label":"14分","value":'14'},
-        {"label":"15分","value":'15'},
-        {"label":"16分","value":'16'},
-        {"label":"17分","value":'17'},
-        {"label":"18分","value":'18'},
-        {"label":"19分","value":'19'},
-        {"label":"20分","value":'20'},
-        {"label":"21分","value":'21'},
-        {"label":"22分","value":'22'},
-        {"label":"23分","value":'23'},
-        {"label":"24分","value":'24'},
-        {"label":"25分","value":'25'},
-        {"label":"26分","value":'26'},
-        {"label":"27分","value":'27'},
-        {"label":"28分","value":'28'},
-        {"label":"29分","value":'29'},
-        {"label":"30分","value":'30'},
-        {"label":"31分","value":'31'},
-        {"label":"32分","value":'32'},
-        {"label":"33分","value":'33'},
-        {"label":"34分","value":'34'},
-        {"label":"35分","value":'35'},
-        {"label":"36分","value":'36'},
-        {"label":"37分","value":'37'},
-        {"label":"38分","value":'38'},
-        {"label":"39分","value":'39'},
-        {"label":"40分","value":'40'},
-        {"label":"41分","value":'41'},
-        {"label":"42分","value":'42'},
-        {"label":"43分","value":'43'},
-        {"label":"44分","value":'44'},
-        {"label":"45分","value":'45'},
-        {"label":"46分","value":'46'},
-        {"label":"47分","value":'47'},
-        {"label":"48分","value":'48'},
-        {"label":"49分","value":'49'},
-        {"label":"50分","value":'50'},
-        {"label":"51分","value":'51'},
-        {"label":"52分","value":'52'},
-        {"label":"53分","value":'53'},
-        {"label":"54分","value":'54'},
-        {"label":"55分","value":'55'},
-        {"label":"56分","value":'56'},
-        {"label":"57分","value":'57'},
-        {"label":"58分","value":'58'},
-        {"label":"59分","value":'59'}
-      ]
+      pubMinuteOptions.value = [...minuteOptions]
     }
     publishMinute.value = ''
   }
@@ -875,7 +447,7 @@
         <div class="pictrue-upload-box">
           <i class="iconfont icon-jiahao"></i>
         </div>
-        <input @change="uploadPicture" accept="image/*" maxSize id="upload-pic" type="file">
+        <input @change="uploadPicture" accept="image/*" id="upload-pic" type="file">
       </label>
     </div>
     <div v-if="showVoteBox" class="vote-box">
