@@ -216,7 +216,10 @@
               <i class="iconfont icon-cuowu"></i>
             </span>
           </div>
-          <div class="add-btn" @mouseenter="handleShowCategorys" @mouseleave="mouseState = false"><i class="iconfont icon-jiahao"></i>添加分类</div>
+          <div class="add-btn" @mouseenter="handleShowCategorys" @mouseleave="mouseState = false">
+            <i class="iconfont icon-jiahao"></i>
+            添加分类
+          </div>
           <div v-if="showCategoryBox" class="categorys-box">
             <div class="categorys-box-header">
               <span class="limit">最多选择3个分类专栏</span>
@@ -236,7 +239,7 @@
                   </div>
                   <span class="category-name">{{ item.categoryName }}</span>
                 </div>
-                <div @click="showAddCategoryBox = true" class="category-item create-category">
+                <div v-if="categoryList.length < 100" @click="showAddCategoryBox = true" class="category-item create-category">
                   <i class="iconfont icon-jiahao"></i>
                 </div>
               </div>

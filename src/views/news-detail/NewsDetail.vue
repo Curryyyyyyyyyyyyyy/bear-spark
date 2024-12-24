@@ -10,21 +10,33 @@
   import { useRoute, useRouter } from 'vue-router';
   import {getNewsDetailApi,deleteNewsApi,getVoteDetailApi,likeNewsApi} from '@/api/news.js'
   import {revokeBookLiveApi, modBookLiveStateApi} from '@/api/bookLive'
+  import {getArticleDetailApi,deleteArticleApi,collectArticleApi,giveMeritApi} from '@/api/article'
   import { onMounted, ref } from 'vue';
   import useUser from '@/store/user.js'
   import { ElMessage, ElMessageBox } from 'element-plus';
 
   /* Store */
-  const {username} = useUser()
+  const {username, userId} = useUser()
   /* router */
   const router = useRouter()
   /* route */
   const route = useRoute()
   /* onMounted */
+  const happeningId = ref('')
+  const articleId = ref('')
   const newsInfo = ref({})
+  const articleInfo = ref({})
   onMounted(async () => {
+    happeningId.value = route.query.happeningId
+    articleId.value = route.query.articleId
+    if(articleId.value) {
+      articleInfo.value = await getArticleDetailApi({
+        articleId:articleId.value
+      })
+      happeningId.value = articleInfo.value.happeningId
+    }
     newsInfo.value = await getNewsDetailApi({
-      happeningId:route.params.id
+      happeningId:happeningId.value
     })
   })
   //#region 投票
@@ -82,7 +94,7 @@
   //#endregion
   //#region setting
   const showCascader = ref(false)
-  function deleteNews(id) {
+  function deleteNews() {
     ElMessageBox.confirm(
       '动态删除后将无法恢复，请谨慎操作',
       '确认删除动态吗？',
@@ -94,16 +106,35 @@
       }
     ).then(async ()=>{
       await deleteNewsApi({
-        happeningId:id
+        happeningId:happeningId
       })
       ElMessage.info('删除成功')
+      router.replace('/news_index')
+    })
+  }
+  function deleteArticle() {
+    ElMessageBox.confirm(
+      '文章删除后将无法恢复，请谨慎操作',
+      '确认删除文章吗？',
+      {
+        confirmButtonText:'确认删除',
+        confirmButtonClass:'confirmButtonClass',
+        cancelButtonText:'取消',
+        type:'error'
+      }
+    ).then(async ()=>{
+      await deleteArticleApi({
+        articleId:articleId.value
+      })
+      ElMessage.info('删除成功')
+      router.replace('/news_index')
     })
   }
   //#endregion
   //#region 点赞
   async function likeNews(item) {
     await likeNewsApi({
-      happeningId:item.happeningId,
+      happeningId:happeningId.value,
       liked:item.liked ? 0 : 1
     })
     if(item.liked) {
@@ -115,6 +146,33 @@
       item.likeNumInfo = handleNumInfo(item.likeNumInfo, 1)
       ElMessage.success('点赞成功')
     }
+  }
+  //#endregion
+  //#region 收藏
+  async function collectArticle() {
+    await collectArticleApi({
+      articleId:articleId.value,
+      collected:articleInfo.value.collected ? 0 :1
+    })
+    if(articleInfo.value.collected) {
+      articleInfo.value.collected = 0
+      articleInfo.value.collectNumInfo = handleNumInfo(articleInfo.value.collectNumInfo, -1)
+      ElMessage.info('取消收藏')
+    } else {
+      articleInfo.value.collected = 1
+      articleInfo.value.collectNumInfo = handleNumInfo(articleInfo.value.collectNumInfo, 1)
+      ElMessage.success('收藏成功')
+    }
+  }
+  //#endregion
+  //#region 功德
+  async function giveMerit() {
+    if(articleInfo.value.merited) return ElMessage.info('不能重复赠送哦')
+    await giveMeritApi({
+      articleId:articleId.value
+    })
+    articleInfo.value.meritNumInfo = handleNumInfo(articleInfo.value.meritNumInfo, 1)
+    ElMessage.success('赠送成功')
   }
   //#endregion
   //#region 编辑
@@ -150,15 +208,54 @@
   <div class="news-detail">
     <div class="bg"></div>
     <div class="news-detail-card">
-      <div class="news-item">
+      <div v-if="articleId" class="article-item">
+        <div class="article-title">
+          <span class="title">{{ articleInfo.title }}</span>
+        </div>
+        <div class="author-module">
+          <div class="author-info">
+            <a :href="`/#/home/${articleInfo.publisherInfo?.userId}`" class="avatar-box">
+              <img :src="articleInfo.publisherInfo?.avatarUrl">
+            </a>
+            <div class="author-center">
+              <a :href="`/#/home/${articleInfo.publisherInfo?.userId}`" class="username">{{ articleInfo.publisherInfo?.username }}</a>
+              <p class="pubtime">{{ articleInfo.pubTimeInfo }}</p>
+            </div>
+            <div @mouseenter="showCascader = true" @mouseleave="showCascader = false" class="setting-box">
+              <div class="setting-btn">
+                <i class="iconfont icon-gengduo1"></i>
+              </div>
+              <div v-if="showCascader" class="setting-warp">
+                <div class="settings">
+                  <div v-if="userId === articleId.publisherInfo?.userId" @click="deleteArticle" class="setting-item setting-delete">删除</div>
+                  <div v-else class="setting-item setting-report">举报</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="article-tag">
+          <div class="tag">
+            <i class="iconfont icon-huati"></i>
+            <span class="tag-name">{{ articleInfo.tag }}</span>
+          </div>
+        </div>
+        <div class="article-content" v-html="articleInfo.content"></div>
+        <div class="article-category">
+          <ul class="category-list">
+            <li v-for="item in articleInfo.categoryInfoList" :key="item.categoryId" class="category-item">{{ item.categoryName }}</li>
+          </ul>
+        </div>
+      </div>
+      <div v-else class="news-item">
         <div v-if="newsInfo.happeningInfo?.content" class="item-warpper">
           <div class="news-item-avatar">
-            <a :href="`/#/mainInterface/${newsInfo.publisherInfo?.userId}`" target="_blank">
+            <a :href="`/#/home/${newsInfo.publisherInfo?.userId}`" target="_blank">
               <img :src="newsInfo.publisherInfo.avatarUrl" alt="头像">
             </a>
           </div>
           <div class="news-item-header">
-            <a class="news-item-author" :href="`/#/mainInterface/${newsInfo.publisherInfo?.userId}`" target="_blank">
+            <a class="news-item-author" :href="`/#/home/${newsInfo.publisherInfo?.userId}`" target="_blank">
               {{ newsInfo.publisherInfo?.username }}
             </a>
             <span v-if="!newsInfo.happeningInfo.advanceRelease" class="news-item-early-pub">提前发布</span>
@@ -184,7 +281,7 @@
                 </div>
                 <div v-else class="cascader-list">
                   <div @click="showModifyBox = true" class="cascader-item">编辑</div>
-                  <div @click.stop="deleteNews(newsInfo.id)" class="cascader-item">删除</div>
+                  <div @click.stop="deleteNews" class="cascader-item">删除</div>
                 </div>
               </div>
             </div>
@@ -194,9 +291,11 @@
               <i class="iconfont icon-huati"></i>
               <span>{{ newsInfo.happeningInfo.tag }}</span>
             </div>
-            <div class="news-title">{{ newsInfo.happeningInfo.title }}</div>
-            <div class="news-text-content">
-              <bs-html-text :content="newsInfo.happeningInfo.content" :atUserInfoList="newsInfo.happeningInfo.atUserInfoList"></bs-html-text>
+            <div class="news-content">
+              <div class="news-title">{{ newsInfo.happeningInfo.title }}</div>
+              <div class="news-text-content">
+                <bs-html-text :content="newsInfo.happeningInfo.content" :atUserInfoList="newsInfo.happeningInfo.atUserInfoList"></bs-html-text>
+              </div>
             </div>
             <div v-if="newsInfo.happeningInfo.imgUrlList.length" class="news-album">
               <div class="news-album-preview grid">
@@ -260,13 +359,13 @@
             </div>
           </div>
           <div v-if="newsInfo.happeningInfo.quotedHappening" class="news-item-body" :class="{'news-reference':true}">
-            <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.content" class="quote-wrapper">
+            <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.content || newsInfo.happeningInfo.quotedHappening.happeningInfo.articleInfo" class="quote-wrapper">
             <div class="refer-author-box">
               <div class="author-info">
-                <a :href="`/#/mainInterface/${newsInfo.happeningInfo.quotedHappening.publisherInfo.userId}`" target="_blank">
+                <a :href="`/#/home/${newsInfo.happeningInfo.quotedHappening.publisherInfo.userId}`" target="_blank">
                   <img :src="newsInfo.happeningInfo.quotedHappening.publisherInfo.avatarUrl" alt="头像">
                 </a>
-                <a :href="`/#/mainInterface/${newsInfo.happeningInfo.quotedHappening.publisherInfo.userId}`" target="_blank">
+                <a :href="`/#/home/${newsInfo.happeningInfo.quotedHappening.publisherInfo.userId}`" target="_blank">
                   <span class="author-username">{{ newsInfo.happeningInfo.quotedHappening.publisherInfo.username }}</span>
                 </a>
                 <span class="refer-text">投稿了文章</span>
@@ -276,10 +375,33 @@
               <i class="iconfont icon-huati"></i>
               <span>{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.tag }}</span>
             </div>
-            <a :href="`/#/news_detail/quote/${newsInfo.happeningInfo.quotedHappening.happeningInfo.happeningId}`" target="_blank" class="news-title">{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.title }}</a>
-            <a :href="`/#/news_detail/quote/${newsInfo.happeningInfo.quotedHappening.happeningInfo.happeningId}`" target="_blank" class="news-text-content">
-              <bs-html-text :content="newsInfo.happeningInfo.quotedHappening.happeningInfo.content" :atUserInfoList="newsInfo.happeningInfo.quotedHappening.happeningInfo.atUserInfoList"></bs-html-text>
-            </a>
+            <div class="news-content">
+              <div @click="router.push({
+                name:'news_detail_quote',
+                query:{
+                  happeningId:newsInfo.happeningInfo.quotedHappening.happeningInfo.happeningId,
+                }
+              })" class="news-title">{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.title }}</div>
+              <div @click="router.push({
+                name:'news_detail_quote',
+                query:{
+                  happeningId:newsInfo.happeningInfo.quotedHappening.happeningInfo.happeningId,
+                }
+              })" class="news-text-content">
+                <bs-html-text :content="newsInfo.happeningInfo.quotedHappening.happeningInfo.content" :atUserInfoList="newsInfo.happeningInfo.quotedHappening.happeningInfo.atUserInfoList"></bs-html-text>
+              </div>
+            </div>
+            <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.articleInfo" class="news-article">
+              <router-link :to="{
+                name:'news_detail_quote',
+                query:{
+                  articleId:newsInfo.happeningInfo.quotedHappening.happeningInfo.articleInfo.articleId
+                }
+              }">
+                <div class="article-title">{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.articleInfo.title }}</div>
+                <div class="article-summary">{{ newsInfo.happeningInfo.quotedHappening.happeningInfo.articleInfo.summary }}</div>   
+              </router-link>
+            </div>
             <div v-if="newsInfo.happeningInfo.quotedHappening.happeningInfo.imgUrlList.length" class="news-album">
               <div class="news-album-preview grid">
                 <div v-for="(item,index) in newsInfo.happeningInfo.quotedHappening.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
@@ -355,6 +477,18 @@
             {{ newsInfo.happeningInfo?.likeNumInfo }}
           </div>
         </div>
+        <div @click="giveMerit" class="side-toolbar-item merit-info" :class="{'active':articleInfo.merited}">
+          <i class="iconfont icon-muyu"></i>
+          <div class="side-toolbar-item-text">
+            {{ articleInfo.meritNumInfo }}
+          </div>
+        </div>
+        <div @click="collectArticle" class="side-toolbar-item collect-info" :class="{'active':articleInfo.collected}">
+          <i class="iconfont icon-shoucang"></i>
+          <div class="side-toolbar-item-text">
+            {{ articleInfo.collectNumInfo }}
+          </div>
+        </div>
         <div @click="showForwardBox = true" class="side-toolbar-item forward-info">
           <i class="iconfont icon-zhuanfa"></i>
           <div class="side-toolbar-item-text">
@@ -377,9 +511,9 @@
         </div>
       </div>
       <div class="item-tabs-content">
-        <comment-list v-if="tab === 'comment'" :commentAble="newsInfo.happeningInfo?.commentAble" :happeningId="newsInfo.happeningInfo?.happeningId"></comment-list>
-        <like-list v-if="tab === 'like'" :happeningId="newsInfo.happeningInfo?.happeningId"></like-list>
-        <forward-list v-if="tab === 'forward'" :happeningId="newsInfo.happeningInfo?.happeningId"></forward-list>
+        <comment-list v-if="tab === 'comment'" :commentAble="newsInfo.happeningInfo?.commentAble" :happeningId="happeningId"></comment-list>
+        <like-list v-if="tab === 'like'" :happeningId="happeningId"></like-list>
+        <forward-list v-if="tab === 'forward'" :happeningId="happeningId"></forward-list>
       </div>
     </div>
   </div>
@@ -409,7 +543,9 @@
   @use '@/assets/sass/mixin.scss' as *;
   .header {
     z-index: 100;
-    position: sticky;
+    position: fixed;
+    left: 0;
+    right: 0;
     top: 0px;
     height: 64px;
     padding-bottom: 10px;
@@ -426,7 +562,7 @@
   }
   .news-detail {
     margin: 0 auto;
-    margin-top: 8px;
+    margin-top: 74px;
     .bg {
       position: fixed;
       bottom: 0;
@@ -442,6 +578,116 @@
       margin: 0 auto;
       border-radius: 6px;
       background-color: $colorG;
+      .article-item {
+        padding: 0 60px;
+        .article-title {
+          padding-top: 24px;
+          font-size: $fontD;
+        }
+        .author-module {
+          padding: 20px 0;
+          .author-info {
+            position: relative;
+            @include flex(left);
+            .avatar-box {
+              margin-right: 14px;
+              cursor: pointer;
+              img {
+                height: 48px;
+                width: 48px;
+                border-radius: 24px;
+              }
+            }
+            .author-center {
+              @include flex(space-between, start);
+              flex-direction: column;
+              height: 34px;
+              .username {
+                font-size: $fontI;
+                font-weight: 600;
+                cursor: pointer;
+              }
+              .pubtime {
+                color: $colorD;
+              }
+            }
+            .setting-box {
+              z-index: 10;
+              position: absolute;
+              right: 0;
+              .setting-btn {
+                @include flex(center);
+                height: 20px;
+                width: 20px;
+                border-radius: 4px;
+                &:hover {
+                  background-color: $colorN;
+                }
+                .icon-gengduo1 {
+                  font-size: $fontH;
+                  cursor: pointer;
+                  color: $colorD;
+                }
+              }
+              .setting-warp {
+                position: absolute;
+                right: 0;
+                padding-top: 10px;
+                .settings {
+                  padding: 10px 0;
+                  border-radius: 6px;
+                  background-color: $colorG;
+                  box-shadow: 0 0 1px rgba(0,0,0,0.44);
+                  .setting-item {
+                    min-width: 80px;
+                    padding: 12px 24px;
+                    cursor: pointer;
+                    &:hover {
+                      background-color: $colorN;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        .article-tag {
+          .tag {
+            display: inline-flex;
+            color: $colorP;
+            cursor: pointer;
+            &:hover {
+              color: $colorM;
+            }
+            .icon-huati {
+              margin-right: 2px;
+            }
+          }
+        }
+        .article-content {
+          padding-bottom: 32px;
+          margin-top: 10px;
+          border-bottom: 1px solid $colorN;
+          img {
+            max-width: 100%;
+          }
+        }
+        .article-category {
+          padding: 20px 0;
+          .category-list {
+            @include flex(left);
+            .category-item {
+              height: 26px;
+              line-height: 26px;
+              padding: 0 10px;
+              margin-right: 10px;
+              border-radius: 4px;
+              background-color: $colorN;
+              color: $colorB;
+            }
+          }
+        }
+      }
       .news-item {
         padding: 0 20px 20px 88px;
         margin-bottom: 10px;
@@ -578,6 +824,7 @@
               }
             }
             .news-tag {
+              display: inline-flex;
               font-size: $fontJ;
               color: $colorP;
               font-weight: 500;
@@ -590,21 +837,36 @@
                 margin-right: 5px;
               }
             }
-            .news-title {
-              font-size: $fontJ;
-              font-weight: bold;
-              margin-top: 15px;
+            .news-content {
+              margin-top: 10px;
+              .news-title {
+                font-size: $fontJ;
+                font-weight: bold;
+                margin-top: 15px;
+              }
+              .news-text-content {
+                margin-top: 10px;
+                font-size: $fontJ;
+                img{
+                  height: 20px;
+                  width: 20px;
+                  vertical-align: middle;
+                }
+                .username {
+                  color: $colorM;
+                }
+              }
             }
-            .news-text-content {
+            .news-article {
               margin-top: 10px;
               font-size: $fontJ;
-              img{
-                height: 20px;
-                width: 20px;
-                vertical-align: middle;
+              .article-title {
+                font-weight: bold;
+                cursor: pointer;
               }
-              .username {
-                color: $colorM;
+              .article-summary {
+                margin-top: 6px;
+                cursor: pointer;
               }
             }
             .news-album {
@@ -801,7 +1063,9 @@
           flex-direction: column;
           width: 46px;
           cursor: pointer;
-          &.forward-info {
+          &.forward-info,
+          &.merit-info,
+          &.collect-info {
             margin: 10px 0;
           }
           &.active {
@@ -817,6 +1081,9 @@
             text-align: center;
             font-size: $fontG;
             &.icon-zhuanfa {
+              font-size: $fontH;
+            }
+            &.icon-muyu {
               font-size: $fontH;
             }
           }

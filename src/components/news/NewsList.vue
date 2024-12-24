@@ -6,7 +6,7 @@
   import BsHtmlText from '@/components/common/BsHtmlText.vue'
   import Loading from '@/components/common/Loading.vue'
   import { ElMessage, ElMessageBox } from 'element-plus';
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import handleNumInfo from '@/hooks/handleNumInfo'
   import { useRouter } from 'vue-router';
   import { storeToRefs } from 'pinia';
@@ -21,6 +21,10 @@
   const router = useRouter()
   /* Props */
   const props = defineProps(['tab','activeUp'])
+  /* onMounted */
+  onMounted(() => {
+    loadMoreNews()
+  })
   //#region 预约直播
   function revokeBookLive(bookLiveId,index) {
     ElMessageBox.confirm(
@@ -209,14 +213,17 @@
 <template>
   <div class="news-list">
     <div v-for="(item,index) in newsList" :key="index" class="news-item">
-      <div v-if="item.happeningInfo.content" class="item-warpper">
-        <a class="news-item-avatar" :href="`/#/mainInterface/${item.publisherInfo.userId}`">
+      <div v-if="item.happeningInfo.content || item.happeningInfo.articleInfo" class="item-warpper">
+        <a class="news-item-avatar" :href="`/#/home/${item.publisherInfo.userId}`">
           <img :src="item.publisherInfo.avatarUrl" alt="头像">
         </a>
         <div class="news-item-header">
-          <a class="news-item-author" :href="`/#/mainInterface/${item.publisherInfo.userId}`">{{ item.publisherInfo.username }}</a>
+          <a class="news-item-author" :href="`/#/home/${item.publisherInfo.userId}`">{{ item.publisherInfo.username }}</a>
           <span v-if="!item.happeningInfo.advanceRelease" class="news-item-early-pub">提前发布</span>
-          <p class="news-item-time">{{ item.happeningInfo.pubTimeInfo }}</p>
+          <p class="news-item-desc">
+            <span class="pubtime">{{ item.happeningInfo.pubTimeInfo }}</span>
+            <span v-if="item.happeningInfo.articleInfo" class="news-type">投稿了文章</span>
+          </p>
           <div @mouseenter="newsList[index].isOpen = true" @mouseleave="newsList[index].isOpen = false" class="news-item-more-btn">
             <i class="iconfont icon-gengduo1"></i>
             <div v-if="newsList[index].isOpen" class="new-item-cascader">
@@ -235,9 +242,32 @@
             <i class="iconfont icon-huati"></i>
             <span>{{ item.happeningInfo.tag }}</span>
           </div>
-          <div @click="router.push(`/news_detail/${item.happeningInfo.happeningId}`)" class="news-title">{{ item.happeningInfo.title }}</div>
-          <div @click="router.push(`/news_detail/${item.happeningInfo.happeningId}`)" class="news-text-content">
-            <bs-html-text :content="item.happeningInfo.content" :atUserInfoList="item.happeningInfo.atUserInfoList"></bs-html-text>
+          <div class="news-content">
+            <div @click="router.push({
+              name:'news_detail',
+              query:{
+                happeningId:item.happeningInfo.happeningId
+              }
+            })" class="news-title">{{ item.happeningInfo.title }}</div>
+            <div @click="router.push({
+              name:'news_detail',
+              query:{
+                happeningId:item.happeningInfo.happeningId
+              }
+            })" class="news-text-content">
+              <bs-html-text :content="item.happeningInfo.content" :atUserInfoList="item.happeningInfo.atUserInfoList"></bs-html-text>
+            </div>
+          </div>
+          <div v-if="item.happeningInfo.articleInfo" class="news-article">
+            <router-link :to="{
+              name:'news_detail',
+              query:{
+                articleId:item.happeningInfo.articleInfo.articleId,
+              }
+            }">
+              <div class="article-title">{{ item.happeningInfo.articleInfo.title }}</div>
+              <div class="article-summary">{{ item.happeningInfo.articleInfo.summary }}</div>
+            </router-link>
           </div>
           <div v-if="item.happeningInfo.imgUrlList.length" class="news-album">
             <div class="news-album-preview grid">
@@ -300,22 +330,45 @@
             </div>
           </div>
         </div>
-        <div v-if="item.happeningInfo.quotedHappening" class="news-item-body" :class="{'news-reference':true}">
-          <div v-if="item.happeningInfo.quotedHappening.happeningInfo.content" class="quote-wrapper">
+        <div v-if="item.happeningInfo.quotedHappening" class="news-item-body news-reference">
+          <div v-if="item.happeningInfo.quotedHappening.happeningInfo.content || item.happeningInfo.quotedHappening.happeningInfo.articleInfo" class="quote-wrapper">
             <div class="refer-author-box">
               <div class="author-info">
                 <img :src="item.happeningInfo.quotedHappening.publisherInfo.avatarUrl" alt="头像">
                 <span class="author-username">{{ item.happeningInfo.quotedHappening.publisherInfo.username }}</span>
-                <span v-if="false" class="refer-text">投稿了文章</span>
+                <span v-if="item.happeningInfo.quotedHappening.happeningInfo.articleInfo" class="refer-text">投稿了文章</span>
               </div>
             </div>
             <div v-if="item.happeningInfo.quotedHappening.happeningInfo.tag" class="news-tag">
               <i class="iconfont icon-huati"></i>
               <span>{{ item.happeningInfo.quotedHappening.happeningInfo.tag }}</span>
             </div>
-            <div @click="router.push(`/news_detail/${item.happeningInfo.quotedHappening.happeningInfo.happeningId}`)" class="news-title">{{ item.happeningInfo.quotedHappening.happeningInfo.title }}</div>
-            <div @click="router.push(`/news_detail/${item.happeningInfo.quotedHappening.happeningInfo.happeningId}`)" class="news-text-content">
-              <bs-html-text :content="item.happeningInfo.quotedHappening.happeningInfo.content" :atUserInfoList="item.happeningInfo.quotedHappening.happeningInfo.atUserInfoList"></bs-html-text>
+            <div class="news-content">
+              <div @click="router.push({
+                name:'news_detail',
+                query:{
+                  happeningId:item.happeningInfo.quotedHappening.happeningInfo.happeningId,
+                }
+              })" class="news-title">{{ item.happeningInfo.quotedHappening.happeningInfo.title }}</div>
+              <div @click="router.push({
+                name:'news_detail',
+                query:{
+                  happeningId:item.happeningInfo.quotedHappening.happeningInfo.happeningId,
+                }
+              })" class="news-text-content">
+                <bs-html-text :content="item.happeningInfo.quotedHappening.happeningInfo.content" :atUserInfoList="item.happeningInfo.quotedHappening.happeningInfo.atUserInfoList"></bs-html-text>
+              </div>
+            </div>
+            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.articleInfo" class="news-article">
+              <router-link :to="{
+                name:'news_detail',
+                query:{
+                  articleId:item.happeningInfo.quotedHappening.happeningInfo.articleInfo.articleId
+                }
+              }">
+                <div class="article-title">{{ item.happeningInfo.quotedHappening.happeningInfo.articleInfo.title }}</div>
+                <div class="article-summary">{{ item.happeningInfo.quotedHappening.happeningInfo.articleInfo.summary }}</div>   
+              </router-link>
             </div>
             <div v-if="item.happeningInfo.quotedHappening.happeningInfo.imgUrlList.length" class="news-album">
               <div class="news-album-preview grid">
@@ -388,7 +441,13 @@
             <i class="iconfont icon-zhuanfa"></i>
             {{ item.happeningInfo.forwardNumInfo === '0' ? '转发' : item.happeningInfo.forwardNumInfo}}
           </div>
-          <div @click.stop="router.push(`/news_detail/${item.happeningInfo.happeningId}`)" class="footer-item item-comment">
+          <div @click.stop="router.push({
+            name:'news_detail',
+            query:{
+              [`${item.happeningInfo.articleInfo ? 'articleId' : 'happeningId'}`]: 
+              item.happeningInfo.articleInfo ? item.happeningInfo.articleInfo.articleId :item.happeningInfo.happeningId
+            }
+          })" class="footer-item item-comment">
             <i class="iconfont icon-pinglun"></i>
             {{ item.happeningInfo.commentNumInfo === '0' ? '评论' : item.happeningInfo.commentNumInfo }}
           </div>
@@ -485,9 +544,12 @@
           color: $colorG;
           background-color: #6b09ac;
         }
-        .news-item-time {
+        .news-item-desc {
           color: $colorD;
-          margin-top: 8px
+          margin-top: 8px;
+          .pubtime {
+            margin-right: 8px;
+          }
         }
         .news-item-more-btn {
           position: absolute;
@@ -589,23 +651,38 @@
             margin-right: 5px;
           }
         }
-        .news-title {
-          font-size: $fontJ;
-          font-weight: bold;
-          margin-top: 15px;
-          cursor: pointer;
+        .news-content {
+          margin-top: 10px;
+          .news-title {
+            font-size: $fontJ;
+            font-weight: bold;
+            margin-top: 15px;
+            cursor: pointer;
+          }
+          .news-text-content {
+            margin-top: 6px;
+            font-size: $fontJ;
+            cursor: pointer;
+            img{
+              height: 20px;
+              width: 20px;
+              vertical-align: middle;
+            }
+            .username {
+              color: $colorM;
+            }
+          }
         }
-        .news-text-content {
+        .news-article {
           margin-top: 10px;
           font-size: $fontJ;
-          cursor: pointer;
-          img{
-            height: 20px;
-            width: 20px;
-            vertical-align: middle;
+          .article-title {
+            font-weight: bold;
+            cursor: pointer;
           }
-          .username {
-            color: $colorM;
+          .article-summary {
+            margin-top: 6px;
+            cursor: pointer;
           }
         }
         .news-album {

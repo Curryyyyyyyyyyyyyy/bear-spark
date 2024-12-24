@@ -28,27 +28,27 @@
 
 <template>
   <div class="header-avatar">
-    <a class="avatar" :href="`/#/mainInterface/${userId}`" target="_blank">
+    <a class="avatar" :href="`/#/home/${userId}`" target="_blank">
       <img :src="avatarUrl" alt="">
     </a>
     <div class="avatar-children">
       <div class="nickname-box">
         <a class="nickname" :href="`/#/mainInterface/${userId}`" target="_blank">{{ username }}</a>
       </div>
-      <a class="coins" :href="`/#/mainInterface/${userId}`" target="_blank">
+      <a class="coins" :href="`/#/home/${userId}`" target="_blank">
         <span class="coin-item">功德：<span class="coin-num">{{ currencyInfo.meritNumInfo }}</span></span>
         <span class="merit-item">硬币：<span class="merit-num">{{ currencyInfo.coinNumInfo }}</span></span>
       </a>
       <div class="infos">
-        <a class="info-item" :href="`/#/mainInterface/${userId}`" target="_blank">
+        <a class="info-item" :href="`/#/home/${userId}`" target="_blank">
           <span class="count">{{ followerNumInfo }}</span>
           <p class="desc">关注</p>
         </a>
-        <a class="info-item fans-item" :href="`/#/mainInterface/${userId}`" target="_blank">
+        <a class="info-item fans-item" :href="`/#/home/${userId}`" target="_blank">
           <span class="count">{{ fanNumInfo }}</span>
           <p class="desc">粉丝</p>
         </a>
-        <a class="info-item" :href="`/#/mainInterface/${userId}`" target="_blank">
+        <a class="info-item" :href="`/#/home/${userId}`" target="_blank">
           <span class="count">{{ happeningNumInfo }}</span>
           <p class="desc">动态</p>
         </a>
@@ -57,7 +57,7 @@
         <span class="vip-desc">最后3天 大会员4.6折</span>
         <span class="vip-btn">会员中心</span>
       </div>
-      <a class="user-item user-center" :href="`/#/mainInterface/${userId}`" target="_blank">
+      <a class="user-item user-center" :href="`/#/home/${userId}`" target="_blank">
         <div class="user-item-wrap">
           <i class="iconfont icon-geren"></i>
           <span>个人中心</span>

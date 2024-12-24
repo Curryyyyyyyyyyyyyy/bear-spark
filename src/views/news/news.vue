@@ -128,7 +128,9 @@
   @use '@/assets/sass/mixin.scss' as *;
   .header {
     z-index: 100;
-    position: sticky;
+    position: fixed;
+    left: 0;
+    right: 0;
     top: 0;
     height: 64px;
     padding-bottom: 10px;
@@ -144,6 +146,7 @@
     }
   }
   .news {
+    margin-top: 74px;
     background-size: cover;
     .bg {
       position: fixed;

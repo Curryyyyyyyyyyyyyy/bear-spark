@@ -9,20 +9,20 @@
 
 <template>
   <div class="news-user-box">
-    <a :href="`/#/mainInterface/${userId}`">
+    <a :href="`/#/home/${userId}`">
       <img :src="avatarUrl" alt="头像">
     </a>
-    <a :href="`/#/mainInterface/${userId}`" class="username">{{ username }}</a>
+    <a :href="`/#/home/${userId}`" class="username">{{ username }}</a>
     <div class="infos">
-      <a :href="`/#/mainInterface/${userId}`" class="info-box">
+      <a :href="`/#/home/${userId}`" class="info-box">
         <p class="num">{{ followerNumInfo }}</p>
         <p class="desc">关注</p>
       </a>
-      <a :href="`/#/mainInterface/${userId}`" class="info-box">
+      <a :href="`/#/home/${userId}`" class="info-box">
         <p class="num">{{ fanNumInfo }}</p>
         <p class="desc">粉丝</p>
       </a>
-      <a :href="`/#/mainInterface/${userId}`" class="info-box">
+      <a :href="`/#/home/${userId}`" class="info-box">
         <p class="num">{{ happeningNumInfo }}</p>
         <p class="desc">动态</p>
       </a>

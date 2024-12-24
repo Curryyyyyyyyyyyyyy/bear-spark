@@ -49,36 +49,38 @@ export const deleteArticleApi = (params) => {
 export const getArticleDetailApi = (params) => {
   if(import.meta.env.VITE_MOCK) {
     return {
-      "articleInfo": {
-        "title": "哈哈哈",
-        "summary": "123456789",
-        "content": "<p>123456789</p>",
-        "coverUrl": "/imgs/logo.png",
-        "tagId": 55,
-        "tag": "游戏",
-        "categoryInfoList": [
-          {
-            "categoryId": 0,
-            "categoryName": "数据结构"
-          },
-          {
-            "categoryId": 1,
-            "categoryName": "java"
-          },
-          {
-            "categoryId": 2,
-            "categoryName": "css"
-          },
-        ],
-        "visibility": 1,
-        "commentAble": 0,
-        "declaration": 0,
-        "reprintArticleUrl": "http://123.com"
-      },
+      "title": "哈哈哈",
+      "summary": "123456789",
+      "content": "<p>哈哈哈哈</p><img src='/imgs/indexBg.png'>",
+      "coverUrl": "/imgs/logo.png",
+      "tagId": 55,
+      "tag": "游戏",
+      "categoryInfoList": [
+        {
+          "categoryId": 0,
+          "categoryName": "数据结构"
+        },
+        {
+          "categoryId": 1,
+          "categoryName": "java"
+        },
+        {
+          "categoryId": 2,
+          "categoryName": "css"
+        },
+      ],
+      "visibility": 1,
+      "commentAble": 0,
+      "declaration": 0,
+      "reprintArticleUrl": "http://123.com",
       "likeNumInfo": "12",
+      "meritNumInfo":"33",
       "collectNumInfo": "2",
       "forwardNumInfo": "1",
       "commentNumInfo": "3",
+      "liked":0,
+      "merited":1,
+      "collected":0,
       "pubTimeInfo": "2024-12-12 12:45",
       "publisherInfo": {
         "userId": 0,
@@ -88,6 +90,14 @@ export const getArticleDetailApi = (params) => {
     }
   }
   request.get(`/article/detail/${params.articleId}`)
+}
+/* 收藏专栏 */
+export const collectArticleApi = (params) => {
+  return request.post(`/collect/article/${params.articleId}`)
+}
+/* 投功德 */
+export const giveMeritApi = (params) => {
+  return request.post(`/merit/article/${params.articleId}`)
 }
 //#endregion
 //#region 专栏分类

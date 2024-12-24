@@ -7,7 +7,7 @@
 
 <template>
   <span v-for="(item,index) in htmlArr" :key="index">
-    <a v-html="item.content" class="at-username" v-if="item.isAtSpan" :href="`/#/mainInterface/${item.atUserId}`" target="_blank"></a>
+    <a v-html="item.content" class="at-username" v-if="item.isAtSpan" :href="`/#/home/${item.atUserId}`" target="_blank"></a>
     <span class="content" v-html="item.content" v-else></span>
   </span>
 </template>
@@ -17,6 +17,9 @@
   .at-username {
     color: $colorM !important;
     cursor: pointer;
+    &:hover {
+      color: $colorP !important;
+    }
   }
   .content {
     img {

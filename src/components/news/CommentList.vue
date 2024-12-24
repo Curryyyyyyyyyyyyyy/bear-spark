@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
+  import { onBeforeUnmount, onMounted, ref } from 'vue';
   import BsInputBox from '@/components/input/BsInputBox.vue'
   import BsHtmlText from '@/components/common/BsHtmlText.vue';
   import Loading from '@/components/common/Loading.vue'
@@ -29,13 +29,14 @@
   //#region 控制底部评论输入框展示
   const headerRef = ref()
   const showCommentFooter = ref(false)
-  document.addEventListener('scroll', throttle(() => {
+  const showFooter = throttle(() => {
     if(document.documentElement.scrollTop >= headerRef.value.offsetTop + headerRef.value.offsetHeight) {
       showCommentFooter.value = true
     } else {
       showCommentFooter.value = false
     }
-  }))
+  })
+  document.addEventListener('scroll', showFooter)
   //#endregion
   //#region 加载
   const bldgCommentList = ref([])
@@ -150,6 +151,9 @@
     }
   }
   //#endregion
+  onBeforeUnmount(() => {
+    document.removeEventListener('scroll',showFooter)
+  })
 </script>
 
 <template>
@@ -176,12 +180,12 @@
       <div class="news-comment-body">
         <ul class="bldg-comment-ul">
           <li v-for="(item,index) in bldgCommentList" :key="index" class="bldg-comment-li">
-            <a class="bldg-avatar-box" :href="`/#/mainInterface/${item.userInfo.userId}`" target="_blank">
+            <a class="bldg-avatar-box" :href="`/#/home/${item.userInfo.userId}`" target="_blank">
               <img :src="item.userInfo.avatarUrl">
             </a>
             <div @mouseenter="item.showSettingBtn = true" @mouseleave = "item.showSettingBtn = false" class="bldg-comment-main">
               <div class="main-header">
-                <a :href="`/#/mainInterface/${item.userInfo.userId}`" target="_blank">{{ item.userInfo.username }}</a>
+                <a :href="`/#/home/${item.userInfo.userId}`" target="_blank">{{ item.userInfo.username }}</a>
               </div>
               <div class="main-content">
                 <bs-html-text :content="item.content" :atUserInfoList="item.atUserInfoList"></bs-html-text>
@@ -216,13 +220,13 @@
               </div>
               <ul class="layer-comment-ul">
                 <li v-for="(item2) in item.layerCommentList" :key="item2.commentId" class="layer-comment-li">
-                  <a class="layer-avatar-box" :href="`/#/mainInterface/${item2.userInfo.userId}`" target="_blank">
+                  <a class="layer-avatar-box" :href="`/#/home/${item2.userInfo.userId}`" target="_blank">
                     <img :src="item2.userInfo.avatarUrl">
                   </a>
                   <div @mouseenter="item2.showSettingBtn = true" @mouseleave = "item2.showSettingBtn = false" class="layer-comment-main">
                     <span class="main-header">
-                      <a :href="`/#/mainInterface/${item2.userInfo.userId}`" target="_blank">{{ item2.userInfo.username }}</a>
-                      <span v-if="item2.repliedUserName"> 回复 <span class="username" @click="router.push(`/mainInterface/${item2.repliedUserId}`)">{{'@' + item2.repliedUserName }}</span> ：</span>
+                      <a :href="`/#/home/${item2.userInfo.userId}`" target="_blank">{{ item2.userInfo.username }}</a>
+                      <span v-if="item2.repliedUserName"> 回复 <span class="username" @click="router.push(`/home/${item2.repliedUserId}`)">{{'@' + item2.repliedUserName }}</span> ：</span>
                       <span v-else> ：</span>
                     </span>
                     <span class="main-content">

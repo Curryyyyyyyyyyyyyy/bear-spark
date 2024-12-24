@@ -69,7 +69,7 @@ export const getNewsPrepareApi = () => {
 export const getNewsListApi = (params) => {
   if(import.meta.env.VITE_MOCK) {
     return {
-      "total": 4,
+      "total": 3,
       "records": [
         {
           "happeningInfo":{
@@ -78,8 +78,8 @@ export const getNewsListApi = (params) => {
             "content": "666<s>555",
             "atUserInfoList":[
               {
-                "username":"周权",
-                "userId":10086,
+                "atUsername":"周权",
+                "atUserId":10086,
               }
             ],
             "tag": "pariatur eiusmod aliqua labore reprehenderit",
@@ -112,14 +112,8 @@ export const getNewsListApi = (params) => {
                 "forwardNumInfo":0,
                 "commentAble": 0,
                 "advanceRelease": 0,
-                "voteSimpleInfo": {
-                  "voteId": 8,
-                  "title": "需观反干分取必",
-                  "voteNumInfo": "43"
-                },
-                "imgUrlList": [
-                    "http://dummyimage.com/400x400"
-                ],
+                "voteSimpleInfo": null,
+                "imgUrlList": [],
                 "pubTimeInfo": "1975-04-15 04:31:03"
               },
               "publisherInfo":{
@@ -128,9 +122,97 @@ export const getNewsListApi = (params) => {
                 "avatarUrl": "http://dummyimage.com/100x100",
               },
             },
-            "imgUrlList": [
-                "http://dummyimage.com/400x400"
+            "imgUrlList": [],
+            "pubTimeInfo": "1975-04-15 04:31:03"
+          },
+          "publisherInfo":{
+            "userId":1001,
+            "username": "万超",
+            "avatarUrl": "http://dummyimage.com/100x100",
+          },
+        },
+        {
+          "happeningInfo":{
+            "happeningId":1,
+            "title": "",
+            "content": "",
+            "atUserInfoList":[],
+            "tag": "pariatur eiusmod aliqua labore reprehenderit",
+            "viewNumInfo": 41,
+            "likeNumInfo": '50',
+            "commentNumInfo": 9,
+            "forwardNumInfo":0,
+            "commentAble": 0,
+            "advanceRelease": 0,
+            "voteSimpleInfo": null,
+            "quotedHappening":null,
+            "articleInfo":{
+              "articleId":1,
+              "title":"哈哈哈哈",
+              "summary":"svsanvinvaoinsvniawjviownvovsjoivnoivnsnvso"
+            },
+            "imgUrlList": [],
+            "pubTimeInfo": "1975-04-15 04:31:03"
+          },
+          "publisherInfo":{
+            "userId":1001,
+            "username": "万超",
+            "avatarUrl": "http://dummyimage.com/100x100",
+          },
+        },
+        {
+          "happeningInfo":{
+            "happeningId":1,
+            "title": "现无称点进其原",
+            "content": "666<s>555",
+            "atUserInfoList":[
+              {
+                "atUsername":"周权",
+                "atUserId":10086,
+              }
             ],
+            "tag": "pariatur eiusmod aliqua labore reprehenderit",
+            "viewNumInfo": 41,
+            "likeNumInfo": '50',
+            "commentNumInfo": 9,
+            "forwardNumInfo":0,
+            "commentAble": 0,
+            "advanceRelease": 0,
+            "voteSimpleInfo": null,
+            "quotedHappening":{
+              "happeningInfo":{
+                "happeningId":1,
+                "title": "",
+                "content": "",
+                "atUserInfoList":[
+                  {
+                    "atUsername":'周权',
+                    "atUserId":1
+                  }
+                ],
+                "tag": "pariatur eiusmod aliqua labore reprehenderit",
+                "viewNumInfo": 41,
+                "likeNumInfo": '50',
+                "commentNumInfo": 9,
+                "forwardNumInfo":0,
+                "commentAble": 0,
+                "advanceRelease": 0,
+                "voteSimpleInfo": null,
+                "articleInfo":{
+                  "articleId":2,
+                  "title":"1234567",
+                  "summary":"snvsnvosniovnsdivodisvnsonvovsvsdv"
+                },
+                "imgUrlList": [],
+                "pubTimeInfo": "1975-04-15 04:31:03"
+              },
+              "publisherInfo":{
+                "userId":1001,
+                "username": "万超",
+                "avatarUrl": "http://dummyimage.com/100x100",
+              },
+            },
+            "imgUrlList": [],
             "pubTimeInfo": "1975-04-15 04:31:03"
           },
           "publisherInfo":{
@@ -229,8 +311,8 @@ export const getNewsDetailApi = (params) => {
         "content": "11<s>",
         "atUserInfoList":[
           {
-            "username":'周权',
-            "userId":1
+            "atUsername":'周权',
+            "atUserId":1
           }
         ],
         "tag": "pariatur eiusmod aliqua labore reprehenderit",
@@ -248,14 +330,9 @@ export const getNewsDetailApi = (params) => {
         "quotedHappening":{
           "happeningInfo":{
             "happeningId":2,
-            "title": "现无称点进其原",
-            "content": "11<s>",
-            "atUserInfoList":[
-              {
-                "username":'周权',
-                "userId":1
-              }
-            ],
+            "title": "",
+            "content": "",
+            "atUserInfoList":[],
             "tag": "pariatur eiusmod aliqua labore reprehenderit",
             "viewNumInfo": 41,
             "likeNumInfo": '50',
@@ -263,14 +340,13 @@ export const getNewsDetailApi = (params) => {
             "forwardNumInfo":0,
             "commentAble": 0,
             "advanceRelease": 0,
-            "voteSimpleInfo": {
-              "voteId": 8,
-              "title": "需观反干分取必",
-              "voteNumInfo": "43"
+            "voteSimpleInfo":null,
+            "articleInfo":{
+              "articleId":7,
+              "title":"哈哈哈哈啊哈哈哈",
+              "summary":"sum,ary"
             },
-            "imgUrlList": [
-                "http://dummyimage.com/400x400"
-            ],
+            "imgUrlList": [],
             "pubTimeInfo": "1975-04-15 04:31:03"
           },
           "publisherInfo":{
@@ -279,9 +355,7 @@ export const getNewsDetailApi = (params) => {
             "avatarUrl": "http://dummyimage.com/100x100",
           },
         },
-        "imgUrlList": [
-            "http://dummyimage.com/400x400"
-        ],
+        "imgUrlList": [],
         "pubTimeInfo": "1975-04-15 04:31:03"
       },
       "publisherInfo":{

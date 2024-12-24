@@ -31,7 +31,7 @@
     },100)
   }
   function handleSelectTag(tagName,id) {
-    selectTagName.value = tagName
+    selectTagName.value = tagName.replace(/<\/?em>/g, '')
     tagSelected.value = true
     emit('getSelectTagId', id)
   }
