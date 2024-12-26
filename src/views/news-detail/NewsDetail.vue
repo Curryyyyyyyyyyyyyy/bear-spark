@@ -194,11 +194,11 @@
 </script>
 
 <template>
-  <div class="header">
+  <div class="news-header">
     <nav-header>
       <template v-slot:nav>
-        <a>
-          <span @click="router.push('/index')" class="logo"></span>
+        <a href="/#/index" class="header-index">
+          <span class="logo"></span>
           <span>首页</span>
           <i class="iconfont icon-down"></i>
         </a>
@@ -477,13 +477,13 @@
             {{ newsInfo.happeningInfo?.likeNumInfo }}
           </div>
         </div>
-        <div @click="giveMerit" class="side-toolbar-item merit-info" :class="{'active':articleInfo.merited}">
+        <div v-if="articleId && articleInfo.publisherInfo?.userId !== userId" @click="giveMerit" class="side-toolbar-item merit-info" :class="{'active':articleInfo.merited}">
           <i class="iconfont icon-muyu"></i>
           <div class="side-toolbar-item-text">
             {{ articleInfo.meritNumInfo }}
           </div>
         </div>
-        <div @click="collectArticle" class="side-toolbar-item collect-info" :class="{'active':articleInfo.collected}">
+        <div v-if="articleId" @click="collectArticle" class="side-toolbar-item collect-info" :class="{'active':articleInfo.collected}">
           <i class="iconfont icon-shoucang"></i>
           <div class="side-toolbar-item-text">
             {{ articleInfo.collectNumInfo }}
@@ -541,7 +541,7 @@
 <style lang="scss"> 
   @use '@/assets/sass/config.scss' as *;
   @use '@/assets/sass/mixin.scss' as *;
-  .header {
+  .news-header {
     z-index: 100;
     position: fixed;
     left: 0;

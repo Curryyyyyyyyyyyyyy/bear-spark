@@ -6,7 +6,7 @@
   <div class="index-header">
     <nav-header>
       <template v-slot:nav>
-        <a>
+        <a class="header-index">
           <i class="iconfont icon-shouye"></i>
           <span>首页</span>
         </a>

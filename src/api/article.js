@@ -91,6 +91,55 @@ export const getArticleDetailApi = (params) => {
   }
   request.get(`/article/detail/${params.articleId}`)
 }
+/* 分页获取指定分类专栏 */
+export const getArticleListApi = (params) => {
+  if(import.meta.env.VITE_MOCK) {
+    return {
+      "total":10,
+      "records":[
+        {
+          "articleId": 1,
+          "title": "111",
+          "coverUrl": "/imgs/slide-bar.jpg",
+          "summary":'哈哈哈哈哈哈哈哈哈哈摘要1111111111111111111111111111111111111111111111随哈吃撒的活动v哦i我从未佛i无法弄完',
+          "declaration": 0,
+          "likeNumInfo": "13",
+          "viewNumInfo": "14",
+          "commentNumInfo": "1",
+          "collectNumInfo": "4",
+          "pubTimeInfo": "2024-1-1 13:10:00"
+        },
+        {
+          "articleId": 2,
+          "title": "111",
+          "coverUrl": "/imgs/slide-bar.jpg",
+          "summary":'哈哈哈哈哈哈哈哈哈哈摘要1111111111111111111111111111111111111111111111随哈吃撒的活动v哦i我从未佛i无法弄完',
+          "declaration": 0,
+          "likeNumInfo": "13",
+          "viewNumInfo": "14",
+          "commentNumInfo": "1",
+          "collectNumInfo": "4",
+          "pubTimeInfo": "2024-1-1 13:10:00"
+        },
+        {
+          "articleId": 3,
+          "title": "111",
+          "coverUrl": "/imgs/slide-bar.jpg",
+          "summary":'哈哈哈哈哈哈哈哈哈哈摘要1111111111111111111111111111111111111111111111随哈吃撒的活动v哦i我从未佛i无法弄完',
+          "declaration": 0,
+          "likeNumInfo": "13",
+          "viewNumInfo": "14",
+          "commentNumInfo": "1",
+          "collectNumInfo": "4",
+          "pubTimeInfo": "2024-1-1 13:10:00"
+        },
+      ]
+    }
+  }
+  return request.get(`/article/${params.pageNum}/${params.pageSize}`, {
+    params
+  })
+}
 /* 收藏专栏 */
 export const collectArticleApi = (params) => {
   return request.post(`/collect/article/${params.articleId}`)
@@ -106,24 +155,29 @@ export const getCategoryListApi = () => {
   if(import.meta.env.VITE_MOCK) {
     return [
       {
-        "categoryId": 0,
-        "categoryName": "数据结构",
+        "categoryId": 10,
+        "categoryName": "数据结构哈哈哈",
+        "articleNum":10
       },
       {
         "categoryId": 1,
         "categoryName": "c语言",
+        "articleNum":10
       },
       {
         "categoryId": 2,
         "categoryName": "Java",
+        "articleNum":10
       },
       {
         "categoryId": 3,
         "categoryName": "Vue",
+        "articleNum":10
       },
       {
         "categoryId": 4,
         "categoryName": "React",
+        "articleNum":10
       },
     ]
   }
@@ -135,7 +189,7 @@ export const getCategoryInfoApi = (params) => {
     return {
       "categoryId": 0,
       "categoryName": "数据结构",
-      "categoryPhotoUrl": "/imgs/logo.png"
+      "categoryPhotoUrl": "/imgs/slide-bar.jpg"
     }
   }
   return request.get(`/category/${params.categoryId}`)
@@ -190,8 +244,18 @@ export const getDraftListApi = (params) => {
           "lastSaveTimeInfo": "2024-10-13 23:12"
         },
         {
+          "draftId": 1,
+          "title": "222sdavsvs",
+          "lastSaveTimeInfo": "2024-10-13 23:12"
+        },
+        {
+          "draftId": 1,
+          "title": "222sdavsvs",
+          "lastSaveTimeInfo": "2024-10-13 23:12"
+        },
+        {
           "draftId": 2,
-          "title": "33svvs3",
+          "title": "33svdcsdddddddddddddddsssssssssvs3",
           "lastSaveTimeInfo": "2024-10-14 23:12"
         },
       ]

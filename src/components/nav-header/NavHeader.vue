@@ -38,15 +38,15 @@
     <div class="wrapper">
       <div class="nav-left">
         <slot name="nav"></slot>
-        <a class="jump">番剧</a>
-        <a class="jump">直播</a>
-        <a class="jump">游戏中心</a>
-        <a class="jump">会员购</a>
-        <a class="jump">漫画</a>
-        <a class="jump">赛事</a>
-        <a class="jump">KPL</a>
-        <a v-if="!pageSmall" class="jump">KPL</a>
-        <a v-if="!pageSmall" class="jump">KPL</a>
+        <a class="left-item jump">番剧</a>
+        <a class="left-item jump">直播</a>
+        <a class="left-item jump">游戏中心</a>
+        <a class="left-item jump">会员购</a>
+        <a class="left-item jump">漫画</a>
+        <a class="left-item jump">赛事</a>
+        <a class="left-item jump">KPL</a>
+        <a v-if="!pageSmall" class="left-item jump">KPL</a>
+        <a v-if="!pageSmall" class="left-item jump">KPL</a>
       </div>
       <div class="inp" :class="{'inp-small':pageSmall}">
         <input name="keyword" type="text" placeholder="尚硅谷">
@@ -166,21 +166,29 @@
         @include flex();
         height: 40px;
         line-height: 40px;
-        .logo {
-          vertical-align: middle;
-          @include bgImg(30px,30px,'/imgs/logo.png',50px 50px);
-          margin-right:10px;
-        }
-        a {
-          display: inline-block;
-          margin-right: 10px;
-          cursor: pointer;
-          &:first-child:hover {
+        .header-index {
+          @include flex();
+          margin-right: 8px;
+          .logo {
+            vertical-align: middle;
+            @include bgImg(30px,30px,'/imgs/logo.png',50px 50px);
+            margin-right:10px;
+          }
+          .icon-down {
+            font-size: $fontH;
+            transition: all .3s;
+          }
+          &:hover {
             .icon-down {
               display: inline-block;
               transform: rotate(180deg);
             }
           }
+          }
+        .left-item {
+          display: inline-block;
+          margin-right: 10px;
+          cursor: pointer;
           &:last-child {
             margin: 0;
           }
@@ -188,10 +196,6 @@
         .icon-shouye {
           font-size: $fontC;
           vertical-align: middle;
-        }
-        .icon-down {
-          font-size: $fontH;
-          transition: all .3s;
         }
       }
       .inp {
@@ -348,13 +352,13 @@
           height: 35px;
           padding: 0 10px;
           border-radius: 15px;
-          background-color: $colorA;
+          background-color: $colorM;
           span {
             margin-left: 3px;
           }
           &:hover {
             cursor: pointer;
-            background-color: #f987a7;
+            background-color: rgb(15, 141, 214);
             .submit-ways {
               display: block;
             }

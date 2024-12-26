@@ -125,7 +125,7 @@
       border-radius: 5px;
       background-color: $colorG;
       box-shadow: 0 0 1px $colorE;
-      color:$colorI;
+      color:$colorI !important;
       transform: translateX(-50%);
       .nickname-box {
         @include flex(center);
@@ -211,6 +211,7 @@
         &.user-center {
           display: block;
           @include flex();
+          color: $colorB;
         }
         &:hover {
           background-color: $colorN;

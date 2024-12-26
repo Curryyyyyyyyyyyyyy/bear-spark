@@ -62,10 +62,12 @@
             }">
               <span class="title">{{ item.title }}</span>
             </router-link>
-            <div class="save-time">{{ item.lastSaveTimeInfo }}</div>
+          </div>
+          <div class="draft-mark">
+            <span class="draft-text">草稿</span>
           </div>
           <div class="footer">
-            <span class="draft-mark">草稿</span>
+            <div class="save-time">{{ item.lastSaveTimeInfo }}</div>
             <div class="tools">
               <router-link :to="{
                 name:'submit_article',
@@ -79,14 +81,14 @@
             </div>
           </div>
         </li>
-        <div class="load-more"
-          v-infinite-scroll="loadMore" 
-          :infinite-scroll-disabled="busy" 
-          infinite-scroll-distance="50"
-        >
-          <Loading v-show="!isArriveTotal && loading"></Loading>
-        </div>
       </ul>
+      <div class="load-more"
+        v-infinite-scroll="loadMore" 
+        :infinite-scroll-disabled="busy" 
+        infinite-scroll-distance="50"
+      >
+        <Loading v-show="!isArriveTotal && loading"></Loading>
+      </div>
       <div v-if="isEmpty" class="draft-empty">
         <i class="iconfont icon-kongxiangzi"></i>
         <span class="empty-text">还木有草稿 ~ 快去创作吧 ~</span>
@@ -127,32 +129,32 @@
       background-color: $colorG;
       border-radius: 6px;
       .draft-list {
+        @include flex(left);
+        flex-wrap: wrap;
         .draft-item {
-          padding: 18px 0;
-          border-bottom: 1px solid $colorF;
+          height: 86px;
+          width: 196px;
+          padding: 10px 14px 0;
+          border: 1px solid $colorF;
+          border-radius: 6px;
+          margin: 20px 5px 0;
           .header {
-            @include flex();
             .title {
-              flex: 1;
-              font-size: $fontI;
+              display: inline-block;
+              width: 100%;
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
+              font-size: $fontI;
               cursor: pointer;
               &:hover {
                 color: $colorM;
               }
             }
-            .save-time {
-              margin-left: 24px;
-              font-size: $fontJ;
-              color: $colorD;
-            }
           }
-          .footer {
-            @include flex();
-            margin-top: 16px;
-            .draft-mark {
+          .draft-mark {
+            margin-top: 12px;
+            .draft-text {
               display: inline-block;
               height: 18px;
               padding: 0 4px;
@@ -160,6 +162,14 @@
               background-color: $colorN;
               color: $colorD;
               font-size: $fontK;
+            }
+          }
+          .footer {
+            @include flex();
+            margin-top: 6px;
+            .save-time {
+              font-size: $fontJ;
+              color: $colorD;
             }
             .tools {
               button {

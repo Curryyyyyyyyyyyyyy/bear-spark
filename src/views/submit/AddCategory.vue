@@ -40,7 +40,7 @@
       <div class="add-category">
         <div class="category-title">
           <span class="category-title-text">分类专栏名称：</span>
-          <input v-model="categoryName" type="text" maxlength="10" placeholder="请输入分类专栏名称（最多10个字）">
+          <input v-model="categoryName" type="text" maxlength="7" placeholder="请输入分类专栏名称（最多7个字）">
         </div>
         <div class="category-photo">
           <span class="category-photo-text">分类专栏配图：</span>

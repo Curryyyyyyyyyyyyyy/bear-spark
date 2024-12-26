@@ -205,6 +205,16 @@
     }, 500);
   }
   //#endregion 
+  function toDetail(articleId, happeningId) {
+    const page = router.resolve({
+      name:'news_detail',
+      query:{
+        articleId,
+        happeningId
+      }
+    })
+    window.open(page.href)
+  }
   defineExpose({
     getUserNewsList
   })
@@ -220,10 +230,14 @@
         <div class="news-item-header">
           <a class="news-item-author" :href="`/#/home/${item.publisherInfo.userId}`">{{ item.publisherInfo.username }}</a>
           <span v-if="!item.happeningInfo.advanceRelease" class="news-item-early-pub">提前发布</span>
-          <p class="news-item-desc">
+          <div class="news-item-desc">
             <span class="pubtime">{{ item.happeningInfo.pubTimeInfo }}</span>
             <span v-if="item.happeningInfo.articleInfo" class="news-type">投稿了文章</span>
-          </p>
+              <div v-if="item.happeningInfo.tag" class="news-tag">
+              <i class="iconfont icon-huati"></i>
+              <span>{{ item.happeningInfo.tag }}</span>
+            </div>
+          </div>
           <div @mouseenter="newsList[index].isOpen = true" @mouseleave="newsList[index].isOpen = false" class="news-item-more-btn">
             <i class="iconfont icon-gengduo1"></i>
             <div v-if="newsList[index].isOpen" class="new-item-cascader">
@@ -237,37 +251,16 @@
             </div>
           </div>
         </div>
-        <div class="news-item-body">
-          <div v-if="item.happeningInfo.tag" class="news-tag">
-            <i class="iconfont icon-huati"></i>
-            <span>{{ item.happeningInfo.tag }}</span>
-          </div>
+        <div @click="toDetail(item.happeningInfo.articleInfo.articleId)" v-if="item.happeningInfo.articleInfo" class="news-article-content">
+          <div class="article-title">{{ item.happeningInfo.articleInfo.title }}</div>
+          <div class="article-summary">{{ item.happeningInfo.articleInfo.summary }}</div>
+        </div>
+        <div v-else class="news-item-body">
           <div class="news-content">
-            <div @click="router.push({
-              name:'news_detail',
-              query:{
-                happeningId:item.happeningInfo.happeningId
-              }
-            })" class="news-title">{{ item.happeningInfo.title }}</div>
-            <div @click="router.push({
-              name:'news_detail',
-              query:{
-                happeningId:item.happeningInfo.happeningId
-              }
-            })" class="news-text-content">
+            <div @click="toDetail(null,item.happeningInfo.happeningId)" class="news-title">{{ item.happeningInfo.title }}</div>
+            <div @click="toDetail(null,item.happeningInfo.happeningId)" class="news-text-content">
               <bs-html-text :content="item.happeningInfo.content" :atUserInfoList="item.happeningInfo.atUserInfoList"></bs-html-text>
             </div>
-          </div>
-          <div v-if="item.happeningInfo.articleInfo" class="news-article">
-            <router-link :to="{
-              name:'news_detail',
-              query:{
-                articleId:item.happeningInfo.articleInfo.articleId,
-              }
-            }">
-              <div class="article-title">{{ item.happeningInfo.articleInfo.title }}</div>
-              <div class="article-summary">{{ item.happeningInfo.articleInfo.summary }}</div>
-            </router-link>
           </div>
           <div v-if="item.happeningInfo.imgUrlList.length" class="news-album">
             <div class="news-album-preview grid">
@@ -332,101 +325,88 @@
         </div>
         <div v-if="item.happeningInfo.quotedHappening" class="news-item-body news-reference">
           <div v-if="item.happeningInfo.quotedHappening.happeningInfo.content || item.happeningInfo.quotedHappening.happeningInfo.articleInfo" class="quote-wrapper">
-            <div class="refer-author-box">
-              <div class="author-info">
-                <img :src="item.happeningInfo.quotedHappening.publisherInfo.avatarUrl" alt="头像">
-                <span class="author-username">{{ item.happeningInfo.quotedHappening.publisherInfo.username }}</span>
-                <span v-if="item.happeningInfo.quotedHappening.happeningInfo.articleInfo" class="refer-text">投稿了文章</span>
-              </div>
-            </div>
-            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.tag" class="news-tag">
-              <i class="iconfont icon-huati"></i>
-              <span>{{ item.happeningInfo.quotedHappening.happeningInfo.tag }}</span>
-            </div>
-            <div class="news-content">
-              <div @click="router.push({
-                name:'news_detail',
-                query:{
-                  happeningId:item.happeningInfo.quotedHappening.happeningInfo.happeningId,
-                }
-              })" class="news-title">{{ item.happeningInfo.quotedHappening.happeningInfo.title }}</div>
-              <div @click="router.push({
-                name:'news_detail',
-                query:{
-                  happeningId:item.happeningInfo.quotedHappening.happeningInfo.happeningId,
-                }
-              })" class="news-text-content">
-                <bs-html-text :content="item.happeningInfo.quotedHappening.happeningInfo.content" :atUserInfoList="item.happeningInfo.quotedHappening.happeningInfo.atUserInfoList"></bs-html-text>
-              </div>
-            </div>
-            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.articleInfo" class="news-article">
-              <router-link :to="{
-                name:'news_detail',
-                query:{
-                  articleId:item.happeningInfo.quotedHappening.happeningInfo.articleInfo.articleId
-                }
-              }">
-                <div class="article-title">{{ item.happeningInfo.quotedHappening.happeningInfo.articleInfo.title }}</div>
-                <div class="article-summary">{{ item.happeningInfo.quotedHappening.happeningInfo.articleInfo.summary }}</div>   
-              </router-link>
-            </div>
-            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.imgUrlList.length" class="news-album">
-              <div class="news-album-preview grid">
-                <div v-for="(item,index) in item.happeningInfo.quotedHappening.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
-                  <img :src="item" alt="图片">
+            <div class="quote-header">
+              <div class="refer-author-box">
+                <div class="author-info">
+                  <img :src="item.happeningInfo.quotedHappening.publisherInfo.avatarUrl" alt="头像">
+                  <span class="author-username">{{ item.happeningInfo.quotedHappening.publisherInfo.username }}</span>
+                  <span v-if="item.happeningInfo.quotedHappening.happeningInfo.articleInfo" class="refer-text">投稿了文章</span>
                 </div>
               </div>
+              <div v-if="item.happeningInfo.quotedHappening.happeningInfo.tag" class="news-tag">
+                <i class="iconfont icon-huati"></i>
+                <span>{{ item.happeningInfo.quotedHappening.happeningInfo.tag }}</span>
+              </div>
             </div>
-            <div v-if="false" class="news-video-card">
-              <a href="javascript:;" class="news-video-box">
-                <div class="video-box-header">
-                  <video controls src="/imgs/video.mp4"></video>
+            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.articleInfo" @click="toDetail(item.happeningInfo.quotedHappening.happeningInfo.articleInfo.articleId)" class="news-article-content">
+              <div class="article-title">{{ item.happeningInfo.quotedHappening.happeningInfo.articleInfo.title }}</div>
+              <div class="article-summary">{{ item.happeningInfo.quotedHappening.happeningInfo.articleInfo.summary }}</div>   
+            </div>
+            <div v-else class="quote-body">
+              <div class="news-content">
+                <div @click="toDetail(null,item.happeningInfo.quotedHappening.happeningInfo.happeningId,)" class="news-title">{{ item.happeningInfo.quotedHappening.happeningInfo.title }}</div>
+                <div @click="toDetail(null,item.happeningInfo.quotedHappening.happeningInfo.happeningId,)" class="news-text-content">
+                  <bs-html-text :content="item.happeningInfo.quotedHappening.happeningInfo.content" :atUserInfoList="item.happeningInfo.quotedHappening.happeningInfo.atUserInfoList"></bs-html-text>
                 </div>
-                <div class="video-box-body">
-                  <div class="video-title">vhosnvonvosnovl</div>
-                  <div class="video-stat">
-                    <div class="video-stat-item">
-                      <i class="iconfont icon-shipin"></i>
-                      22
-                    </div>
-                    <div class="video-stat-item">
-                      <i class="iconfont icon-icon"></i>
-                      11
-                    </div>
+              </div>
+              <div v-if="item.happeningInfo.quotedHappening.happeningInfo.imgUrlList.length" class="news-album">
+                <div class="news-album-preview grid">
+                  <div v-for="(item,index) in item.happeningInfo.quotedHappening.happeningInfo.imgUrlList" :key="index" class="news-album-preview-picture">
+                    <img :src="item" alt="图片">
                   </div>
                 </div>
-              </a>
-            </div>
-            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo" class="news-book-lives">
-              <div class="lives-detail">
-                <p class="lives-title">直播预约：{{item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.title}}</p>
-                <p class="lives-stat">
-                  <span class="lives-time">{{ item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.liveTimeInfo }} 直播</span>
-                  <span class="book-num">{{item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookNumInfo}}人预约</span>
-                </p>
               </div>
-              <div class="lives-btn-box">
-                <div v-if="username === item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.anchorName" class="revoke-btn-box">
-                  <button v-if="true" @click.stop="revokeBookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn revoke-btn">撤销</button>
-                  <button v-else @click.stop="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
+              <div v-if="false" class="news-video-card">
+                <a href="javascript:;" class="news-video-box">
+                  <div class="video-box-header">
+                    <video controls src="/imgs/video.mp4"></video>
+                  </div>
+                  <div class="video-box-body">
+                    <div class="video-title">vhosnvonvosnovl</div>
+                    <div class="video-stat">
+                      <div class="video-stat-item">
+                        <i class="iconfont icon-shipin"></i>
+                        22
+                      </div>
+                      <div class="video-stat-item">
+                        <i class="iconfont icon-icon"></i>
+                        11
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div v-if="item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo" class="news-book-lives">
+                <div class="lives-detail">
+                  <p class="lives-title">直播预约：{{item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.title}}</p>
+                  <p class="lives-stat">
+                    <span class="lives-time">{{ item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.liveTimeInfo }} 直播</span>
+                    <span class="book-num">{{item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookNumInfo}}人预约</span>
+                  </p>
                 </div>
-                <div v-else class="book-btn-box">
-                  <button v-if="item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.booked" @click.stop="bookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn book-btn">
-                    <span><i class="iconfont icon-icon-tixing"></i>预约</span>
-                  </button>
-                  <button v-else @click.stop="cancelBookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn booked-btn">已预约</button>
+                <div class="lives-btn-box">
+                  <div v-if="username === item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.anchorName" class="revoke-btn-box">
+                    <button v-if="true" @click.stop="revokeBookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn revoke-btn">撤销</button>
+                    <button v-else @click.stop="cancelRevokeBookLive" class="book-lives-btn revoked-btn">已撤销</button>
+                  </div>
+                  <div v-else class="book-btn-box">
+                    <button v-if="item.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.booked" @click.stop="bookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn book-btn">
+                      <span><i class="iconfont icon-icon-tixing"></i>预约</span>
+                    </button>
+                    <button v-else @click.stop="cancelBookLive(newsInfo.happeningInfo.quotedHappening.happeningInfo.bookLiveInfo.bookLiveId)" class="book-lives-btn booked-btn">已预约</button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div v-if="item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo" class="news-vote">
-              <div @click.stop="handleShowVoteModal(item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.voteId)" class="news-vote-card">
-                <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
-                <div class="vote-detail">
-                  <p class="vote-title">{{item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.title}}</p>
-                  <p class="vote-stat">{{item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.deadlineInfo }}</p>
-                </div>
-                <div class="vote-btn-box">
-                  <button class="vote-btn">详情</button>
+              <div v-if="item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo" class="news-vote">
+                <div @click.stop="handleShowVoteModal(item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.voteId)" class="news-vote-card">
+                  <div class="vote-icon-box"><i class="iconfont icon-toupiao"></i></div>
+                  <div class="vote-detail">
+                    <p class="vote-title">{{item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.title}}</p>
+                    <p class="vote-stat">{{item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.voteNumInfo}}人参与&nbsp;&nbsp;{{ item.happeningInfo.quotedHappening.happeningInfo.voteSimpleInfo.deadlineInfo }}</p>
+                  </div>
+                  <div class="vote-btn-box">
+                    <button class="vote-btn">详情</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -441,13 +421,7 @@
             <i class="iconfont icon-zhuanfa"></i>
             {{ item.happeningInfo.forwardNumInfo === '0' ? '转发' : item.happeningInfo.forwardNumInfo}}
           </div>
-          <div @click.stop="router.push({
-            name:'news_detail',
-            query:{
-              [`${item.happeningInfo.articleInfo ? 'articleId' : 'happeningId'}`]: 
-              item.happeningInfo.articleInfo ? item.happeningInfo.articleInfo.articleId :item.happeningInfo.happeningId
-            }
-          })" class="footer-item item-comment">
+          <div @click.stop="toDetail(item.happeningInfo.articleInfo?.articleId,item.happeningInfo.happeningId)" class="footer-item item-comment">
             <i class="iconfont icon-pinglun"></i>
             {{ item.happeningInfo.commentNumInfo === '0' ? '评论' : item.happeningInfo.commentNumInfo }}
           </div>
@@ -505,7 +479,6 @@
   @use '@/assets/sass/mixin.scss' as *;
   .news-list {
     width: 100%;
-    margin-top: 10px;
     .news-item {
       position: relative;
       width: 100%;
@@ -513,6 +486,7 @@
       box-sizing: border-box;
       margin-bottom: 10px;
       background-color: $colorG;
+      border: 1px solid rgba(0, 0, 0, .07);
       border-radius: 6px;
       .news-item-avatar {
         position: absolute;
@@ -549,6 +523,20 @@
           margin-top: 8px;
           .pubtime {
             margin-right: 8px;
+          }
+          .news-tag {
+            @include flex(left);
+            font-size: $fontJ;
+            color: $colorP;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+            &:hover {
+              color: $colorM;
+            }
+            .icon-huati {
+              margin-right: 5px;
+            }
           }
         }
         .news-item-more-btn {
@@ -590,6 +578,18 @@
           }
         }
       }
+      .news-article-content {
+        margin-top: 10px;
+        font-size: $fontJ;
+        .article-title {
+          font-weight: bold;
+          cursor: pointer;
+        }
+        .article-summary {
+          margin-top: 6px;
+          cursor: pointer;
+        }
+      }
       .news-item-body {
         &.news-reference {
           margin-top: 10px;
@@ -598,33 +598,40 @@
           .quote-wrapper {
             padding: 20px;
             cursor: pointer;
-            .refer-author-box {
-              .author-info {
-                @include flex(left);
-                img {
-                  width: 36px;
-                  height: 36px;
-                  border-radius: 18px;
-                }
-                .author-username {
-                  font-size: $fontJ;
-                  margin: 0 5px;
-                }
-                .refer-text {
-                  color: $colorD;
-                }
-              }
-            }
-            .news-vote {
-              .news-vote-card {
-                background-color: $colorG;
-                .vote-icon-box {
-                  background-color: $colorR;
+            .quote-header {
+              .refer-author-box {
+                .author-info {
+                  @include flex(left);
+                  img {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 18px;
+                  }
+                  .author-username {
+                    font-size: $fontJ;
+                    margin: 0 5px;
+                  }
+                  .refer-text {
+                    color: $colorD;
+                  }
                 }
               }
             }
-            .news-book-lives {
-              background-color: $colorG
+            .news-article-content {
+              margin-top: 12px;
+            }
+            .quote-body {
+              .news-vote {
+                .news-vote-card {
+                  background-color: $colorG;
+                  .vote-icon-box {
+                    background-color: $colorR;
+                  }
+                }
+              }
+              .news-book-lives {
+                background-color: $colorG
+              }
             }
           }
           .quoted-isdelete {
@@ -671,18 +678,6 @@
             .username {
               color: $colorM;
             }
-          }
-        }
-        .news-article {
-          margin-top: 10px;
-          font-size: $fontJ;
-          .article-title {
-            font-weight: bold;
-            cursor: pointer;
-          }
-          .article-summary {
-            margin-top: 6px;
-            cursor: pointer;
           }
         }
         .news-album {
@@ -896,7 +891,7 @@
           }
           .forward-input-box {
             min-height: 70px;
-            width: 93.5%;
+            flex: 1;
             padding: 10px;
             border: 1px solid $colorF;
             border-radius: 6px;

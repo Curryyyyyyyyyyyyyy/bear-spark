@@ -5,13 +5,10 @@
   import NewsPublishBox from './NewsPublishBox.vue';
   import NewsAsideBox from './NewsAsideBox.vue';
   import NewsList from '@/components/news/NewsList.vue'
-  import {useRouter} from 'vue-router'
   import {getNewsPrepareApi} from '@/api/news.js'
   import { debounce } from '@/hooks/performance';
   import { updateUserInfo } from '@/hooks/handleUserInfo';
 
-  /* Router */
-  const router = useRouter()
   //#region Mounted
   const recentTagList = ref([])
   const followerList = ref([])
@@ -69,11 +66,11 @@
 </script>
 
 <template>
-  <div class="header">
+  <div class="news-header">
     <nav-header>
       <template v-slot:nav>
-        <a>
-          <span @click="router.push('/index')" class="logo"></span>
+        <a href="/#/index" class="header-index">
+          <span class="logo"></span>
           <span>首页</span>
           <i class="iconfont icon-down"></i>
         </a>
@@ -126,7 +123,7 @@
 <style lang="scss">
   @use '@/assets/sass/config.scss' as *;
   @use '@/assets/sass/mixin.scss' as *;
-  .header {
+  .news-header {
     z-index: 100;
     position: fixed;
     left: 0;

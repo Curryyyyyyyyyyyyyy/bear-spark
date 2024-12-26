@@ -1,5 +1,5 @@
 <script setup>
-  import { onBeforeUnmount, onMounted, ref } from 'vue';
+  import { onMounted, onUnmounted, ref } from 'vue';
   import BsInputBox from '@/components/input/BsInputBox.vue'
   import BsHtmlText from '@/components/common/BsHtmlText.vue';
   import Loading from '@/components/common/Loading.vue'
@@ -151,7 +151,7 @@
     }
   }
   //#endregion
-  onBeforeUnmount(() => {
+  onUnmounted(() => {
     document.removeEventListener('scroll',showFooter)
   })
 </script>
