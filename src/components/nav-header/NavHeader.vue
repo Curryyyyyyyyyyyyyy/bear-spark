@@ -4,12 +4,32 @@
   import HeaderMessage from '@/components/nav-header/HeaderMessage.vue';
   import useUser from '@/store/user';
   import { storeToRefs } from 'pinia';
-  import { ref} from 'vue';
+  import { onMounted, ref} from 'vue';
 
   /* Router */
   const userStore = useUser()
   const {token} = storeToRefs(userStore)
-  /* Mounted */
+  /* onMounted */
+  onMounted(() => {
+    document.addEventListener('click', (event) => {
+      if(!inputWrapperRef.value.contains(event.target)) {
+        searchPanel.value = false
+      }
+    })
+  })
+
+  //#region 搜索
+  const keyword = ref('')
+  function search() {
+    
+  }
+  const inputWrapperRef = ref()
+  const searchPanel = ref(false)
+  function handleInputFocus() {
+    searchPanel.value = true
+  }
+  //#endregion
+  //#region 登录
   let showLogin = ref(false)
   function openLogin() {
     showLogin.value = true
@@ -17,7 +37,8 @@
   function closeLogin() {
     showLogin.value = false
   }
-  // 防止刷新显示问题
+  //#endregion
+  //#region 防止刷新显示问题
   let pageSmall = ref(false)
   if(window.innerWidth < 1396) {
     pageSmall.value = true
@@ -31,6 +52,7 @@
       pageSmall.value = false
     }
   })
+  //#endregion
 </script>
 
 <template>
@@ -48,11 +70,57 @@
         <a v-if="!pageSmall" class="left-item jump">KPL</a>
         <a v-if="!pageSmall" class="left-item jump">KPL</a>
       </div>
-      <div class="inp" :class="{'inp-small':pageSmall}">
-        <input name="keyword" type="text" placeholder="尚硅谷">
-        <span class="icon-search">
-          <i class="iconfont icon-search-1-copy"></i>
-        </span>
+      <div class="input-wrapper" :class="{'inp-small':pageSmall,'focus':searchPanel}" ref="inputWrapperRef" tabindex="1" @blur="searchPanel = false">
+        <div class="input-box">
+          <input v-model="keyword" @focus="handleInputFocus" name="keyword" type="text" placeholder="尚硅谷">
+          <span @click="search" class="icon-search">
+            <i class="iconfont icon-search-1-copy"></i>
+          </span>
+        </div>
+        <div v-if="searchPanel" class="search-panel">
+          <div class="search-history">
+            <div class="search-history-header">
+              <div class="header-text">搜索历史</div>
+              <div class="clear-btn">清空</div>
+            </div>
+            <ul class="search-history-list">
+              <li class="search-history-item">
+                <span class="history-text">哈啊dscvcsdvsdvwwwfefwef哈</span>
+                <div class="delete-btn">
+                  <i class="iconfont icon-cuowu"></i>
+                </div>
+              </li>
+              <li class="search-history-item">
+                <span class="history-text">哈啊dscvcsdvsdvwwwfefwef哈</span>
+                <div class="delete-btn">
+                  <i class="iconfont icon-cuowu"></i>
+                </div>
+              </li>
+              <li class="search-history-item">
+                <span class="history-text">哈啊dscvcsdvsdvwwwfefwef哈</span>
+                <div class="delete-btn">
+                  <i class="iconfont icon-cuowu"></i>
+                </div>
+              </li>
+              <li class="search-history-item">
+                <span class="history-text">哈啊dscvcsdvsdvwwwfefwef哈</span>
+                <div class="delete-btn">
+                  <i class="iconfont icon-cuowu"></i>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="search-hot">
+            <div class="search-hot-header">
+              <span class="header-text">热搜</span>
+            </div>
+            <ul class="search-hot-list">
+              <li class="search-hot-item">
+                <span class="order-text">1</span>&nbsp;&nbsp;滴哦闹女哦少女
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
       <div class="nav-right">
         <div v-if="!token" class="login right-item">
@@ -148,13 +216,13 @@
     max-width: $max-width;
     margin: 0 auto;
     // height: 152px;
-    padding: 0 15px;
-    padding-top: 10px;
+    padding: 10px 15px;
     box-sizing: border-box;
     // background-color: transparent;
     .wrapper {
       display: flex;
       justify-content: space-between;
+      align-items: start;
       height: 40px;
       // color: $colorG;
       font-size: $fontJ;
@@ -198,47 +266,129 @@
           vertical-align: middle;
         }
       }
-      .inp {
-        position: relative;
+      .input-wrapper {
         width: 420px;
-        // height:34px;
-        padding: 0 5px;
-        box-sizing: border-box;
-        background-color: $colorJ;
-        border: 1px solid $colorL;
         border-radius: 5px;
-        &:hover {
+        border: 1px solid $colorL;
+        &.focus {
+          box-shadow: 0 0 30px #0000001a;
+          .input-box {
+            input {
+              background-color: #e3e5e7;
+            }
+          }
+        }
+        .input-box {
+          position: relative;
+          padding: 0 5px;
+          background-color: $colorJ;
+          border-top-left-radius: 5px;
+          border-top-right-radius: 5px;
+          input {
+            border:none;
+            width: 89%;
+            height: 30px;
+            padding: 0 5px;
+            margin: 6px 0;
+            border-radius: 5px;
+            background-color: transparent;
+            box-sizing: border-box;
+            margin-right: 10px;
+          }
+          .icon-search {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-block;
+            width: 8%;
+            height: 30px;
+            line-height: 30px;
+            border-radius: 5px;
+            text-align: center;
+            vertical-align: middle;
+            color: $colorI;
+            &:hover {
+              background-color: $colorL;
+              cursor: pointer;
+            }
+          }
+        }
+        .search-panel {
+          padding: 12px 0;
           background-color: $colorG;
-        }
-        input {
-          border:none;
-          width: 85%;
-          height: 40px;
-          padding: 3px 5px;
-          border-radius: 5px;
-          background-color: transparent;
-          box-sizing: border-box;
-          margin-right: 10px;
-          // &:focus {
-          //   background-color: $colorG;
-          // }
-        }
-        .icon-search {
-          position: absolute;
-          right: 10px;
-          top: 50%;
-          transform: translateY(-50%);
-          display: inline-block;
-          width: 30px;
-          height: 20px;
-          line-height: 20px;
-          border-radius: 5px;
-          text-align: center;
-          vertical-align: middle;
-          color: $colorI;
-          &:hover {
-            background-color: $colorL;
-            cursor: pointer;
+          border-bottom-left-radius: 5px;
+          border-bottom-right-radius: 5px;
+          .search-history {
+            padding: 0 12px;
+            .search-history-header {
+              @include flex();
+              .header-text {
+                font-weight: 550;
+              }
+              .clear-btn {
+                font-size: $fontK;
+                color: $colorD;
+                cursor: pointer;
+              }
+            }
+            .search-history-list {
+              display: flex;
+              flex-wrap: wrap;
+              margin-top: 10px;
+              .search-history-item {
+                position: relative;
+                margin: 0 10px 10px 0;
+                border-radius: 5px;
+                background-color: $colorN;
+                cursor: pointer;
+                .history-text {
+                  display: inline-block;
+                  max-width: 100px;
+                  padding: 5px 8px;
+                  overflow: hidden;
+                  white-space: nowrap;
+                  text-overflow: ellipsis;
+                  font-size: $fontK;
+                }
+                .delete-btn {
+                  position: absolute;
+                  top: -4px;
+                  right: -4px;
+                  @include flex(center);
+                  height: 12px;
+                  width: 12px;
+                  border-radius: 6px;
+                  background-color: $colorE;
+                  color: $colorG;
+                  .icon-cuowu {
+                    font-size: 10px;
+                  }
+                }
+              }
+            }
+          }
+          .search-hot {
+            .search-hot-header {
+              padding: 0 12px;
+              .header-text {
+                font-weight: 550;
+              }
+            }
+            .search-hot-list {
+              margin-top: 6px;
+              .search-hot-item {
+                padding: 10px 14px;
+                font-size: $fontK;
+                cursor: pointer;
+                &:hover {
+                  background-color: $colorN;
+                }
+                .order-text {
+                  font-weight: 550;
+                }
+              }
+            }
           }
         }
       }

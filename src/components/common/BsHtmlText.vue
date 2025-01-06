@@ -1,13 +1,26 @@
 <script setup>
   import { unparseSpan } from '@/hooks/parseHtmlText';
+  import { useRouter } from 'vue-router';
 
+  /* router */
+  const router = useRouter()
   const props = defineProps(['content','atUserInfoList'])
   const htmlArr = unparseSpan(props.content, props.atUserInfoList)
+
+  function toHome(id) {
+    const page = router.resolve({
+      name:'home',
+      params:{
+        userId:id
+      }
+    })
+    window.open(page.href, '_blank')
+  }
 </script>
 
 <template>
   <span v-for="(item,index) in htmlArr" :key="index">
-    <a v-html="item.content" class="at-username" v-if="item.isAtSpan" :href="`/#/home/${item.atUserId}`" target="_blank"></a>
+    <a v-html="item.content" class="at-username" v-if="item.isAtSpan" @click.stop="toHome(item.atUserId)"></a>
     <span class="content" v-html="item.content" v-else></span>
   </span>
 </template>

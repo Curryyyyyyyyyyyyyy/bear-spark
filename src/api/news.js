@@ -65,7 +65,7 @@ export const getNewsPrepareApi = () => {
   }
   return request.get('/happening/prepare')
 }
-/* 获取动态列表 */
+/* 分页获取动态列表 */
 export const getNewsListApi = (params) => {
   if(import.meta.env.VITE_MOCK) {
     return {

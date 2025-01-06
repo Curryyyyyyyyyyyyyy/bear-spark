@@ -20,8 +20,9 @@
   /* Router */
   const router = useRouter()
   /* Props */
-  const props = defineProps(['tab','activeUp'])
+  defineProps(['tab'])
   /* onMounted */
+  const userId = ref(null)
   onMounted(() => {
     loadMoreNews()
   })
@@ -139,7 +140,7 @@
       const newsRes = await getNewsListApi({
         pageNum:pageNum.value++,
         pageSize:pageSize.value,
-        username:props.activeUp
+        selectedUserId:userId.value
       })
       newsList.value.push(...newsRes.records)
       if(newsRes.total <= newsList.value.length) isArriveTotal.value = true
@@ -188,7 +189,8 @@
   }
   //#endregion
   //#region 查看指定用户动态
-  function getUserNewsList(userId) {
+  function getUserNewsList(id) {
+    userId.value = id
     pageNum.value = 1
     newsList.value.splice(0, newsList.value.length)
     isArriveTotal.value = false
@@ -197,7 +199,7 @@
       const newsRes = await getNewsListApi({
         pageNum:pageNum.value++,
         pageSize:pageSize.value,
-        selectedUserId:userId
+        selectedUserId:id
       })
       newsList.value.push(...newsRes.records)
       if(newsRes.total <= newsList.value.length) isArriveTotal.value = true

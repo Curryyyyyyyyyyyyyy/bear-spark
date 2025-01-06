@@ -109,7 +109,7 @@
           </div>
           <div class="news-tabs-highlight" :style="{transform:tab==='all'?`translateX(37px)`:(tab==='video'?`translateX(98px)`:`translateX(158px)`)}"></div>
         </div>
-        <NewsList ref="newsListRef" :tab="tab" :activeUp="activeUp"></NewsList>
+        <NewsList ref="newsListRef" :tab="tab"></NewsList>
       </div>
       <news-aside-box :sideBarUrl="sideBarUrl" :recentTagList="recentTagList"></news-aside-box>
     </div>

@@ -16,5 +16,6 @@
   @use '@/assets/sass/mixin.scss' as *;
   .home_index {
     @include flex();
+    padding: 20px 0;
   }
 </style>

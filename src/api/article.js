@@ -151,7 +151,7 @@ export const giveMeritApi = (params) => {
 //#endregion
 //#region 专栏分类
 /* 获取专栏分类列表 */
-export const getCategoryListApi = () => {
+export const getCategoryListApi = (params) => {
   if(import.meta.env.VITE_MOCK) {
     return [
       {
@@ -162,12 +162,12 @@ export const getCategoryListApi = () => {
       {
         "categoryId": 1,
         "categoryName": "c语言",
-        "articleNum":10
+        "articleNum":11
       },
       {
         "categoryId": 2,
         "categoryName": "Java",
-        "articleNum":10
+        "articleNum":1111
       },
       {
         "categoryId": 3,
@@ -181,7 +181,9 @@ export const getCategoryListApi = () => {
       },
     ]
   }
-  return request.get('/category/list')
+  return request.get('/category/list', {
+    params
+  })
 }
 /* 获取专栏分类信息 */
 export const getCategoryInfoApi = (params) => {

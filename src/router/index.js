@@ -1,6 +1,7 @@
 import {createRouter,createWebHashHistory} from 'vue-router'
 
 const routes = [
+  /* 首页 */
   {
     path:'/',
     redirect:'/index'
@@ -10,6 +11,7 @@ const routes = [
     name:'index',
     component:()=>import('@/views/index.vue')
   },
+  /* 投稿 */
   {
     path:'/submit',
     name:'submit',
@@ -32,6 +34,7 @@ const routes = [
       },
     ]
   },
+  /* 主页 */
   {
     path:'/home/:userId',
     name:'home',
@@ -69,11 +72,13 @@ const routes = [
       },
     ]
   },
+  /* 动态 */
   {
     path:'/news_index',
     name:'news_index',
     component:()=>import('@/views/news/news.vue')
   },
+  /* 动态详情 */
   {
     path:'/news_detail',
     name:'news_detail',
@@ -83,6 +88,12 @@ const routes = [
     path:'/news_detail/quote',
     name:'news_detail_quote',
     component:()=>import('@/views/news-detail/NewsDetail.vue')
+  },
+  /* 搜索 */
+  {
+    path:'/search',
+    name:'search',
+    component:()=>import('@/views/search/search.vue')
   },
 ]
 

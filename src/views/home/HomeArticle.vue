@@ -2,15 +2,18 @@
   import Loading from '../../components/common/Loading.vue'
   import {getArticleListApi, getCategoryListApi, getCategoryInfoApi} from '../../api/article'
   import { onMounted, ref } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { useRouter, useRoute } from 'vue-router';
 
   /* router */
   const router = useRouter()
+  const route = useRoute()
   /* onMounted */
   const categoryList = ref([])
   const allArticleNum = ref(0)
   onMounted(async () => {
-    categoryList.value = await getCategoryListApi()
+    categoryList.value = await getCategoryListApi({
+      listedUserId:route.params.userId
+    })
     categoryList.value.forEach(item => {
       allArticleNum.value += item.articleNum
     })
@@ -39,7 +42,8 @@
     const res = await getArticleListApi({
       pageNum:pageNum.value,
       pageSize:pageSize.value,
-      categoryId:id
+      categoryId:id,
+      listedUserId:route.params.userId
     })
     articleList.value = res.records
   }
