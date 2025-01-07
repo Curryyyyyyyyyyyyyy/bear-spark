@@ -1,12 +1,16 @@
 <script setup>
-  import Loading from '../../components/common/Loading.vue'
-  import {getArticleListApi, getCategoryListApi, getCategoryInfoApi} from '../../api/article'
+  import Loading from '@/components/common/Loading.vue'
+  import {getArticleListApi, getCategoryListApi, getCategoryInfoApi} from '@/api/article'
+  import handleNum from '@/hooks/handleNum'
   import { onMounted, ref } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
+  import useUser from '@/store/user'
 
   /* router */
   const router = useRouter()
   const route = useRoute()
+  /* store */
+  const {userId} = useUser()
   /* onMounted */
   const categoryList = ref([])
   const allArticleNum = ref(0)
@@ -17,9 +21,9 @@
     categoryList.value.forEach(item => {
       allArticleNum.value += item.articleNum
     })
+    total.value = allArticleNum.value
     loadMore()
   })
-
   //#region 加载文章
   const showCategory = ref(false)
   const categoryId = ref(null)
@@ -29,23 +33,20 @@
   const pageSize = ref(20)
   const busy = ref(false)
   const loading = ref(false)
+  const total = ref(0)
   const isArriveTotal = ref(false)
-  async function getArticleList(id) {
+  async function getArticleList(id, articleNum) {
     categoryId.value = id
+    total.value = articleNum
     pageNum.value = 1
+    articleList.value = []
     isArriveTotal.value = false
     if(id) {
       categoryInfo.value = await getCategoryInfoApi({
         categoryId:id
       })
     }
-    const res = await getArticleListApi({
-      pageNum:pageNum.value,
-      pageSize:pageSize.value,
-      categoryId:id,
-      listedUserId:route.params.userId
-    })
-    articleList.value = res.records
+    loadMore()
   }
   function loadMore() {
     busy.value = true
@@ -54,10 +55,11 @@
       const res = await getArticleListApi({
         pageNum:pageNum.value++,
         pageSize:pageSize.value,
-        categoryId:categoryId.value
+        categoryId:categoryId.value,
+        listedUserId:route.params.userId
       })
-      articleList.value.push(...res.records)
-      if(articleList.value.length >= res.total) isArriveTotal.value = true
+      articleList.value.push(...res)
+      if(articleList.value.length >= total.value) isArriveTotal.value = true
       loading.value = false
       busy.value = false
     }, 500);
@@ -78,10 +80,10 @@
 <template>
   <div class="home-article">
     <div class="side-nav">
-      <div @click="getArticleList(null)" class="side-nav-item all">
+      <div @click="getArticleList(null, allArticleNum)" class="side-nav-item all">
         <div class="side-nav-item-header" :class="{'active':categoryId === null}">
           <span class="side-nav-item-text">全部</span>
-          <div class="side-nav-item-num">{{ allArticleNum }}</div>
+          <div class="side-nav-item-num">{{ handleNum(allArticleNum) }}</div>
         </div>
       </div>
       <div class="side-nav-item category">
@@ -92,14 +94,14 @@
         <div v-if="showCategory" class="side-nav-item-content">
           <ul class="side-nav-content-list">
             <li
-              @click="getArticleList(item.categoryId)"
+              @click="getArticleList(item.categoryId, item.articleNum)"
               v-for="item in categoryList"
               :key="item.categoryId"
               class="side-nav-content-item"
               :class="{'content-active':categoryId === item.categoryId}"
               >
               <div class="item-text">{{ item.categoryName }}</div>
-              <div class="item-num">{{ item.articleNum }}</div>
+              <div class="item-num">{{ handleNum(item.articleNum) }}</div>
             </li>
           </ul>
         </div>
@@ -146,6 +148,12 @@
                   <span class="stat-item-text">收藏</span>
                 </div>
               </div>
+              <div v-if="userId == route.params.userId" @click.stop="router.push({
+                name:'submit_article',
+                query:{
+                  articleId:item.articleId
+                }
+              })" class="modify-btn">编辑</div>
             </div>
           </div>
         </a>
@@ -168,7 +176,7 @@
     display: flex;
     .side-nav {
       flex-shrink: 0;
-      width: 160px;
+      width: 174px;
       margin-right: 24px;
       .side-nav-item {
         border-bottom: 1px solid $colorN;
@@ -316,7 +324,9 @@
               }
             }
             .article-info-footer {
+              position: relative;
               @include flex(left);
+              width: 100%;
               .article-declaration {
                 width: 32px;
                 height: 18px;
@@ -345,6 +355,15 @@
                   .stat-item-num {
                     margin-right: 3px;
                   }
+                }
+              }
+              .modify-btn {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                color: $colorD;
+                &:hover {
+                  color: $colorI;
                 }
               }
             }

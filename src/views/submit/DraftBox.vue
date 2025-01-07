@@ -57,7 +57,7 @@
             <router-link :to="{
               name:'submit_article',
               query:{
-                draftId:1
+                draftId:item.draftId
               }
             }">
               <span class="title">{{ item.title }}</span>
@@ -72,7 +72,7 @@
               <router-link :to="{
                 name:'submit_article',
                 query:{
-                  draftId:1
+                  draftId:item.draftId
                 }
               }">
                 <button>编辑</button>
@@ -103,7 +103,7 @@
   .draft-box {
     @include flex(space-between, start);
     height: calc(100% - 60px);
-    padding: 26px 60px 26px 36px;
+    padding: 86px 60px 26px 36px;
     box-sizing: border-box;
     .draft-box-header {
       @include flex(left, start);

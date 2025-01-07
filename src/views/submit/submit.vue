@@ -30,8 +30,10 @@
     height: 100%;
     .bs-submit-header {
       z-index: 100;
-      position: sticky;
+      position: fixed;
+      left: 0;
       top: 0;
+      right: 0;
       @include flex();
       padding: 0 60px 0 24px;
       background-color: $colorG;

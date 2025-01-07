@@ -19,7 +19,7 @@
   const {pictureList} = storeToRefs(newsStore)
   //#region 标签
   /* publishTagId */
-  const publishTagId = ref('')
+  const publishTagId = ref(null)
   function changePubTagId(id) {
     publishTagId.value = id
   }
@@ -56,6 +56,7 @@
     ElMessage.success('发布成功')
     //#region 清空表单
       newsTitle.value = ''
+      publishTagId.value = null
       pubInputBoxRef.value.children[0].innerHTML = ''
       pubInputMethods.value.handleContentNum(pubInputBoxRef.value.children[0])
       imgUrlList.value = []

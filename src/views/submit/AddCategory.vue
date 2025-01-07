@@ -13,19 +13,22 @@
     if(event.target.files[0].size / 1024 / 1024 > 1) return ElMessage.error('图片大小不能超过1MB')
     const fd = new FormData()
     fd.append('file', event.target.files[0])
-    categoryPhotoUrl.value = await uploadApi(fd, 1)
+    categoryPhotoUrl.value = await uploadApi(fd, 2)
   }
   function closeModal() {
     emit('close')
   }
   async function submit() {
     if(!categoryName.value) return ElMessage.error('请输入专栏分类名称')
-    if(!categoryName.value) return ElMessage.error('请上传专栏分类配图')
+    if(!categoryPhotoUrl.value) return ElMessage.error('请上传专栏分类配图')
     await addCategoryApi({
       categoryName:categoryName.value,
       categoryPhotoUrl:categoryPhotoUrl.value
     })
     ElMessage.success('添加成功')
+    categoryName.value = ''
+    categoryPhotoUrl.value = ''
+    closeModal()
   }
 </script>
 
@@ -85,12 +88,15 @@
         color: $colorC;
       }
       .photo-box {
+        height: 120px;
+        width: 160px;
         border: 1px solid $colorN;
         border-radius: 6px;
         cursor: pointer;
         img {
-          height: 120px;
-          width: 160px;
+          height: 100%;
+          width: 100%;
+          border-radius: 6px
         }
       }
       .upload-box {

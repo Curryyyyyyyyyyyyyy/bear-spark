@@ -7,10 +7,16 @@
   import {timeFormat} from '@/hooks/timeFormat.js'
   import { dayjs, ElMessage } from 'element-plus';
   import { nextTick, onMounted, ref } from 'vue';
+  import useUser from '@/store/user'
+  import { useRouter } from 'vue-router';
 
   const emit = defineEmits(['close'])
-  const props = defineProps(['title','contentHtml','contentText','contentImgList','articleId','articleInfo'])
+  const props = defineProps(['title','draftId','contentHtml','contentText','contentImgList','articleId','articleInfo'])
 
+  /* store */
+  const {userId} = useUser()
+  /* router */
+  const router = useRouter()
   /* onMounted */
   onMounted(async () => {
     if(props.articleId) {
@@ -36,15 +42,16 @@
   const coverUrl = ref(null)
   const coverIndex = ref('')
   const coverList = ref([...props.contentImgList])
-  function uploadCover(event) {
+  async function uploadCover(event) {
     if(event.target.files[0].size / 1024 / 1024 > 1) return ElMessage.error('图片大小不能超过1MB')
     const fd = new FormData()
     fd.append('file', event.target.files[0])
-    coverUrl.value = uploadApi(fd, 1)
+    coverUrl.value = await uploadApi(fd, 2)
     coverIndex.value = ''
+    event.target.value = ''
   }
   function selectCover(imgUrl,index) {
-    coverUrl.value = imgUrl
+    coverUrl.value = imgUrl.src
     coverIndex.value = index
   }
   //#endregion
@@ -65,7 +72,9 @@
     mouseState.value = true
     setTimeout(async () => {
       if(mouseState.value) {
-        categoryList.value = await getCategoryListApi()
+        categoryList.value = await getCategoryListApi({
+          listedUserId:userId
+        })
         showCategoryBox.value = true
         nextTick(()=>{
           categoryRef.value.focus()
@@ -101,8 +110,10 @@
   async function publishArticle(pubTime) {
     if(declaration.value === 1 && !reprintArticleUrl.value) return ElMessage.error('请填写原文链接')
     if(declaration.value === 0) reprintArticleUrl.value = null
+    if(!summary.value) return ElMessage.error('请填写文章摘要')
     const nowTime = dayjs()
     pubTime = pubTime ? pubTime : timeFormat(nowTime.format('YYYY-MM-DD'),nowTime.$H,nowTime.$m)
+    const imgUrlList = props.contentImgList.map(item => item.src)
     if(props.articleId) {
       await modifyArticleApi({
         articleId:props.articleId,
@@ -112,7 +123,7 @@
         coverUrl:coverUrl.value,
         tagId:tagId.value,
         categoryIdList:selectedCategoryList.value.map(item => item.categoryId),
-        imgUrlList:props.contentImgList,
+        imgUrlList:imgUrlList,
         visibility:visibility.value,
         commentAble:commentAble.value,
         declaration:declaration.value,
@@ -121,13 +132,14 @@
       })
     } else {
       await publishArticleApi({
+        draftId:props.draftId,
         title:props.title,
         summary:summary.value,
         content:props.contentHtml,
         coverUrl:coverUrl.value,
         tagId:tagId.value,
         categoryIdList:selectedCategoryList.value.map(item => item.categoryId),
-        imgUrlList:props.contentImgList,
+        imgUrlList:imgUrlList,
         visibility:visibility.value,
         commentAble:commentAble.value,
         declaration:declaration.value,
@@ -136,6 +148,14 @@
       })
     }
     ElMessage.success('发布成功')
+    setTimeout(() => {
+      router.push({
+        name:'home_article',
+        params:{
+          userId:userId
+        }
+      })
+    }, 500)
   }
   //#endregion
   //#region 定时发布框
@@ -167,26 +187,23 @@
         <span class="item-text">添加封面：</span>
         <div class="cover-select-box">
           <div class="cover-box">
-            <img v-if="coverUrl" src="/imgs/logo.png" alt="">
+            <img v-if="coverUrl" :src="coverUrl" alt="">
             <label v-else for="upload-cover" class="upload-box">
               <i class="iconfont icon-jiahao"></i>
               <span class="upload-text">添加文章封面</span>
             </label>
-            <div v-if="coverUrl" @click="coverUrl = ''" class="icon-delete-btn">
+            <div v-if="coverUrl" @click="coverUrl = null,coverIndex = ''" class="icon-delete-btn">
               <i class="iconfont icon-cuowu"></i>
             </div>
           </div>
           <div class="cover-list-box">
             <div class="cover-category-list">
               <div class="cover-category-item active">正文图</div>
-              <div class="cover-category-item">标签图</div>
-              <div class="cover-category-item">热门</div>
-              <div class="cover-category-item">VIP</div>
               <label for="upload-cover" class="cover-category-item">本地上传</label>
             </div>
             <div class="cover-list">
               <div @click="selectCover(item,index)" v-for="(item,index) in coverList" :key="index" class="cover-box">
-                <img :src="item" alt="">
+                <img :src="item.src" alt="">
                 <div v-if="index === coverIndex" class="icon-gou-box">
                   <i class="iconfont icon-gou"></i>
                 </div>
@@ -202,7 +219,7 @@
         <div class="summary-box">
           <textarea v-model="summary" placeholder="摘要：会在推荐、列表等场景外露，帮助读者快速了解内容，支持一键将正文前256字符键入摘要文本框" maxlength="256"></textarea>
           <div class="desc-box">
-            <span class="desc-text">{{ summary.length }}/256</span>
+            <span class="desc-text">{{ summary ? summary.length : 0 }}/256</span>
             <button @click="extractSummary" class="extract-btn">一键提取</button>
           </div>
         </div>
@@ -306,7 +323,7 @@
     <div class="modal-footer">
       <button v-if="props.articleId" @click="close" class="modal-footer-btn cancel-btn">取消</button>
       <button v-else @click="handleShowSetTime" class="modal-footer-btn set-time-btn">定时发布</button>
-      <button @click="publishArticle" class="modal-footer-btn publish-btn">发布文章</button>
+      <button @click="publishArticle('')" class="modal-footer-btn publish-btn">发布文章</button>
     </div>
   </div>
   <set-time-submit v-if="showSetTimeBox" @publishArticle="publishArticle" @close="showSetTimeBox = false"></set-time-submit>
@@ -370,17 +387,21 @@
           @include flex();
           .cover-box {
             position: relative;
+            width: 160px;
+            height: 90px;
             border: 1px dotted $colorF;
             border-radius: 6px;
+            box-sizing: border-box;
             img {
-              width: 160px;
-              height: 90px;
+              height: 100%;
+              width: 100%;
+              border-radius: 6px
             }
             .upload-box {
               @include flex(center);
               flex-direction: column;
-              width: 160px;
-              height: 90px;
+              width: 100%;
+              height: 100%;
               cursor: pointer;
               .icon-jiahao {
                 font-size: $fontJ;
@@ -406,7 +427,8 @@
             height: 90px;
             width: 356px;
             .cover-category-list {
-              @include flex();
+              width: 100%;
+              @include flex(left);
               .cover-category-item {
                 height: 22px;
                 line-height: 22px;
@@ -448,14 +470,18 @@
                 border-radius: 2px;
               }
               .cover-box {
+                flex-shrink: 0;
                 position: relative;
+                width: 80px;
+                height: 45px;
                 border-radius: 6px;
                 background-color: $colorG;
                 margin-right: 4px;
                 cursor: pointer;
                 img {
-                  width: 80px;
-                  height: 45px;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 6px
                 }
                 .icon-gou-box {
                   @include flex(center);

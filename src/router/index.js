@@ -110,25 +110,17 @@ router.beforeEach((to, from, next) => {
 }) 
 /* 修改页面title */
 router.afterEach((to) => {
-  switch(to.name) {
-    case 'index':
-      document.title = '首页_bear-spark'
-      break
-    case 'news_index':
-      document.title = '动态首页_bear-spark'
-      break
-    case 'news_detail':
-      document.title = '动态详情_bear-spark'
-      break
-    case 'submit_article':
-      document.title = '创作中心_bear-spark'
-      break
-    case 'submit_video':
-      document.title = '创作中心_bear-spark'
-      break
-    case 'draft_box':
-      document.title = '创作中心_bear-spark'
-      break
+  const path = to.path
+  if(path.includes('/home')) {
+    document.title = '个人中心_bear-spark'
+  } else if(path.includes('/submit')) {
+    document.title = '创作中心_bear-spark'
+  } else if(path.includes('/index')) {
+    document.title = '首页_bear-spark'
+  } else if(path.includes('news_index')) {
+    document.title = '动态首页_bear-spark'
+  } else if(path.includes('news_detail')) {
+    document.title = '动态详情_bear-spark'
   }
 })
 

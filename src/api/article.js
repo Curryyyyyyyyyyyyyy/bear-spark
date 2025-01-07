@@ -89,7 +89,7 @@ export const getArticleDetailApi = (params) => {
       }
     }
   }
-  request.get(`/article/detail/${params.articleId}`)
+  return request.get(`/article/detail/${params.articleId}`)
 }
 /* 分页获取指定分类专栏 */
 export const getArticleListApi = (params) => {
@@ -137,12 +137,15 @@ export const getArticleListApi = (params) => {
     }
   }
   return request.get(`/article/${params.pageNum}/${params.pageSize}`, {
-    params
+    params:{
+      categoryId:params.categoryId,
+      listedUserId:params.listedUserId
+    }
   })
 }
 /* 收藏专栏 */
 export const collectArticleApi = (params) => {
-  return request.post(`/collect/article/${params.articleId}`)
+  return request.post(`/collect/article/${params.articleId}/${params.collected}`)
 }
 /* 投功德 */
 export const giveMeritApi = (params) => {
@@ -157,7 +160,7 @@ export const getCategoryListApi = (params) => {
       {
         "categoryId": 10,
         "categoryName": "数据结构哈哈哈",
-        "articleNum":10
+        "articleNum":13000000
       },
       {
         "categoryId": 1,

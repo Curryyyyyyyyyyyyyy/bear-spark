@@ -72,11 +72,10 @@
     timeout: 5 * 1000, // 5 秒
     // 自定义上传
     async customUpload(file, insertFn) {
-      // file 即选中的文件
       const fd = new FormData()
       fd.append('file',file)
       // 自己实现上传，并得到图片 url alt href
-      const url = await uploadApi(file, 1)
+      const url = await uploadApi(fd, 2)
       // 最后插入图片
       insertFn(url)
     },
@@ -169,6 +168,7 @@
     :contentImgList="contentImgList"
     :articleId="articleId"
     :articleInfo="articleInfo"
+    :draftId="draftId"
   >
   </submit-article-modal>
 </template>
@@ -177,6 +177,7 @@
   @use '@/assets/sass/config.scss' as *;
   @use '@/assets/sass/mixin.scss' as *;
   .bs-submit-article {
+    padding-top: 60px;
     padding-bottom: 90px;
     .editor-box {
       .w-e-bar.w-e-bar-show.w-e-toolbar {

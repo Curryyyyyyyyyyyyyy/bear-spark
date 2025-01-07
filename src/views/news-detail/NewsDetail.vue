@@ -33,6 +33,7 @@
       articleInfo.value = await getArticleDetailApi({
         articleId:articleId.value
       })
+      console.log(articleInfo.value)
       happeningId.value = articleInfo.value.happeningId
     }
     newsInfo.value = await getNewsDetailApi({
@@ -152,7 +153,7 @@
   async function collectArticle() {
     await collectArticleApi({
       articleId:articleId.value,
-      collected:articleInfo.value.collected ? 0 :1
+      collected:articleInfo.value.collected ? 0 : 1
     })
     if(articleInfo.value.collected) {
       articleInfo.value.collected = 0
@@ -227,14 +228,14 @@
               </div>
               <div v-if="showCascader" class="setting-warp">
                 <div class="settings">
-                  <div v-if="userId === articleId.publisherInfo?.userId" @click="deleteArticle" class="setting-item setting-delete">删除</div>
+                  <div v-if="userId === articleInfo.publisherInfo?.userId" @click="deleteArticle" class="setting-item setting-delete">删除</div>
                   <div v-else class="setting-item setting-report">举报</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="article-tag">
+        <div v-if="articleInfo.tagId" class="article-tag">
           <div class="tag">
             <i class="iconfont icon-huati"></i>
             <span class="tag-name">{{ articleInfo.tag }}</span>
@@ -477,7 +478,7 @@
             {{ newsInfo.happeningInfo?.likeNumInfo }}
           </div>
         </div>
-        <div v-if="articleId && articleInfo.publisherInfo?.userId !== userId" @click="giveMerit" class="side-toolbar-item merit-info" :class="{'active':articleInfo.merited}">
+        <div v-if="articleId" @click="giveMerit" class="side-toolbar-item merit-info" :class="{'active':articleInfo.merited}">
           <i class="iconfont icon-muyu"></i>
           <div class="side-toolbar-item-text">
             {{ articleInfo.meritNumInfo }}

@@ -92,7 +92,7 @@
                 <span><i class="iconfont icon-dongtai"></i></span>
                 <p>全部动态</p>
               </div>
-              <div v-for="(item,index) in followerList" :key="index" @click="getUserNewsList(item.userId)" class="up-box" :class="{'active':activeUp === item.username}">
+              <div v-for="(item,index) in followerList" :key="index" @click="getUserNewsList(item.userId)" class="up-box" :class="{'active':activeUp === item.userId}">
                 <img :src="item.avatarUrl" alt="头像">
                 <p>{{ item.username }}</p>
               </div>
@@ -109,7 +109,9 @@
           </div>
           <div class="news-tabs-highlight" :style="{transform:tab==='all'?`translateX(37px)`:(tab==='video'?`translateX(98px)`:`translateX(158px)`)}"></div>
         </div>
-        <NewsList ref="newsListRef" :tab="tab"></NewsList>
+        <div class="new-list">
+          <NewsList ref="newsListRef" :tab="tab"></NewsList>
+        </div>
       </div>
       <news-aside-box :sideBarUrl="sideBarUrl" :recentTagList="recentTagList"></news-aside-box>
     </div>
@@ -314,6 +316,9 @@
             transform: translateX(37px);
             transition: transform .2s;
           }
+        }
+        .new-list {
+          margin-top: 10px;
         }
       }
     }

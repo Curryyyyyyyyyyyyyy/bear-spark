@@ -273,6 +273,8 @@
         &.focus {
           box-shadow: 0 0 30px #0000001a;
           .input-box {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
             input {
               background-color: #e3e5e7;
             }
@@ -282,8 +284,7 @@
           position: relative;
           padding: 0 5px;
           background-color: $colorJ;
-          border-top-left-radius: 5px;
-          border-top-right-radius: 5px;
+          border-radius: 5px;
           input {
             border:none;
             width: 89%;
@@ -325,6 +326,7 @@
               @include flex();
               .header-text {
                 font-weight: 550;
+                color: $colorI;
               }
               .clear-btn {
                 font-size: $fontK;
@@ -336,6 +338,7 @@
               display: flex;
               flex-wrap: wrap;
               margin-top: 10px;
+              color: $colorI;
               .search-history-item {
                 position: relative;
                 margin: 0 10px 10px 0;
@@ -372,6 +375,7 @@
             .search-hot-header {
               padding: 0 12px;
               .header-text {
+                color: $colorI;
                 font-weight: 550;
               }
             }
@@ -380,6 +384,7 @@
               .search-hot-item {
                 padding: 10px 14px;
                 font-size: $fontK;
+                color: $colorI;
                 cursor: pointer;
                 &:hover {
                   background-color: $colorN;
@@ -418,6 +423,7 @@
         }
         .login {
           position: relative;
+          color: $colorG;
           .nav-login {
             display: inline-block;
             height: 40px;
@@ -503,6 +509,7 @@
           padding: 0 10px;
           border-radius: 15px;
           background-color: $colorM;
+          color: $colorG;
           span {
             margin-left: 3px;
           }
