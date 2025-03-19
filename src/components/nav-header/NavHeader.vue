@@ -1,10 +1,10 @@
 <script setup>
-  import login from '@/views/login.vue'
+  import login from '@/views/login/login.vue'
   import HeaderAvatar from '@/components/nav-header/HeaderAvatar.vue';
   import HeaderMessage from '@/components/nav-header/HeaderMessage.vue';
   import useUser from '@/store/user';
   import { storeToRefs } from 'pinia';
-  import { onMounted, ref} from 'vue';
+  import { onMounted, ref } from 'vue';
 
   /* Router */
   const userStore = useUser()
@@ -16,6 +16,16 @@
         searchPanel.value = false
       }
     })
+  })
+  defineProps({
+    color:{
+      type: String,
+      default: 'black'
+    },
+    showLogo:{
+      type: Boolean,
+      default: false
+    }
   })
 
   //#region 搜索
@@ -59,16 +69,25 @@
   <div class="nav-header">
     <div class="wrapper">
       <div class="nav-left">
+        <a v-if="showLogo" class="header-index" href="/#/index" :style="{color:color}">
+          <span class="logo"></span>
+          <span>首页</span>
+          <i class="iconfont icon-down"></i>
+        </a>
+        <a v-else class="header-index" :style="{color:color}">
+          <i class="iconfont icon-shouye"></i>
+          <span>首页</span>
+        </a>
         <slot name="nav"></slot>
-        <a class="left-item jump">番剧</a>
-        <a class="left-item jump">直播</a>
-        <a class="left-item jump">游戏中心</a>
-        <a class="left-item jump">会员购</a>
-        <a class="left-item jump">漫画</a>
-        <a class="left-item jump">赛事</a>
-        <a class="left-item jump">KPL</a>
-        <a v-if="!pageSmall" class="left-item jump">KPL</a>
-        <a v-if="!pageSmall" class="left-item jump">KPL</a>
+        <a class="left-item jump" :style="{color:color}">番剧</a>
+        <a class="left-item jump" :style="{color:color}">直播</a>
+        <a class="left-item jump" :style="{color:color}">游戏中心</a>
+        <a class="left-item jump" :style="{color:color}">会员购</a>
+        <a class="left-item jump" :style="{color:color}">漫画</a>
+        <a class="left-item jump" :style="{color:color}">赛事</a>
+        <a class="left-item jump" :style="{color:color}">KPL</a>
+        <a v-if="!pageSmall" class="left-item jump" :style="{color:color}">KPL</a>
+        <a v-if="!pageSmall" class="left-item jump" :style="{color:color}">KPL</a>
       </div>
       <div class="input-wrapper" :class="{'inp-small':pageSmall,'focus':searchPanel}" ref="inputWrapperRef" tabindex="1" @blur="searchPanel = false">
         <div class="input-box">
@@ -124,7 +143,7 @@
       </div>
       <div class="nav-right">
         <div v-if="!token" class="login right-item">
-          <span class="nav-login" @click="openLogin">登录</span>
+          <span class="nav-login" @click="openLogin" :style="{color:color}">登录</span>
           <div class="children">
             <div class="login-info">
               <p>登录后你可以：</p>
@@ -156,26 +175,26 @@
         <div v-else class="avatar-box right-item">
           <header-avatar></header-avatar>
         </div>
-        <a class="right-item">
+        <a class="right-item" :style="{color:color}">
           <i class="iconfont icon-huiyuan jump" :class="{'onlyIcon':pageSmall}"></i>
           <p v-if="!pageSmall">大会员</p>
         </a>
-        <a class="right-item">
+        <a class="right-item" :style="{color:color}">
           <header-message :showText="!pageSmall"></header-message>
         </a>
-        <a class="right-item" href="/#/news_index" target="_blank">
+        <a class="right-item" :style="{color:color}" href="/#/news_index" target="_blank">
           <i class="iconfont icon-dongtai jump" :class="{'onlyIcon':pageSmall}"></i>
           <p v-if="!pageSmall">动态</p>
         </a>
-        <a class="right-item">
+        <a class="right-item" :style="{color:color}">
           <i class="iconfont icon-shoucang jump" :class="{'onlyIcon':pageSmall}"></i>
           <p v-if="!pageSmall">收藏</p>
         </a>
-        <a class="right-item">
+        <a class="right-item" :style="{color:color}">
           <i class="iconfont icon-lishi jump" :class="{'onlyIcon':pageSmall}"></i>
           <p v-if="!pageSmall">历史</p>
         </a>
-        <a class="right-item">
+        <a class="right-item" :style="{color:color}">
           <i class="iconfont icon-chuangzuozhongxin jump" :class="{'onlyIcon':pageSmall}"></i>
           <p v-if="!pageSmall">创作中心</p>
         </a>
@@ -252,7 +271,7 @@
               transform: rotate(180deg);
             }
           }
-          }
+        }
         .left-item {
           display: inline-block;
           margin-right: 10px;
@@ -432,6 +451,7 @@
             text-align: center;
             border-radius: 20px;
             background-color: $colorM;
+            color: $colorG !important;
             cursor: pointer;
           }
           &:hover {

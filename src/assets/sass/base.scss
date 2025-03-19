@@ -11,8 +11,19 @@ html,body {
 
 .container{
   position: relative;
-  width: 1268px;
+  padding: 0 60px;
   margin: 0 auto;
+}
+
+@media (min-width: 1260px) {
+  .container {
+    padding: 0 150px;
+  }
+}
+@media (min-width: 2060px) {
+  .container {
+    padding: 0 250px;
+  }
 }
 
 .fl {

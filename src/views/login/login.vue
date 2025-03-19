@@ -231,8 +231,8 @@
 </template>
 
 <style lang="scss" scoped>
-  @use '../assets/sass/config.scss' as *;
-  @use '../assets/sass/mixin.scss' as *;
+  @use '@/assets/sass/config.scss' as *;
+  @use '@/assets/sass/mixin.scss' as *;
   .login {
     position: absolute;
     top: 0;

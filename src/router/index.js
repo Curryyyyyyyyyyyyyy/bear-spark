@@ -9,7 +9,7 @@ const routes = [
   {
     path:'/index',
     name:'index',
-    component:()=>import('@/views/index.vue')
+    component:()=>import('@/views/index/index.vue')
   },
   /* 投稿 */
   {
@@ -95,6 +95,12 @@ const routes = [
     name:'search',
     component:()=>import('@/views/search/search.vue')
   },
+  /* 视频详情 */
+  {
+    path:'/video/:id',
+    name:'video-detail',
+    component:()=>import('@/views/videoDetail/videoDetail.vue')
+  }
 ]
 
 const router = createRouter({

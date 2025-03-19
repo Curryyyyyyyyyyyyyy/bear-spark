@@ -41,14 +41,14 @@
   }
   //#endregion
   //#region 页面尺寸缩放调整
-  let smallSize = ref(false)
-  window.addEventListener('resize', ()=> {
-    if(window.innerWidth < 1396) {
-      smallSize.value = true
-    } else {
-      smallSize.value = false
-    }
-  })
+  // let smallSize = ref(false)
+  // window.addEventListener('resize', ()=> {
+  //   if(window.innerWidth < 1396) {
+  //     smallSize.value = true
+  //   } else {
+  //     smallSize.value = false
+  //   }
+  // })
   //#endregion
   //#region 回顶部
   const showBackToTop = ref(false)
@@ -67,19 +67,11 @@
 
 <template>
   <div class="news-header">
-    <nav-header>
-      <template v-slot:nav>
-        <a href="/#/index" class="header-index">
-          <span class="logo"></span>
-          <span>首页</span>
-          <i class="iconfont icon-down"></i>
-        </a>
-      </template>
-    </nav-header>
+    <nav-header :showLogo="true"></nav-header>
   </div>
   <div class="news">
     <div class="bg"></div>
-    <div class="container" :class="{'container-small':smallSize}">
+    <div class="container">
       <news-user-box></news-user-box>
       <div class="body">
         <news-publish-box></news-publish-box>
@@ -137,11 +129,7 @@
     background-color: $colorG;
     box-shadow: 0 3px 5px $colorF;
     .nav-header{
-      color: $colorI;
       background-color: $colorG;
-      .submit,.login {
-        color: $colorG;
-      }
     }
   }
   .news {
@@ -322,9 +310,9 @@
         }
       }
     }
-    .container-small {
-      width: 1100px;
-    }
+    // .container-small {
+    //   width: 1100px;
+    // }
     .back-to-top {
       position: fixed;
       right: 1%;

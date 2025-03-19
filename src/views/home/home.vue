@@ -48,15 +48,7 @@
         <div class="top"></div>
         <div class="bottom"></div>
       </div>
-      <nav-header>
-        <template v-slot:nav>
-          <a class="header-index" href="/#/index">
-            <span class="logo"></span>
-            <span>首页</span>
-            <i class="iconfont icon-down"></i>
-          </a>
-        </template>
-      </nav-header>
+      <nav-header color="white" :showLogo="true"></nav-header>
       <div class="header-user-info">
         <div class="user-box">
           <div class="avatar-box">
@@ -198,9 +190,6 @@
       .nav-header{
         width: 100%;
         background-color: transparent;
-        .submit,.login,.header-index,.left-item,.right-item {
-          color: $colorG;
-        }
       }
       .header-user-info {
         z-index: 1;
