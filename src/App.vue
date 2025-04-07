@@ -6,13 +6,13 @@
   /* router */
   const router = useRouter()
   const userStore = useUser()
-  if(Date.now() > userStore.timestamp + userStore.expire) {
-    userStore.token = ''
-    ElMessage.info('登录失效，请重新登录')
-    router.replace('')
-  } else {
-    userStore.expires = Date.now()
-  }
+  // if(Date.now() > userStore.timestamp + userStore.expire) {
+  //   userStore.token = ''
+  //   ElMessage.info('登录失效，请重新登录')
+  //   router.replace('')
+  // } else {
+  //   userStore.expires = Date.now()
+  // }
 </script>
 
 <template>

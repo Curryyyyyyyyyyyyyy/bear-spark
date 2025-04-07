@@ -2,7 +2,7 @@
   import BsTagSelect from '@/components/news/BsTagSelect.vue';
   import BsInput from '@/components/input/BsInput.vue';
   import BsModal from '@/components/common/BsModal.vue'
-  import { nextTick, onBeforeUnmount, ref } from 'vue';
+  import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
   import dayjs from 'dayjs';
   import {timeFormat} from '@/hooks/timeFormat.js'
   import {hourOptions,minuteOptions} from '@/hooks/timeOptions.js'
@@ -13,10 +13,16 @@
   import { storeToRefs } from 'pinia';
   import { throttle } from '@/hooks/performance';
   import { regTime } from '@/util/reg';
+  import useClickOutside from '@/hooks/useClickOutside';
 
   /* Store */
   const newsStore = useNews()
   const {pictureList} = storeToRefs(newsStore)
+  onMounted(() => {
+    useClickOutside(emojiBtnDom.value, () => {
+      showEmojiBox.value = false
+    })
+  })
   //#region 标签
   /* publishTagId */
   const publishTagId = ref(null)
@@ -78,10 +84,12 @@
   }
   //#endregion
   //#region 表情包
+  const emojiBtnDom = ref()
   const pubInputMethods = ref()
   const pubInputBoxRef = ref()
   const showEmojiBox = ref(false)
   function insertEmoji(emojiUrl, inputRef) {
+    console.log(pubInputMethods.value)
     pubInputMethods.value.insertEmoji(emojiUrl, inputRef)
   }
   //#endregion

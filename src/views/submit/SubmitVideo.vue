@@ -64,7 +64,6 @@
     videoPlayer.value.src = videoURL;
     videoPlayer.value.load(); // 加载视频
     frames.value = []
-    extractAllFrames(); // 提取所有帧
   }
   // 开始上传
   const startUpload = async (file, fileHash) => {
@@ -131,42 +130,43 @@
     })
   }
   // 提取所有帧
-  const extractAllFrames = () => {
-    const video = videoPlayer.value
-    const canvas = document.createElement('canvas')
-    const context = canvas.getContext('2d')
+  let video
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')
+  // 定义帧间隔时间（单位：秒）
+  let frameInterval
+  let currentTime = 0
+  // 递归提取帧
+  const extractFrame = () => {
+    if (currentTime <= video.duration) {
+      video.currentTime = currentTime
+      currentTime += frameInterval
+    } else {
+      loadingCover.value = false
+      coverData.value = frames.value[0]
+      console.log('帧提取完成')
+      currentTime = 0
+      return;
+    }
+  };
+  onMounted(() => {
+    video = videoPlayer.value
     // 监听视频元数据加载完成
     video.addEventListener('loadedmetadata', () => {
       canvas.width = video.videoWidth
       canvas.height = video.videoHeight
-      // 定义帧间隔时间（单位：秒）
-      const frameInterval = video.duration / 7 // 提取7帧
-      let currentTime = 0
-      // 递归提取帧
-      const extractFrame = () => {
-        if (currentTime <= video.duration) {
-          video.currentTime = currentTime
-          currentTime += frameInterval
-        } else {
-          loadingCover.value = false
-          coverData.value = frames.value[0]
-          console.log('帧提取完成')
-          return;
-        }
-      };
-
-      // 监听 seeked 事件，确保视频跳转到指定时间后提取帧
-      video.addEventListener('seeked', () => {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height)
-        const imageData = canvas.toDataURL('image/png')
-        frames.value.push(imageData) // 将帧数据保存到数组中
-        extractFrame() // 继续提取下一帧
-      });
-
+      frameInterval = video.duration / 7 // 提取7帧
       // 开始提取
       extractFrame()
     });
-  };
+    // 监听 seeked 事件，确保视频跳转到指定时间后提取帧
+    video.addEventListener('seeked', () => {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height)
+      const imageData = canvas.toDataURL('image/png')
+      frames.value.push(imageData) // 将帧数据保存到数组中
+      extractFrame() // 继续提取下一帧
+    });
+  })
   // base64转Blob
   const base64ToBlob = (base64Data) => {
     const parts = base64Data.split(';base64,')

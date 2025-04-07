@@ -13,6 +13,8 @@
   import useUser from '@/store/user';
   import {fowardNewsApi,getNewsListApi,deleteNewsApi,likeNewsApi} from '@/api/news'
   import {revokeBookLiveApi,modBookLiveStateApi} from '@/api/bookLive'
+  import useClickOutside from '@/hooks/useClickOutside';
+  import { nextTick } from 'vue';
 
   /* Store */
   const userStore = useUser()
@@ -89,17 +91,20 @@
   //#region 动态转发输入框
   const inputBoxRefList = ref([])
   const inputMethodsList = ref([])
+  const emojiBoxRefList = ref([])
   function getInputBoxRef(el, index) {
     inputBoxRefList.value[index] = el
   }
   function getInputMethods(el, index) {
     inputMethodsList.value[index] = el
   }
+  function getEmojiBoxRef(el, index) {
+    emojiBoxRefList.value.splice(index, 1, el)
+  }
   /* 输入表情包 */
   function insertEmoji(emojiUrl, inputMethods, inputRef) {
     inputMethods.insertEmoji(emojiUrl, inputRef)
   }
-
   /* 转发动态 */
   async function forwardNews(index) {
     let content = inputBoxRefList.value[index].children[0].innerHTML ? inputBoxRefList.value[index].children[0].innerHTML : '转发动态'
@@ -146,6 +151,13 @@
       if(newsRes.total <= newsList.value.length) isArriveTotal.value = true
       busy.value = false;
       newsLoading.value = false
+      nextTick(() => {
+        for(let i in emojiBoxRefList.value) {
+          useClickOutside(emojiBoxRefList.value[i], () => {
+            newsList.value[i].showEmojiBox = false
+          })
+        }
+      })
     }, 500);
   }
   /* 删除动态 */
@@ -445,7 +457,7 @@
             </div>
           </div>
           <div class="forward-footer">
-            <div class="emoji-btn">
+            <div class="emoji-btn" :ref="el => getEmojiBoxRef(el, index)">
               <i @click.stop="showEmojiBoxForward(index,item.showEmojiBox)" :class="{'active':item.showEmojiBox}" class="iconfont icon-biaoqing"></i>
               <div v-if="item.showEmojiBox" class="emoji-box">
                 <bs-emoji @insertEmoji="insertEmoji($event, inputMethodsList[index], inputBoxRefList[index].children[0])"></bs-emoji>

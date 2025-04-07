@@ -6,12 +6,12 @@
   /* 插入表情包 */
   function insertEmoji(emojiUrl,inputRef) {
     // if(contentNum.value + 3 > 300) return ElMessage.error('字数已达上限')
-    const emojiImgElement = `<img src="${emojiUrl}">`
     if(!focusRange || !inputRef.contains(focusRange.commonAncestorContainer)) {
       focusRange = new Range()
       focusRange.selectNodeContents(inputRef)
       focusRange.collapse(false)
     }
+    const emojiImgElement = `<img src="${emojiUrl}">`
     const emojiImgNode = focusRange.createContextualFragment(emojiImgElement)
     const lastChild = emojiImgNode.lastChild
     if(focusRange.collapsed) {

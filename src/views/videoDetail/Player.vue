@@ -31,7 +31,7 @@
   const initArtplayer = () => {
     /* 关闭右键菜单 */
     Artplayer.CONTEXTMENU = false
-    new Artplayer({
+    art = new Artplayer({
       container: '.play-style',
       url: props.videoUrl,
       settings:[
