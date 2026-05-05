@@ -33,6 +33,9 @@
     activeUp.value = userId
     newsListRef.value.getUserNewsList(userId)
   }
+  function refreshNewsList() {
+    newsListRef.value?.refreshNewsList()
+  }
   //#endregion
   //#region tab栏
   const tab = ref('all')
@@ -74,7 +77,7 @@
     <div class="container">
       <news-user-box></news-user-box>
       <div class="body">
-        <news-publish-box></news-publish-box>
+        <news-publish-box @published="refreshNewsList"></news-publish-box>
         <div class="bs-up-list">
           <div class="shim"></div>
           <div @click="changeUpListScroll(-400)" class="left-btn"><i class="iconfont icon-zuojiantou"></i></div>

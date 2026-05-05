@@ -113,7 +113,9 @@
         >
           <Loading v-show="!isArriveTotal && loading"></Loading>
         </div>
-        <div v-show="isArriveTotal" class="prompt">已经到最底啦~</div>
+        <div v-show="isArriveTotal" class="prompt">
+          {{ videoList.length ? '已经到最底啦~' : '暂无视频内容' }}
+        </div>
       </div>
     </div>
   </div>
@@ -239,6 +241,36 @@
               }
             }
           }
+        }
+        .load-more-video {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 72px;
+          width: 100%;
+          :deep(.bs-loading) {
+            width: 100%;
+            min-height: 40px;
+            align-items: center;
+          }
+          :deep(.bs-loading .box) {
+            perspective: 80px;
+          }
+          :deep(.bs-loading .coin) {
+            width: 18px;
+            height: 18px;
+            border-width: 3px;
+          }
+        }
+        .prompt {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 72px;
+          width: 100%;
+          color: $colorD;
+          font-size: $fontJ;
+          text-align: center;
         }
       }
     }

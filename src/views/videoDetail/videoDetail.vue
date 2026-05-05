@@ -7,6 +7,7 @@
 
   const route = useRoute()
   const router = useRouter()
+  const defaultAvatar = '/imgs/default-avatar.png'
   const videoInfo = ref({})
   onMounted(async () => {
     videoInfo.value = await getVideoInfoApi({
@@ -48,7 +49,13 @@
       <div class="right-container">
         <div class="author-info">
           <div class="author-info__left">
-            <img @click="router.push(`/home/${videoInfo.authorInfo?.userId}`)" class="author-avatar" :src="videoInfo.authorInfo?.avatarUrl" alt="">
+            <img
+              @click="router.push(`/home/${videoInfo.authorInfo?.userId}`)"
+              class="author-avatar"
+              :src="videoInfo.authorInfo?.avatarUrl || defaultAvatar"
+              alt=""
+              @error="$event.target.src = defaultAvatar"
+            >
           </div>
           <div class="author-info__right">
             <span @click="router.push(`/home/${videoInfo.authorInfo?.userId}`)" class="author-name">{{ videoInfo.authorInfo?.username }}</span>

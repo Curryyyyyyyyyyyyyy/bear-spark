@@ -15,6 +15,8 @@
   import { regTime } from '@/util/reg';
   import useClickOutside from '@/hooks/useClickOutside';
 
+  const emit = defineEmits(['published'])
+
   /* Store */
   const newsStore = useNews()
   const {pictureList} = storeToRefs(newsStore)
@@ -59,6 +61,7 @@
       bookLiveInfo:bookLiveInfo.value,
       voteInfo:voteInfo.value
     })
+    emit('published')
     ElMessage.success('发布成功')
     //#region 清空表单
       newsTitle.value = ''

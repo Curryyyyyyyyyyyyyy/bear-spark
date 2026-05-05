@@ -218,6 +218,12 @@
       newsLoading.value = false
     }, 500);
   }
+  function refreshNewsList() {
+    pageNum.value = 1
+    newsList.value.splice(0, newsList.value.length)
+    isArriveTotal.value = false
+    loadMoreNews()
+  }
   //#endregion 
   function toDetail(articleId, happeningId) {
     const page = router.resolve({
@@ -230,7 +236,8 @@
     window.open(page.href)
   }
   defineExpose({
-    getUserNewsList
+    getUserNewsList,
+    refreshNewsList
   })
 </script>
 

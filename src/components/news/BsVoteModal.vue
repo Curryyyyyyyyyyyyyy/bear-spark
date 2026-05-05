@@ -9,7 +9,7 @@
   const emit = defineEmits(['closeVoteModal'])
   const props = defineProps(['voteId'])
 
-  const voteDetailInfo = ref({})
+  const voteDetailInfo = ref(null)
   onMounted(async ()=>{
     voteDetailInfo.value = await getVoteDetailApi({
       voteId:props.voteId
@@ -121,7 +121,7 @@
             </div>
           </div>
           <div class="bs-vote-footer">
-            <div v-if="username === voteDetailInfo.publisherInfo?.username && voteDetailInfo.voterInfoList.length" class="follower-vote">
+            <div v-if="username === voteDetailInfo.publisherInfo?.username && voteDetailInfo.voterInfoList?.length" class="follower-vote">
               <div @click="showVoteDetail = 1" class="desc">
                 <p>你关注的人</p>
                 <p>也参与了投票</p>
@@ -136,7 +136,7 @@
             <button v-if="voteDetailInfo.dead" class="vote-btn" :style="{backgroundColor:'#e5e9ef',color:'#999999'}">投票已结束</button>
             <button v-else-if="username !== voteDetailInfo.publisherInfo?.username && voteDetailInfo.voted" @click="handleVote()" class="vote-btn" :style="{backgroundColor:'#00aeec',color:'#ffffff'}">投票</button>
             <button v-else-if="username !== voteDetailInfo.publisherInfo?.username && !voteDetailInfo.voted" class="vote-btn" :style="{backgroundColor:'#e5e9ef',color:'#999999'}">感谢你的投票</button>
-            <div v-if="username === voteDetailInfo.publisherInfo?.username && !voteDetailInfo.voterInfoList.length" @click="showVoteDetail = 1" class="vote-detail-btn">
+            <div v-if="username === voteDetailInfo.publisherInfo?.username && !voteDetailInfo.voterInfoList?.length" @click="showVoteDetail = 1" class="vote-detail-btn">
               <span>投票详情</span>
               <i class="iconfont icon-youjiantou"></i>
             </div>

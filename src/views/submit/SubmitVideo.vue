@@ -1,9 +1,12 @@
 <script setup>
   import { onMounted, ref, watch } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { ElMessage } from 'element-plus'
   import SparkMD5 from 'spark-md5'
   import Loading from '@/components/common/Loading.vue'
-  import { publishVideoApi } from '../../api/video'
+  import { publishVideoApi, uploadVideoChunkApi } from '../../api/video'
 
+  const router = useRouter()
   const chunkSize = 1024 * 1024  // 1MB
   const videoFileHash = ref(null)
   const coverFileHash = ref(null)
@@ -82,17 +85,14 @@
         const start = i * chunkSize
         const end = Math.min(start + chunkSize, file.size)
         const chunk = file.slice(start, end)
-        const formData = new FormData()
-        formData.append('file', chunk)
-        formData.append('chunkIndex', i)
-        formData.append('totalChunks', totalChunks)
-        formData.append('fileHash', fileHash)
         try {
-          const response = await fetch('http://192.168.1.133:8080/chunk', {
-            method: 'POST',
-            body: formData
+          const data = await uploadVideoChunkApi({
+            file: chunk,
+            chunkIndex: i,
+            totalChunks,
+            fileHash,
+            fileName: file.name
           })
-          const data = await response.json()
           if (data.success) {
             uploadedChunks.value.push(i)
             const fileKey = `uploadedChunks_${fileHash}`
@@ -183,8 +183,8 @@
   const submit = async () => {
     const blob = base64ToBlob(coverData.value)
     coverFileHash.value = await calculateFileHash(blob)
-    const file = new File([blob], coverFileHash.value, {type: 'image/png'})
-    startUpload(file, coverFileHash.value)
+    const file = new File([blob], `${coverFileHash.value}.png`, {type: 'image/png'})
+    await startUpload(file, coverFileHash.value)
     await publishVideoApi({
       videoFileHash:videoFileHash.value,
       coverFileHash:coverFileHash.value,
@@ -192,6 +192,8 @@
       duration: videoPlayer.value.duration,
       description:desc.value
     })
+    ElMessage.success('发布成功')
+    router.push('/index')
   }
 </script>
 

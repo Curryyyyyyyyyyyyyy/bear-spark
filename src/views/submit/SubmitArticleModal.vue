@@ -1,174 +1,174 @@
 <script setup>
-  import BsTagSelect from '@/components/news/BsTagSelect.vue'
-  import SetTimeSubmit from '@/views/submit/SetTimeSubmit.vue';
-  import AddCategory from '@/views/submit/AddCategory.vue';
-  import {uploadApi} from '@/api/file'
-  import {getCategoryListApi, publishArticleApi, modifyArticleApi} from '@/api/article'
-  import {timeFormat} from '@/hooks/timeFormat.js'
-  import { dayjs, ElMessage } from 'element-plus';
-  import { nextTick, onMounted, ref } from 'vue';
-  import useUser from '@/store/user'
-  import { useRouter } from 'vue-router';
+import BsTagSelect from '@/components/news/BsTagSelect.vue'
+import SetTimeSubmit from '@/views/submit/SetTimeSubmit.vue';
+import AddCategory from '@/views/submit/AddCategory.vue';
+import { uploadApi } from '@/api/file'
+import { getCategoryListApi, publishArticleApi, modifyArticleApi } from '@/api/article'
+import { timeFormat } from '@/hooks/timeFormat.js'
+import { dayjs, ElMessage } from 'element-plus';
+import { nextTick, onMounted, ref } from 'vue';
+import useUser from '@/store/user'
+import { useRouter } from 'vue-router';
 
-  const emit = defineEmits(['close'])
-  const props = defineProps(['title','draftId','contentHtml','contentText','contentImgList','articleId','articleInfo'])
+const emit = defineEmits(['close'])
+const props = defineProps(['title', 'draftId', 'contentHtml', 'contentText', 'contentImgList', 'articleId', 'articleInfo'])
 
-  /* store */
-  const {userId} = useUser()
-  /* router */
-  const router = useRouter()
-  /* onMounted */
-  onMounted(async () => {
-    if(props.articleId) {
-      summary.value = props.articleInfo.summary
-      coverUrl.value = props.articleInfo.coverUrl
-      tagId.value = props.articleInfo.tagId
-      tag.value = props.articleInfo.tag
-      selectedCategoryList.value = props.articleInfo.categoryInfoList
-      visibility.value = props.articleInfo.visibility
-      commentAble.value = props.articleInfo.commentAble
-      declaration.value = props.articleInfo.declaration
-      reprintArticleUrl.value = props.articleInfo.reprintArticleUrl
+/* store */
+const { userId } = useUser()
+/* router */
+const router = useRouter()
+/* onMounted */
+onMounted(async () => {
+  if (props.articleId) {
+    summary.value = props.articleInfo.summary
+    coverUrl.value = props.articleInfo.coverUrl
+    tagId.value = props.articleInfo.tagId
+    tag.value = props.articleInfo.tag
+    selectedCategoryList.value = props.articleInfo.categoryInfoList
+    visibility.value = props.articleInfo.visibility
+    commentAble.value = props.articleInfo.commentAble
+    declaration.value = props.articleInfo.declaration
+    reprintArticleUrl.value = props.articleInfo.reprintArticleUrl
+  }
+})
+//#region 获取标签Id
+const tagId = ref(null)
+const tag = ref('')
+function getSelectTagId(id) {
+  tagId.value = id
+}
+//#endregion
+//#region 文章封面
+const coverUrl = ref(null)
+const coverIndex = ref('')
+const coverList = ref([...props.contentImgList])
+async function uploadCover(event) {
+  if (event.target.files[0].size / 1024 / 1024 > 10) return ElMessage.error('图片大小不能超过1MB')
+  const fd = new FormData()
+  fd.append('file', event.target.files[0])
+  coverUrl.value = await uploadApi(fd, 2)
+  coverIndex.value = ''
+  event.target.value = ''
+}
+function selectCover(imgUrl, index) {
+  coverUrl.value = imgUrl.src
+  coverIndex.value = index
+}
+//#endregion
+//#region 文章摘要
+const summary = ref('')
+function extractSummary() {
+  summary.value = props.contentText.slice(0, 256)
+}
+//#endregion
+//#region 专栏分类
+const showCategoryBox = ref(false)
+const showAddCategoryBox = ref(false)
+const mouseState = ref(false)  // 让鼠标在元素上悬浮一秒才显示分类框
+const categoryRef = ref()
+const categoryList = ref([])
+const selectedCategoryList = ref([])
+function handleShowCategorys() {
+  mouseState.value = true
+  setTimeout(async () => {
+    if (mouseState.value) {
+      categoryList.value = await getCategoryListApi({
+        listedUserId: userId
+      })
+      showCategoryBox.value = true
+      nextTick(() => {
+        categoryRef.value.focus()
+      })
     }
+  }, 500);
+}
+function judgeSelect(categoryId) {
+  let resIndex = -1
+  selectedCategoryList.value.forEach((item, index) => {
+    if (item.categoryId === categoryId) resIndex = index
   })
-  //#region 获取标签Id
-  const tagId = ref(null)
-  const tag = ref('')
-  function getSelectTagId(id) {
-    tagId.value = id
+  return resIndex
+}
+function handleSelectCategory(categoryId, categoryName) {
+  const index = judgeSelect(categoryId)
+  if (index === -1) {
+    if (selectedCategoryList.value.length >= 3) return ElMessage.error('最多选择3个分类专栏')
+    selectedCategoryList.value.push({ categoryId, categoryName })
+    return
+  } else {
+    selectedCategoryList.value.splice(index, 1)
   }
-  //#endregion
-  //#region 文章封面
-  const coverUrl = ref(null)
-  const coverIndex = ref('')
-  const coverList = ref([...props.contentImgList])
-  async function uploadCover(event) {
-    if(event.target.files[0].size / 1024 / 1024 > 1) return ElMessage.error('图片大小不能超过1MB')
-    const fd = new FormData()
-    fd.append('file', event.target.files[0])
-    coverUrl.value = await uploadApi(fd, 2)
-    coverIndex.value = ''
-    event.target.value = ''
-  }
-  function selectCover(imgUrl,index) {
-    coverUrl.value = imgUrl.src
-    coverIndex.value = index
-  }
-  //#endregion
-  //#region 文章摘要
-  const summary = ref('')
-  function extractSummary() {
-    summary.value = props.contentText.slice(0, 256)
-  }
-  //#endregion
-  //#region 专栏分类
-  const showCategoryBox = ref(false)
-  const showAddCategoryBox = ref(false)
-  const mouseState = ref(false)  // 让鼠标在元素上悬浮一秒才显示分类框
-  const categoryRef = ref()
-  const categoryList = ref([])
-  const selectedCategoryList = ref([])
-  function handleShowCategorys() {
-    mouseState.value = true
-    setTimeout(async () => {
-      if(mouseState.value) {
-        categoryList.value = await getCategoryListApi({
-          listedUserId:userId
-        })
-        showCategoryBox.value = true
-        nextTick(()=>{
-          categoryRef.value.focus()
-        })
-      }
-    }, 500);
-  }
-  function judgeSelect(categoryId) {
-    let resIndex = -1
-    selectedCategoryList.value.forEach((item, index) => {
-      if(item.categoryId === categoryId) resIndex = index
+}
+//#endregion
+//#region 创作声明/可见范围/评论许可
+const declaration = ref(0)
+const visibility = ref(0)
+const commentAble = ref(0)
+const reprintArticleUrl = ref(null)
+//#endregion
+//#region 发布文章
+async function publishArticle(pubTime) {
+  if (declaration.value === 1 && !reprintArticleUrl.value) return ElMessage.error('请填写原文链接')
+  if (declaration.value === 0) reprintArticleUrl.value = null
+  if (!summary.value) return ElMessage.error('请填写文章摘要')
+  const nowTime = dayjs()
+  pubTime = pubTime ? pubTime : timeFormat(nowTime.format('YYYY-MM-DD'), nowTime.$H, nowTime.$m)
+  const imgUrlList = props.contentImgList.map(item => item.src)
+  if (props.articleId) {
+    await modifyArticleApi({
+      articleId: props.articleId,
+      title: props.title,
+      summary: summary.value,
+      content: props.contentHtml,
+      coverUrl: coverUrl.value,
+      tagId: tagId.value,
+      categoryIdList: selectedCategoryList.value.map(item => item.categoryId),
+      imgUrlList: imgUrlList,
+      visibility: visibility.value,
+      commentAble: commentAble.value,
+      declaration: declaration.value,
+      reprintArticleUrl: reprintArticleUrl.value,
+      pubTime: pubTime
     })
-    return resIndex
+  } else {
+    await publishArticleApi({
+      draftId: props.draftId,
+      title: props.title,
+      summary: summary.value,
+      content: props.contentHtml,
+      coverUrl: coverUrl.value,
+      tagId: tagId.value,
+      categoryIdList: selectedCategoryList.value.map(item => item.categoryId),
+      imgUrlList: imgUrlList,
+      visibility: visibility.value,
+      commentAble: commentAble.value,
+      declaration: declaration.value,
+      reprintArticleUrl: reprintArticleUrl.value,
+      pubTime: pubTime
+    })
   }
-  function handleSelectCategory(categoryId,categoryName) {
-    const index = judgeSelect(categoryId)
-    if(index === -1) {
-      if(selectedCategoryList.value.length >= 3) return ElMessage.error('最多选择3个分类专栏')
-      selectedCategoryList.value.push({categoryId,categoryName})
-      return
-    } else {
-      selectedCategoryList.value.splice(index, 1)
-    }
-  }
-  //#endregion
-  //#region 创作声明/可见范围/评论许可
-  const declaration = ref(0)
-  const visibility = ref(0)
-  const commentAble = ref(0)
-  const reprintArticleUrl = ref(null)
-  //#endregion
-  //#region 发布文章
-  async function publishArticle(pubTime) {
-    if(declaration.value === 1 && !reprintArticleUrl.value) return ElMessage.error('请填写原文链接')
-    if(declaration.value === 0) reprintArticleUrl.value = null
-    if(!summary.value) return ElMessage.error('请填写文章摘要')
-    const nowTime = dayjs()
-    pubTime = pubTime ? pubTime : timeFormat(nowTime.format('YYYY-MM-DD'),nowTime.$H,nowTime.$m)
-    const imgUrlList = props.contentImgList.map(item => item.src)
-    if(props.articleId) {
-      await modifyArticleApi({
-        articleId:props.articleId,
-        title:props.title,
-        summary:summary.value,
-        content:props.contentHtml,
-        coverUrl:coverUrl.value,
-        tagId:tagId.value,
-        categoryIdList:selectedCategoryList.value.map(item => item.categoryId),
-        imgUrlList:imgUrlList,
-        visibility:visibility.value,
-        commentAble:commentAble.value,
-        declaration:declaration.value,
-        reprintArticleUrl:reprintArticleUrl.value,
-        pubTime:pubTime
-      })
-    } else {
-      await publishArticleApi({
-        draftId:props.draftId,
-        title:props.title,
-        summary:summary.value,
-        content:props.contentHtml,
-        coverUrl:coverUrl.value,
-        tagId:tagId.value,
-        categoryIdList:selectedCategoryList.value.map(item => item.categoryId),
-        imgUrlList:imgUrlList,
-        visibility:visibility.value,
-        commentAble:commentAble.value,
-        declaration:declaration.value,
-        reprintArticleUrl:reprintArticleUrl.value,
-        pubTime:pubTime
-      })
-    }
-    ElMessage.success('发布成功')
-    setTimeout(() => {
-      router.push({
-        name:'home_article',
-        params:{
-          userId:userId
-        }
-      })
-    }, 500)
-  }
-  //#endregion
-  //#region 定时发布框
-  function close() {
-    emit('close')
-  }
-  const showSetTimeBox = ref(false)
-  function handleShowSetTime() {
-    if(declaration.value === 1 && !reprintArticleUrl.value) return ElMessage.error('请填写原文链接')
-    if(declaration.value === 0) reprintArticleUrl.value = null
-    showSetTimeBox.value = true
-  }
-  //#endregion
+  ElMessage.success('发布成功')
+  setTimeout(() => {
+    router.push({
+      name: 'home_article',
+      params: {
+        userId: userId
+      }
+    })
+  }, 500)
+}
+//#endregion
+//#region 定时发布框
+function close() {
+  emit('close')
+}
+const showSetTimeBox = ref(false)
+function handleShowSetTime() {
+  if (declaration.value === 1 && !reprintArticleUrl.value) return ElMessage.error('请填写原文链接')
+  if (declaration.value === 0) reprintArticleUrl.value = null
+  showSetTimeBox.value = true
+}
+//#endregion
 </script>
 
 <template>
@@ -192,7 +192,7 @@
               <i class="iconfont icon-jiahao"></i>
               <span class="upload-text">添加文章封面</span>
             </label>
-            <div v-if="coverUrl" @click="coverUrl = null,coverIndex = ''" class="icon-delete-btn">
+            <div v-if="coverUrl" @click="coverUrl = null, coverIndex = ''" class="icon-delete-btn">
               <i class="iconfont icon-cuowu"></i>
             </div>
           </div>
@@ -202,7 +202,7 @@
               <label for="upload-cover" class="cover-category-item">本地上传</label>
             </div>
             <div class="cover-list">
-              <div @click="selectCover(item,index)" v-for="(item,index) in coverList" :key="index" class="cover-box">
+              <div @click="selectCover(item, index)" v-for="(item, index) in coverList" :key="index" class="cover-box">
                 <img :src="item.src" alt="">
                 <div v-if="index === coverIndex" class="icon-gou-box">
                   <i class="iconfont icon-gou"></i>
@@ -217,7 +217,8 @@
       <div class="article-summary">
         <span class="item-text">文章摘要：</span>
         <div class="summary-box">
-          <textarea v-model="summary" placeholder="摘要：会在推荐、列表等场景外露，帮助读者快速了解内容，支持一键将正文前256字符键入摘要文本框" maxlength="256"></textarea>
+          <textarea v-model="summary" placeholder="摘要：会在推荐、列表等场景外露，帮助读者快速了解内容，支持一键将正文前256字符键入摘要文本框"
+            maxlength="256"></textarea>
           <div class="desc-box">
             <span class="desc-text">{{ summary ? summary.length : 0 }}/256</span>
             <button @click="extractSummary" class="extract-btn">一键提取</button>
@@ -227,9 +228,9 @@
       <div class="article-category">
         <span class="item-text">分类专栏：</span>
         <div ref="categoryRef" tabindex="1" @blur="showCategoryBox = false" class="category-select-btn">
-          <div v-for="(item,index) in selectedCategoryList" :key="item.categoryId" class="selected-category-item">
-            <span class="selected-category-name">{{item.categoryName}}</span>
-            <span @click="selectedCategoryList.splice(index,1)" class="icon-delete-box">
+          <div v-for="(item, index) in selectedCategoryList" :key="item.categoryId" class="selected-category-item">
+            <span class="selected-category-name">{{ item.categoryName }}</span>
+            <span @click="selectedCategoryList.splice(index, 1)" class="icon-delete-box">
               <i class="iconfont icon-cuowu"></i>
             </span>
           </div>
@@ -245,18 +246,15 @@
             </div>
             <div class="categorys-main">
               <div class="category-list">
-                <div
-                  @click="handleSelectCategory(item.categoryId,item.categoryName)" 
-                  v-for="(item) in categoryList" :key="item.categoryId" 
-                  class="category-item"  
-                  :class="{'checked':judgeSelect(item.categoryId) !== -1}"
-                >
+                <div @click="handleSelectCategory(item.categoryId, item.categoryName)" v-for="(item) in categoryList"
+                  :key="item.categoryId" class="category-item" :class="{ 'checked': judgeSelect(item.categoryId) !== -1 }">
                   <div class="radio">
                     <i class="iconfont icon-gou"></i>
                   </div>
                   <span class="category-name">{{ item.categoryName }}</span>
                 </div>
-                <div v-if="categoryList.length < 100" @click="showAddCategoryBox = true" class="category-item create-category">
+                <div v-if="categoryList.length < 100" @click="showAddCategoryBox = true"
+                  class="category-item create-category">
                   <i class="iconfont icon-jiahao"></i>
                 </div>
               </div>
@@ -267,13 +265,13 @@
       <div class="article-declaration">
         <span class="item-text">创作声明：</span>
         <div class="declaration-list">
-          <div @click="declaration = 0" class="declaration-item" :class="{'checked':declaration === 0}">
+          <div @click="declaration = 0" class="declaration-item" :class="{ 'checked': declaration === 0 }">
             <div class="radio">
               <div class="inner-white"></div>
             </div>
             <div class="declaration">原创</div>
           </div>
-          <div @click="declaration = 1" class="declaration-item" :class="{'checked':declaration === 1}">
+          <div @click="declaration = 1" class="declaration-item" :class="{ 'checked': declaration === 1 }">
             <div class="radio">
               <div class="inner-white"></div>
             </div>
@@ -288,13 +286,13 @@
       <div class="article-visibility">
         <span class="item-text">可见范围：</span>
         <div class="visibility-box">
-          <div @click="visibility = 0" class="visibility-item" :class="{'checked':visibility === 0}">
+          <div @click="visibility = 0" class="visibility-item" :class="{ 'checked': visibility === 0 }">
             <div class="radio">
               <div class="inner-white"></div>
             </div>
             <span class="visibility-text">全部可见</span>
           </div>
-          <div @click="visibility = 1" class="visibility-item" :class="{'checked':visibility === 1}">
+          <div @click="visibility = 1" class="visibility-item" :class="{ 'checked': visibility === 1 }">
             <div class="radio">
               <div class="inner-white"></div>
             </div>
@@ -305,13 +303,13 @@
       <div class="article-commentable">
         <div class="item-text">评论许可：</div>
         <div class="commentable-box">
-          <div @click="commentAble = 0" class="commentable-item" :class="{'checked':commentAble === 0}">
+          <div @click="commentAble = 0" class="commentable-item" :class="{ 'checked': commentAble === 0 }">
             <div class="radio">
               <div class="inner-white"></div>
             </div>
             <span class="commentable-text">允许评论</span>
           </div>
-          <div @click="commentAble = 1" class="commentable-item" :class="{'checked':commentAble === 1}">
+          <div @click="commentAble = 1" class="commentable-item" :class="{ 'checked': commentAble === 1 }">
             <div class="radio">
               <div class="inner-white"></div>
             </div>
@@ -326,507 +324,603 @@
       <button @click="publishArticle('')" class="modal-footer-btn publish-btn">发布文章</button>
     </div>
   </div>
-  <set-time-submit v-if="showSetTimeBox" @publishArticle="publishArticle" @close="showSetTimeBox = false"></set-time-submit>
+  <set-time-submit v-if="showSetTimeBox" @publishArticle="publishArticle"
+    @close="showSetTimeBox = false"></set-time-submit>
   <add-category v-if="showAddCategoryBox" @close="showAddCategoryBox = false"></add-category>
 </template>
 
 <style lang="scss">
-  @use '@/assets/sass/config.scss' as *;
-  @use '@/assets/sass/mixin.scss' as *;
-  .mask {
-    z-index: 1000;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background-color: $colorI;
-    opacity: .5;
-  }
-  .submit-article-modal {
-    z-index: 1001;
-    position: fixed;
-    left: 50%;
-    top: 20%;
-    transform: translateX(-50%);
-    min-width: 600px;
-    padding: 20px;
-    border-radius: 6px;
-    background-color: $colorG;
-    .modal-header {
-      @include flex();
-      .title-text {
-        font-size: $fontI;
-        font-weight: bold;
-      }
-      .icon-cuowu {
-        color: $colorD;
-        font-size: $fontH;
-        cursor: pointer;
-        transition: all .2s;
-        &:hover {
-          transform: scale(1.2);
-        }
+@use '@/assets/sass/config.scss' as *;
+@use '@/assets/sass/mixin.scss' as *;
+
+.mask {
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-color: $colorI;
+  opacity: .5;
+}
+
+.submit-article-modal {
+  z-index: 1001;
+  position: fixed;
+  left: 50%;
+  top: 20%;
+  transform: translateX(-50%);
+  min-width: 600px;
+  padding: 20px;
+  border-radius: 6px;
+  background-color: $colorG;
+
+  .modal-header {
+    @include flex();
+
+    .title-text {
+      font-size: $fontI;
+      font-weight: bold;
+    }
+
+    .icon-cuowu {
+      color: $colorD;
+      font-size: $fontH;
+      cursor: pointer;
+      transition: all .2s;
+
+      &:hover {
+        transform: scale(1.2);
       }
     }
-    .modal-main {
-      .item-text {
-        color: $colorC;
-        flex-shrink: 0;
-      }
-      .article-tag {
-        @include flex(left);
-        margin-top: 16px;
-      }
-      .article-cover {
+  }
+
+  .modal-main {
+    .item-text {
+      color: $colorC;
+      flex-shrink: 0;
+    }
+
+    .article-tag {
+      @include flex(left);
+      margin-top: 16px;
+    }
+
+    .article-cover {
+      @include flex();
+      align-items: start;
+      margin-top: 16px;
+
+      .cover-select-box {
+        flex: 1;
         @include flex();
-        align-items: start;
-        margin-top: 16px;
-        .cover-select-box {
-          flex: 1;
-          @include flex();
-          .cover-box {
-            position: relative;
-            width: 160px;
-            height: 90px;
-            border: 1px dotted $colorF;
-            border-radius: 6px;
-            box-sizing: border-box;
-            img {
-              height: 100%;
-              width: 100%;
-              border-radius: 6px
-            }
-            .upload-box {
-              @include flex(center);
-              flex-direction: column;
-              width: 100%;
-              height: 100%;
-              cursor: pointer;
-              .icon-jiahao {
-                font-size: $fontJ;
-                margin-bottom: 4px;
-              }
-            }
-            .icon-delete-btn {
-              position: absolute;
-              right: 4px;
-              top: 4px;
-              @include flex(center);
-              width: 16px;
-              height: 16px;
-              border-radius: 8px;
-              background-color: #252e31;
-              color: $colorG;
-              cursor: pointer;
+
+        .cover-box {
+          position: relative;
+          width: 160px;
+          height: 90px;
+          border: 1px dotted $colorF;
+          border-radius: 6px;
+          box-sizing: border-box;
+
+          img {
+            height: 100%;
+            width: 100%;
+            border-radius: 6px
+          }
+
+          .upload-box {
+            @include flex(center);
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+
+            .icon-jiahao {
+              font-size: $fontJ;
+              margin-bottom: 4px;
             }
           }
-          .cover-list-box {
-            @include flex();
-            flex-direction: column;
-            height: 90px;
-            width: 356px;
-            .cover-category-list {
-              width: 100%;
-              @include flex(left);
-              .cover-category-item {
-                height: 22px;
-                line-height: 22px;
-                text-align: center;
-                min-width: 60px;
-                margin: 0 6px;
-                border: 1px solid $colorF;
-                border-radius: 4px;
-                cursor: pointer;
-                &:hover {
-                  border: 1px solid $colorM;
-                }
-                &.active {
-                  border: 1px solid $colorM;
-                }
-                &:first-child {
-                  margin-left: 0;
-                }
-                &:last-child {
-                  margin-right: 0;
-                }
-              }
-            }
-            .cover-list {
-              @include flex(left);
-              width: 100%;
-              height: 60px;
-              padding: 6px 10px;
-              box-sizing: border-box;
-              background-color: $colorN;
-              border-radius: 6px;
-              overflow-x: auto;
-              overflow-y: hidden;
-              &::-webkit-scrollbar {
-                height: 3px;
-              }
-              &::-webkit-scrollbar-thumb {
-                background-color: $colorF;
-                border-radius: 2px;
-              }
-              .cover-box {
-                flex-shrink: 0;
-                position: relative;
-                width: 80px;
-                height: 45px;
-                border-radius: 6px;
-                background-color: $colorG;
-                margin-right: 4px;
-                cursor: pointer;
-                img {
-                  width: 100%;
-                  height: 100%;
-                  border-radius: 6px
-                }
-                .icon-gou-box {
-                  @include flex(center);
-                  position: absolute;
-                  top: 2px;
-                  right: 2px;
-                  height: 14px;
-                  width: 14px;
-                  border-radius: 7px;
-                  background-color: #252e31;
-                  color: $colorG;
-                }
-              }
-              .cover-list-empty {
-                width: 100%;
-                text-align: center;
-              }
-            }
+
+          .icon-delete-btn {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            @include flex(center);
+            width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            background-color: #252e31;
+            color: $colorG;
+            cursor: pointer;
           }
         }
-      }
-      .article-summary {
-        margin-top: 16px;
-        @include flex(left);
-        align-items: start;
-        .summary-box {
-          position: relative;
-          flex: 1;
-          textarea {
+
+        .cover-list-box {
+          @include flex();
+          flex-direction: column;
+          height: 90px;
+          width: 356px;
+
+          .cover-category-list {
             width: 100%;
-            min-height: 64px;
-            padding: 6px;
-            box-sizing: border-box;
-            resize: none;
-            border-radius: 6px;
-            &::-webkit-scrollbar {
-              width: 4px;
+            @include flex(left);
+
+            .cover-category-item {
+              height: 22px;
+              line-height: 22px;
+              text-align: center;
+              min-width: 60px;
+              margin: 0 6px;
+              border: 1px solid $colorF;
+              border-radius: 4px;
+              cursor: pointer;
+
+              &:hover {
+                border: 1px solid $colorM;
+              }
+
+              &.active {
+                border: 1px solid $colorM;
+              }
+
+              &:first-child {
+                margin-left: 0;
+              }
+
+              &:last-child {
+                margin-right: 0;
+              }
             }
+          }
+
+          .cover-list {
+            @include flex(left);
+            width: 100%;
+            height: 60px;
+            padding: 6px 10px;
+            box-sizing: border-box;
+            background-color: $colorN;
+            border-radius: 6px;
+            overflow-x: auto;
+            overflow-y: hidden;
+
+            &::-webkit-scrollbar {
+              height: 3px;
+            }
+
             &::-webkit-scrollbar-thumb {
               background-color: $colorF;
               border-radius: 2px;
             }
-          }
-          .desc-box {
-            position: absolute;
-            right: 2px;
-            bottom: 6px;
-            .desc-text {
-              padding: 2px;
+
+            .cover-box {
+              flex-shrink: 0;
+              position: relative;
+              width: 80px;
+              height: 45px;
+              border-radius: 6px;
               background-color: $colorG;
-              border-radius: 10px;
-            }
-            .extract-btn {
-              border: 1px solid $colorF;
-              font-size: $fontK;
-              padding: 2px 8px;
-              margin-left: 8px;
-              border-radius: 10px;
-              background-color: $colorG;
-              color: $colorB;
+              margin-right: 4px;
               cursor: pointer;
-            }
-          }
-        }
-      }
-      .article-category {
-        margin-top: 16px;
-        @include flex(left);
-        .category-select-btn {
-          position: relative;
-          @include flex(left);
-          .selected-category-item {
-            @include flex();
-            padding: 2px 6px 2px 10px;
-            background-color: #f4f8fc;
-            border: 1px solid $colorM;
-            margin-right: 8px;
-            border-radius: 4px;
-            color: $colorM;
-            font-size: $fontK;
-            .icon-delete-box {
-              @include flex(center);
-              width: 14px;
-              height: 14px;
-              border-radius: 7px;
-              margin-left: 4px;
-              cursor: pointer;
-              &:hover {
-                background-color: #267dcc;
+
+              img {
+                width: 100%;
+                height: 100%;
+                border-radius: 6px
+              }
+
+              .icon-gou-box {
+                @include flex(center);
+                position: absolute;
+                top: 2px;
+                right: 2px;
+                height: 14px;
+                width: 14px;
+                border-radius: 7px;
+                background-color: #252e31;
                 color: $colorG;
               }
             }
-          }
-          .add-btn {
-            padding: 2px 10px;
-            border: 1px solid $colorF;
-            color: $colorD;
-            border-radius: 4px;
-            font-size: $fontK;
-            cursor: pointer;
-            &:hover {
-              color: $colorM;
-              background-color: #f4f8fc;
-            }
-            .icon-jiahao {
-              font-size: $fontK;
-              margin-right: 4px;
-            }
-          }
-          .categorys-box {
-            position: absolute;
-            top: 120%;
-            width: 540px;
-            height: 170px;
-            padding: 0 20px;
-            box-sizing: border-box;
-            background-color: $colorG;
-            border: 1px solid $colorN;
-            border-radius: 6px;
-            box-shadow: 0 1px 1px $colorF;
-            .categorys-box-header {
-              position: relative;
-              padding: 10px 0;
-              border-bottom: 1px solid $colorF;
-              .limit {
-                font-size: $fontI;
-                margin-right: 10px;
-              }
-              .desc {
-                font-size: $fontJ;
-                color: $colorE;
-              }
-              .icon-cuowu {
-                position: absolute;
-                right: 0;
-                cursor: pointer;
-                color: $colorD;
-                &:hover {
-                  color: $colorI;
-                }
-              }
-            }
-            .categorys-main {
-              padding: 10px 0;
-              .category-list {
-                @include flex(left);
-                flex-wrap: wrap;
-                overflow-y: auto;
-                &::-webkit-scrollbar {
-                  width: 4px;
-                }
-                &::-webkit-scrollbar-thumb {
-                  background-color: $colorF;
-                  border-radius: 2px
-                }
-                .category-item {
-                  @include flex();
-                  margin-right: 18px;
-                  margin-bottom: 10px;
-                  cursor: pointer;
-                  &.checked {
-                    .radio {
-                      background-color: #409eff;
-                    }
-                  }
-                  .radio {
-                    @include flex(center);
-                    width: 14px;
-                    height: 14px;
-                    border: 1px solid $colorF;
-                    border-radius: 4px;
-                    margin-right: 4px;
-                    .icon-gou {
-                      color: $colorG;
-                    }
-                  }
-                  .category-name {
-                    font-size: $fontJ;
-                  }
-                }
-                .create-category {
-                  @include flex(center);
-                  height: 20px;
-                  width: 50px;
-                  border-radius: 8px;
-                  box-sizing: border-box;
-                  background-color: $colorM;
-                  color: $colorG;
-                  &:hover {
-                    background-color: $colorP;
-                  }
-                  .icon-jiahao {
-                    font-size: $fontK;
-                  }
-                }
-              }
+
+            .cover-list-empty {
+              width: 100%;
+              text-align: center;
             }
           }
         }
       }
-      .article-declaration {
-        @include flex(left);
-        margin-top: 16px;
-        .declaration-list {
-          @include flex(left);
-          .declaration-item {
-            @include flex();
-            margin-right: 14px;
-            cursor: pointer;
-            &.checked {
-              color: $colorM;
-              .radio {
-                background-color: #409eff;
-              }
-            }
-            .radio {
-              @include flex(center);
-              width: 12px;
-              height: 12px;
-              border-radius: 6px;
-              border: 1px solid $colorF;
-              margin-right: 4px;
-              .inner-white {
-                height: 6px;
-                width: 6px;
-                border-radius: 3px;
-                background-color: $colorG;
-              }
-            }
-          }
-        }
-      }
-      .article-reprint {
-        margin-top: 16px;
-        padding-left: 60px;
-        input {
-          width: 540px;
-          height: 24px;
-          padding: 4px 10px;
-          border: 1px solid $colorF;
-          border-radius: 6px;
+    }
+
+    .article-summary {
+      margin-top: 16px;
+      @include flex(left);
+      align-items: start;
+
+      .summary-box {
+        position: relative;
+        flex: 1;
+
+        textarea {
+          width: 100%;
+          min-height: 64px;
+          padding: 6px;
           box-sizing: border-box;
+          resize: none;
+          border-radius: 6px;
+
+          &::-webkit-scrollbar {
+            width: 4px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: $colorF;
+            border-radius: 2px;
+          }
         }
-        .reprint-desc {
-          margin-top: 2px;
-          color: rgb(239, 6, 6);
-        }
-      }
-      .article-visibility {
-        @include flex(left);
-        margin-top: 16px;
-        .visibility-box {
-          @include flex(left);
-          .visibility-item {
-            @include flex(left);
-            margin-right: 14px;
+
+        .desc-box {
+          position: absolute;
+          right: 2px;
+          bottom: 6px;
+
+          .desc-text {
+            padding: 2px;
+            background-color: $colorG;
+            border-radius: 10px;
+          }
+
+          .extract-btn {
+            border: 1px solid $colorF;
+            font-size: $fontK;
+            padding: 2px 8px;
+            margin-left: 8px;
+            border-radius: 10px;
+            background-color: $colorG;
+            color: $colorB;
             cursor: pointer;
-            &.checked {
-              color: $colorM;
-              .radio {
-                background-color: #409eff;
-              }
-            }
-            .radio {
-              @include flex(center);
-              width: 12px;
-              height: 12px;
-              border-radius: 6px;
-              border: 1px solid $colorF;
-              margin-right: 4px;
-              .inner-white {
-                height: 6px;
-                width: 6px;
-                border-radius: 3px;
-                background-color: $colorG;
-              }
-            }
           }
         }
       }
-      .article-commentable {
+    }
+
+    .article-category {
+      margin-top: 16px;
+      @include flex(left);
+
+      .category-select-btn {
+        position: relative;
         @include flex(left);
-        margin-top: 16px;
-        .commentable-box {
-          @include flex(left);
-          .commentable-item {
-            @include flex(left);
-            margin-right: 14px;
+
+        .selected-category-item {
+          @include flex();
+          padding: 2px 6px 2px 10px;
+          background-color: #f4f8fc;
+          border: 1px solid $colorM;
+          margin-right: 8px;
+          border-radius: 4px;
+          color: $colorM;
+          font-size: $fontK;
+
+          .icon-delete-box {
+            @include flex(center);
+            width: 14px;
+            height: 14px;
+            border-radius: 7px;
+            margin-left: 4px;
             cursor: pointer;
-            &.checked {
-              color: $colorM;
-              .radio {
-                background-color: #409eff;
+
+            &:hover {
+              background-color: #267dcc;
+              color: $colorG;
+            }
+          }
+        }
+
+        .add-btn {
+          padding: 2px 10px;
+          border: 1px solid $colorF;
+          color: $colorD;
+          border-radius: 4px;
+          font-size: $fontK;
+          cursor: pointer;
+
+          &:hover {
+            color: $colorM;
+            background-color: #f4f8fc;
+          }
+
+          .icon-jiahao {
+            font-size: $fontK;
+            margin-right: 4px;
+          }
+        }
+
+        .categorys-box {
+          position: absolute;
+          top: 120%;
+          width: 540px;
+          height: 170px;
+          padding: 0 20px;
+          box-sizing: border-box;
+          background-color: $colorG;
+          border: 1px solid $colorN;
+          border-radius: 6px;
+          box-shadow: 0 1px 1px $colorF;
+
+          .categorys-box-header {
+            position: relative;
+            padding: 10px 0;
+            border-bottom: 1px solid $colorF;
+
+            .limit {
+              font-size: $fontI;
+              margin-right: 10px;
+            }
+
+            .desc {
+              font-size: $fontJ;
+              color: $colorE;
+            }
+
+            .icon-cuowu {
+              position: absolute;
+              right: 0;
+              cursor: pointer;
+              color: $colorD;
+
+              &:hover {
+                color: $colorI;
               }
             }
-            .radio {
-              @include flex(center);
-              width: 12px;
-              height: 12px;
-              border-radius: 6px;
-              border: 1px solid $colorF;
-              margin-right: 4px;
-              .inner-white {
-                height: 6px;
-                width: 6px;
-                border-radius: 3px;
-                background-color: $colorG;
+          }
+
+          .categorys-main {
+            padding: 10px 0;
+
+            .category-list {
+              @include flex(left);
+              flex-wrap: wrap;
+              overflow-y: auto;
+
+              &::-webkit-scrollbar {
+                width: 4px;
+              }
+
+              &::-webkit-scrollbar-thumb {
+                background-color: $colorF;
+                border-radius: 2px
+              }
+
+              .category-item {
+                @include flex();
+                margin-right: 18px;
+                margin-bottom: 10px;
+                cursor: pointer;
+
+                &.checked {
+                  .radio {
+                    background-color: #409eff;
+                  }
+                }
+
+                .radio {
+                  @include flex(center);
+                  width: 14px;
+                  height: 14px;
+                  border: 1px solid $colorF;
+                  border-radius: 4px;
+                  margin-right: 4px;
+
+                  .icon-gou {
+                    color: $colorG;
+                  }
+                }
+
+                .category-name {
+                  font-size: $fontJ;
+                }
+              }
+
+              .create-category {
+                @include flex(center);
+                height: 20px;
+                width: 50px;
+                border-radius: 8px;
+                box-sizing: border-box;
+                background-color: $colorM;
+                color: $colorG;
+
+                &:hover {
+                  background-color: $colorP;
+                }
+
+                .icon-jiahao {
+                  font-size: $fontK;
+                }
               }
             }
           }
         }
       }
     }
-    .modal-footer {
-      @include flex(right);
-      margin-top: 20px;
-      .modal-footer-btn {
-        width: 100px;
-        height: 40px;
-        border-radius: 20px;
-        cursor: pointer;
-      }
-      .cancel-btn {
-        border: 1px solid $colorF;
-        color: $colorB;
-        &:hover {
-          background-color: $colorR;
+
+    .article-declaration {
+      @include flex(left);
+      margin-top: 16px;
+
+      .declaration-list {
+        @include flex(left);
+
+        .declaration-item {
+          @include flex();
+          margin-right: 14px;
+          cursor: pointer;
+
+          &.checked {
+            color: $colorM;
+
+            .radio {
+              background-color: #409eff;
+            }
+          }
+
+          .radio {
+            @include flex(center);
+            width: 12px;
+            height: 12px;
+            border-radius: 6px;
+            border: 1px solid $colorF;
+            margin-right: 4px;
+
+            .inner-white {
+              height: 6px;
+              width: 6px;
+              border-radius: 3px;
+              background-color: $colorG;
+            }
+          }
         }
       }
-      .set-time-btn {
+    }
+
+    .article-reprint {
+      margin-top: 16px;
+      padding-left: 60px;
+
+      input {
+        width: 540px;
+        height: 24px;
+        padding: 4px 10px;
         border: 1px solid $colorF;
-        color: $colorB;
-        &:hover {
-          border: 1px solid $colorI;
+        border-radius: 6px;
+        box-sizing: border-box;
+      }
+
+      .reprint-desc {
+        margin-top: 2px;
+        color: rgb(239, 6, 6);
+      }
+    }
+
+    .article-visibility {
+      @include flex(left);
+      margin-top: 16px;
+
+      .visibility-box {
+        @include flex(left);
+
+        .visibility-item {
+          @include flex(left);
+          margin-right: 14px;
+          cursor: pointer;
+
+          &.checked {
+            color: $colorM;
+
+            .radio {
+              background-color: #409eff;
+            }
+          }
+
+          .radio {
+            @include flex(center);
+            width: 12px;
+            height: 12px;
+            border-radius: 6px;
+            border: 1px solid $colorF;
+            margin-right: 4px;
+
+            .inner-white {
+              height: 6px;
+              width: 6px;
+              border-radius: 3px;
+              background-color: $colorG;
+            }
+          }
         }
       }
-      .publish-btn {
-        background-color: $colorM;
-        color: $colorG;
-        border: none;
-        margin-left: 14px;
-        &:hover {
-          background-color: $colorP;
+    }
+
+    .article-commentable {
+      @include flex(left);
+      margin-top: 16px;
+
+      .commentable-box {
+        @include flex(left);
+
+        .commentable-item {
+          @include flex(left);
+          margin-right: 14px;
+          cursor: pointer;
+
+          &.checked {
+            color: $colorM;
+
+            .radio {
+              background-color: #409eff;
+            }
+          }
+
+          .radio {
+            @include flex(center);
+            width: 12px;
+            height: 12px;
+            border-radius: 6px;
+            border: 1px solid $colorF;
+            margin-right: 4px;
+
+            .inner-white {
+              height: 6px;
+              width: 6px;
+              border-radius: 3px;
+              background-color: $colorG;
+            }
+          }
         }
       }
     }
   }
+
+  .modal-footer {
+    @include flex(right);
+    margin-top: 20px;
+
+    .modal-footer-btn {
+      width: 100px;
+      height: 40px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    .cancel-btn {
+      border: 1px solid $colorF;
+      color: $colorB;
+
+      &:hover {
+        background-color: $colorR;
+      }
+    }
+
+    .set-time-btn {
+      border: 1px solid $colorF;
+      color: $colorB;
+
+      &:hover {
+        border: 1px solid $colorI;
+      }
+    }
+
+    .publish-btn {
+      background-color: $colorM;
+      color: $colorG;
+      border: none;
+      margin-left: 14px;
+
+      &:hover {
+        background-color: $colorP;
+      }
+    }
+  }
+}
 </style>
